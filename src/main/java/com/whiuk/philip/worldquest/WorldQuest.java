@@ -13,19 +13,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.whiuk.philip.worldquest.MapConstants.*;
+
 public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
-    private static final int MAP_WIDTH = 40;
-    private static final int MAP_HEIGHT = 40;
-    private static final int MAX_X = MAP_WIDTH - 1;
-    private static final int MAX_Y = MAP_HEIGHT - 1;
-    private static final int TILE_WIDTH = 10;
-    private static final int TILE_HEIGHT = 10;
-    private static final int MAP_SPACING = 10;
-    private static final int BORDER_WIDTH = (MAP_WIDTH * TILE_WIDTH) + 1;
-    private static final int BORDER_HEIGHT = (MAP_HEIGHT * TILE_HEIGHT) + 1;
-    private static final int DIFFICULTY = 1;
     private static final HashMap<Character, Action> keymap = new HashMap<>();
+
+    public void npcAttacked(NPC npc) {
+        if (npc.isDead()) {
+            player.addExperience(npc.experience);
+            map[npc.x][npc.y].objects.add(npc.dropItem());
+            eventHistory.add("Killed a "+npc.type.name);
+        }
+
+    }
 
     enum Action {
         NORTH, EAST, SOUTH, WEST, STAIRS, EQUIP_0, DROP_0,
@@ -61,402 +62,8 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private Rectangle INVENTORY_DROP_2 = new Rectangle(
             467,267, 15, 15);
 
-    private void equipItem(int index) {
-        Item i = player.inventory.get(index);
-        if (i instanceof Weapon) {
-            Weapon w = (Weapon) i;
-            if (player.mainHandWeapon != null) {
-                player.inventory.add(player.mainHandWeapon);
-                player.mainHandWeapon = null;
-            }
-            player.inventory.remove(w);
-            player.mainHandWeapon = w;
-        } else if (i instanceof Armour) {
-            Armour a = (Armour) i;
-            Armour removed = player.armour.put(a.slot, a);
-            if (removed != null) {
-                player.inventory.add(removed);
-            }
-            player.inventory.remove(a);
-        }
-    }
 
-    private void dropItem(int index) {
-        map[player.x][player.y].objects.add(new ItemDrop(player.inventory.remove(index)));
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
-    private class Tile {
-        private final TileType type;
-        private final List<GameObject> objects;
-        private boolean hasSeen = false;
-
-        private Tile(TileType type) {
-            this.type = type;
-            objects = new ArrayList<>();
-        }
-
-        private boolean canMoveTo() {
-            if (type.canMoveTo()) {
-                boolean canMove = true;
-                for (GameObject obj : objects) {
-                    if (!obj.canMoveTo()) {
-                        canMove = false;
-                    }
-                }
-                return canMove;
-            }
-            return false;
-        }
-
-        public Color getColor(boolean isVisible) {
-            if (isVisible) {
-                hasSeen = true;
-                return type.color;
-            } else if (hasSeen) {
-                return type.fowColor;
-            } else {
-                return Color.BLACK;
-            }
-        }
-
-        public void onMoveTo() {
-            objects.forEach(GameObject::onMoveTo);
-            objects.removeIf(GameObject::isDeleted);
-        }
-    }
-
-    private class TileType {
-        private final Color color;
-        private final Color fowColor;
-        private final boolean canMoveTo;
-
-        private TileType(Color color, Color fowColor, boolean canMoveTo) {
-            this.color = color;
-            this.fowColor = fowColor;
-            this.canMoveTo = canMoveTo;
-        }
-
-        public boolean canMoveTo() {
-            return canMoveTo;
-        }
-    }
-
-    private class Player extends GameCharacter {
-        private HashMap<Slot, Armour> armour;
-        private Weapon mainHandWeapon;
-        private List<Item> inventory;
-        private int money;
-        private int baseDamage;
-        private int experience;
-
-        private Player() {
-            this.color = Color.YELLOW;
-            this.maxHealth = 10;
-            this.health = 10;
-            this.baseDamage = 3;
-            this.armour = new HashMap<>();
-            this.inventory = new ArrayList<>();
-        }
-
-        void actionOnNpc(NPC npc) {
-            if (npc.canFight()) {
-                attackNpc(npc);
-            }
-        }
-
-        @Override
-        void attackNpc(NPC npc) {
-            super.attackNpc(npc);
-            if (npc.isDead()) {
-                addExperience(npc.experience);
-                map[npc.x][npc.y].objects.add(npc.dropItem());
-                eventHistory.add("Killed a "+npc.type.name);
-            }
-        }
-
-        @Override
-        int calculateDamage() {
-            return baseDamage + (mainHandWeapon != null ? mainHandWeapon.damage : 0);
-        }
-    }
-
-    private class NPCType {
-        private final String name;
-        private final Color color;
-        public final boolean canFight;
-        public int health;
-        public int damage;
-        public ItemDrop[] dropTable;
-
-        private NPCType(String name, Color color, boolean canFight, int health, int damage, ItemDrop[] dropTable) {
-            this.name = name;
-            this.color = color;
-            this.canFight = canFight;
-            this.health = health;
-            this.damage = damage;
-            this.dropTable = dropTable;
-        }
-    }
-
-    private class NPC extends GameCharacter {
-        private final NPCType type;
-        private final int experience = 10;
-
-        private NPC(NPCType type, int x, int y) {
-            this.type = type;
-            this.color = type.color;
-            this.x = x;
-            this.y = y;
-            this.health = type.health;
-        }
-
-        private boolean canFight() {
-            return type.canFight;
-        }
-
-        private void tick() {
-            if (nextToPlayer()) {
-                attackPlayer();
-            } else if(random.nextBoolean()) {
-               move();
-            }
-        }
-
-        void attackPlayer() {
-            attack(player);
-            if (player.isDead()) {
-                eventHistory.add("Killed by a "+this.type.name);
-            }
-        }
-
-        private boolean nextToPlayer() {
-            return
-                (player.x == x && (player.y-1 == y || player.y+1 == y)) ||
-                (player.y == y && (player.x-1 == x || player.x+1 == x));
-        }
-
-        private void move() {
-            switch(random.nextInt(4)) {
-                case 0:
-                    north();
-                    break;
-                case 1:
-                    east();
-                    break;
-                case 2:
-                    west();
-                    break;
-                case 3:
-                    south();
-                    break;
-            }
-        }
-
-        @Override
-        void actionOnNpc(NPC npc) {
-            //TODO: NPC->NPC interaction
-        }
-
-        @Override
-        int calculateDamage() {
-            return type.damage;
-        }
-
-        public ItemDrop dropItem() {
-            return type.dropTable[random.nextInt(type.dropTable.length)].copy();
-        }
-    }
-
-    abstract class GameCharacter {
-        Color color;
-        int x;
-        int y;
-        int maxHealth;
-        int health;
-
-        void north() {
-            if (inBounds(x, y - 1)) {
-                directionAction(x, y - 1);
-            }
-        }
-
-        void south() {
-            if (inBounds(x, y + 1)) {
-                directionAction(x, y + 1);
-            }
-        }
-
-        void east() {
-            if (inBounds(x + 1, y)) {
-                directionAction(x + 1, y);
-            }
-        }
-
-        void west() {
-            if (inBounds(x - 1, y)) {
-                directionAction(x - 1, y);
-            }
-        }
-
-        private void directionAction(int x, int y) {
-            for (NPC npc : npcs) {
-                if (npc.x == x && npc.y == y && npc != this) {
-                    actionOnNpc(npc);
-                    return;
-                }
-            }
-            if (player.x == x && player.y == y && player != this) {
-                return;
-            }
-            if (map[x][y].canMoveTo()) {
-                if (player == this) {
-                    map[x][y].onMoveTo();
-                }
-                this.x = x;
-                this.y = y;
-            } else if (map[x][y].objects.size() > 0) {
-                map[x][y].objects.get(0).doAction();
-            }
-        }
-
-        abstract void actionOnNpc(NPC npc);
-
-        void attackNpc(NPC npc) {
-            attack(npc);
-        }
-
-        void attack(GameCharacter c) {
-            if (random.nextBoolean()) {
-                c.takeHit(this.calculateDamage());
-            }
-        }
-
-        abstract int calculateDamage();
-
-        void takeHit(int damage) {
-            if (health < damage) {
-                health = 0;
-            } else {
-                health -= damage;
-            }
-        }
-
-        boolean isDead() {
-            return health <= 0;
-        }
-    }
-
-    abstract class GameObject {
-        boolean deleted = false;
-
-        void tick() {}
-
-        abstract void draw(Graphics2D g, int x, int y);
-
-        public boolean canMoveTo() {
-             return true;
-        }
-
-        public void onMoveTo() {}
-
-        public boolean isDeleted() {
-            return deleted;
-        }
-
-        public void doAction() {}
-    }
-
-    abstract class GameObjectBuilder {
-        public abstract GameObject build(String[] arguments);
-    }
-
-    class StairsBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            return new Stairs(arguments);
-        }
-    }
-
-    class Stairs extends GameObject {
-        private String map;
-        private int startX;
-        private int startY;
-
-        public Stairs(String[] arguments) {
-            this(arguments[0], Integer.parseInt(arguments[1]), Integer.parseInt(arguments[2]));
-        }
-
-        public Stairs(String map, int startX, int startY) {
-            this.map = map;
-            this.startX = startX;
-            this.startY = startY;
-        }
-
-        void go() {
-            loadMap(map);
-            player.x = startX;
-            player.y = startY;
-        }
-
-        @Override
-        void draw(Graphics2D g, int x, int y) {
-            g.setColor(Color.blue);
-            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT), TILE_WIDTH, TILE_HEIGHT / 2);
-        }
-    }
-
-    class ItemDrop extends GameObject {
-        private Item item;
-        private int money;
-
-        ItemDrop(Item i) {
-            this.item = i;
-        }
-
-        ItemDrop(int money) {
-            this.money = money;
-        }
-
-        @Override
-        void draw(Graphics2D g, int x, int y) {
-            g.setColor(new Color(255,173,0));
-            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 3,
-                    TILE_WIDTH - 6, TILE_HEIGHT - 6);
-        }
-
-        @Override
-        public void onMoveTo() {
-            if (item != null) {
-                player.inventory.add(item);
-            }
-            player.money += money;
-            deleted = true;
-        }
-
-        public ItemDrop copy() {
-            ItemDrop copy = new ItemDrop(money);
-            if (item != null)
-                copy.item = item.copy();
-            return copy;
-        }
-    }
-
-    class Item {
+    static class Item {
         final String name;
         Item(String name) {
             this.name = name;
@@ -473,7 +80,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     enum Slot { CHEST }
 
-    class Armour extends Item {
+    static class Armour extends Item {
         private final Slot slot;
 
         Armour(String name, Slot slot) {
@@ -492,7 +99,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    class Weapon extends Item {
+    static class Weapon extends Item {
         public final int damage;
 
         Weapon(String name, int damage) {
@@ -511,7 +118,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    class Hatchet extends Weapon {
+    static class Hatchet extends Weapon {
 
         Hatchet(String name, int damage) {
             super(name, damage);
@@ -523,93 +130,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    class TreeBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            return new Tree();
-        }
-    }
-
-    class Tree extends GameObject {
-        boolean cutDown;
-        int ticksToRegrow;
-
-        public Tree() {
-        }
-
-        @Override
-        void tick() {
-            if (cutDown && ticksToRegrow <= 1) {
-                cutDown = false;
-            } else {
-                ticksToRegrow -= 1;
-            }
-        }
-
-        @Override
-        void draw(Graphics2D g, int x, int y) {
-            if (!cutDown) {
-                g.setColor(new Color(0, 40, 0));
-                g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 1, MAP_SPACING + (y * TILE_HEIGHT) + 1,
-                        TILE_WIDTH - 2, TILE_HEIGHT - 2);
-            } else {
-                g.setColor(new Color(50,34,4));
-                g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 2, MAP_SPACING + (y * TILE_HEIGHT) + 2,
-                        TILE_WIDTH - 4, TILE_HEIGHT - 4);
-            }
-        }
-
-        @Override
-        public boolean canMoveTo() {
-            return cutDown;
-        }
-
-        @Override
-        public void doAction() {
-            if (player.mainHandWeapon instanceof Hatchet) {
-                cutDown = true;
-                ticksToRegrow = 10;
-                player.inventory.add(new Item("Oak logs"));
-            }
-        }
-    }
-
-    private TileType Grass = new TileType(
-            new Color(0,100,0),
-            new Color(0,40,0),
-            true);
-    private TileType Door = new TileType(
-            new Color(55,27,0),
-            new Color(20,15,0),
-            true);
-    private TileType Floor = new TileType(
-            new Color(100,68,8),
-            new Color(50,34,4),
-            true);
-    private TileType Wall = new TileType(
-            Color.GRAY,
-            Color.DARK_GRAY,
-            false);
-    private NPCType Goblin = new NPCType(
-            "Goblin",
-            Color.RED,
-            true,
-            5,
-            2*DIFFICULTY,
-            new ItemDrop[]{
-                new ItemDrop(new Weapon("Bronze dagger",2)),
-                new ItemDrop(new Weapon("Bronze sword",4)),
-                new ItemDrop(new Hatchet("Bronze hatchet",3)),
-                new ItemDrop(new Armour("Leather tunic", Slot.CHEST)),
-                new ItemDrop(new Item("Oak logs")),
-                new ItemDrop(5),
-                new ItemDrop(10),
-            });
-
     private Random random = new Random();
 
     private Map<String, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
-    private Map<String, GameObjectBuilder> gameObjectBuilders = new HashMap<>();
+    private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
     private Tile[][] map;
     private List<NPC> npcs;
     private Player player;
@@ -650,7 +175,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private void loadScenario() {
         loadTileTypes();
-        loadBuilders();
+        gameObjectBuilders = GObjects.provideBuilders();
     }
 
     private void newGame() {
@@ -663,16 +188,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private void loadTileTypes() {
         //TODO: At some point this will come from a file too, but right now there's not much to load.
-        tileTypes.put("Grass", Grass);
-        tileTypes.put("Wall", Wall);
-        tileTypes.put("Floor", Floor);
-        tileTypes.put("Door", Door);
-        npcTypes.put("Goblin", Goblin);
-    }
-
-    private void loadBuilders() {
-        gameObjectBuilders.put("Stairs", new StairsBuilder());
-        gameObjectBuilders.put("Tree", new TreeBuilder());
+        tileTypes.put("Grass", GameData.Grass);
+        tileTypes.put("Wall", GameData.Wall);
+        tileTypes.put("Floor", GameData.Floor);
+        tileTypes.put("Door", GameData.Door);
+        npcTypes.put("Goblin", GameData.Goblin);
     }
 
     private void loadMap(String mapResourceName) {
@@ -707,6 +227,19 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         return newMap;
     }
 
+    private void processMapLine(Tile[][] map, int y, String mapLine) {
+        String[] tileData = mapLine.split(",");
+        for (int x = 0; x < tileData.length; x++) {
+            //Currently the per tile data is just the tileType.
+            String tileTypeName = tileData[x];
+            TileType tileType = tileTypes.get(tileTypeName);
+            if (tileType == null) {
+                throw new RuntimeException("Invalid tile type: " + tileTypeName);
+            }
+            map[x][y] = new Tile(tileType);
+        }
+    }
+
     private List<NPC> processNPCs(BufferedReader buffer) throws IOException {
         int npcCount = Integer.parseInt(buffer.readLine());
         List<NPC> npcs = new ArrayList<>(npcCount);
@@ -730,19 +263,6 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    private void processMapLine(Tile[][] map, int y, String mapLine) {
-        String[] tileData = mapLine.split(",");
-        for (int x = 0; x < tileData.length; x++) {
-            //Currently the per tile data is just the tileType.
-            String tileTypeName = tileData[x];
-            TileType tileType = tileTypes.get(tileTypeName);
-            if (tileType == null) {
-                throw new RuntimeException("Invalid tile type: " + tileTypeName);
-            }
-            map[x][y] = new Tile(tileType);
-        }
-    }
-
     private void createPlayer() {
         Player player = new Player();
         player.x = 10;
@@ -753,7 +273,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private class WorldQuestCanvas extends JPanel implements Runnable {
 
         WorldQuestCanvas() {
-            Dimension size = new Dimension (640, 480);
+            Dimension size = new Dimension (PANEL_WIDTH, PANEL_HEIGHT);
             setPreferredSize(size);
             addKeyListener(WorldQuest.this);
             setFocusable(true);
@@ -798,7 +318,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                             g.setColor(map[x][y].getColor(isVisible(x, y)));
                             g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT), TILE_WIDTH, TILE_HEIGHT);
                             if (isVisible(x, y)) {
-                                for (GameObject object : map[x][y].objects) {
+                                for (GObjects.GameObject object : map[x][y].objects) {
                                     object.draw(g, x, y);
                                 }
                             }
@@ -965,25 +485,25 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
         switch(action) {
             case NORTH:
-                player.north();
+                north(player);
                 shouldTick = true;
                 break;
             case EAST:
-                player.east();
+                east(player);
                 shouldTick = true;
                 break;
             case SOUTH:
-                player.south();
+                south(player);
                 shouldTick = true;
                 break;
             case WEST:
-                player.west();
+                west(player);
                 shouldTick = true;
                 break;
             case STAIRS:
-                for (GameObject object : map[player.x][player.y].objects) {
-                    if (object instanceof Stairs) {
-                        ((Stairs) object).go();
+                for (GObjects.GameObject object : map[player.x][player.y].objects) {
+                    if (object instanceof GObjects.Stairs) {
+                        ((GObjects.Stairs) object).go(this);
                     }
                 }
                 break;
@@ -1020,14 +540,87 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
+    void north(GameCharacter subject) {
+        if (inBounds(subject.x, subject.y - 1)) {
+            directionAction(subject, subject.x, subject.y - 1);
+        }
+    }
+
+    void south(GameCharacter subject) {
+        if (inBounds(subject.x, subject.y + 1)) {
+            directionAction(subject, subject.x, subject.y + 1);
+        }
+    }
+
+    void east(GameCharacter subject) {
+        if (inBounds(subject.x + 1, subject.y)) {
+            directionAction(subject, subject.x + 1, subject.y);
+        }
+    }
+
+    void west(GameCharacter subject) {
+        if (inBounds(subject.x - 1, subject.y)) {
+            directionAction(subject,subject.x - 1, subject.y);
+        }
+    }
+
+    boolean inBounds(int x, int y) {
+        return x >= 0 && x <= MAX_X && y >= 0 && y <= MAX_Y;
+    }
+
+    private void directionAction(GameCharacter subject, int x, int y) {
+        for (NPC npc : npcs) {
+            if (npc.x == x && npc.y == y && npc != subject) {
+                subject.actionOnNpc(this, npc);
+                return;
+            }
+        }
+        if (player.x == x && player.y == y && player != subject) {
+            return;
+        }
+        if (map[x][y].canMoveTo()) {
+            if (player == subject) {
+                map[x][y].onMoveTo(player);
+            }
+            subject.x = x;
+            subject.y = y;
+        } else if (map[x][y].objects.size() > 0) {
+            map[x][y].objects.get(0).doAction(player);
+        }
+    }
+
+    private void equipItem(int index) {
+        Item i = player.inventory.get(index);
+        if (i instanceof Weapon) {
+            Weapon w = (Weapon) i;
+            if (player.mainHandWeapon != null) {
+                player.inventory.add(player.mainHandWeapon);
+                player.mainHandWeapon = null;
+            }
+            player.inventory.remove(w);
+            player.mainHandWeapon = w;
+        } else if (i instanceof Armour) {
+            Armour a = (Armour) i;
+            Armour removed = player.armour.put(a.slot, a);
+            if (removed != null) {
+                player.inventory.add(removed);
+            }
+            player.inventory.remove(a);
+        }
+    }
+
+    private void dropItem(int index) {
+        map[player.x][player.y].objects.add(new GObjects.ItemDrop(player.inventory.remove(index)));
+    }
+
     private void tick(int initialPlayerHealth) {
         for (NPC npc: npcs) {
-            npc.tick();
+            tickNPC(npc);
         }
         npcs.removeIf(GameCharacter::isDead);
         for (Tile[] tiles: map) {
             for(Tile tile: tiles) {
-                tile.objects.forEach(GameObject::tick);
+                tile.objects.forEach(GObjects.GameObject::tick);
             }
         }
         if (player.isDead()) {
@@ -1037,16 +630,52 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
+    void tickNPC(NPC npc) {
+        if (nextToPlayer(npc)) {
+            attackPlayer(npc);
+        } else if(random.nextBoolean()) {
+            move(npc);
+        }
+    }
+
+    void attackPlayer(NPC npc) {
+        npc.attack(player);
+        if (player.isDead()) {
+            eventHistory.add("Killed by a "+npc.type.name);
+        }
+    }
+
+    private boolean nextToPlayer(NPC npc) {
+        return
+                (player.x == npc.x && (player.y-1 == npc.y || player.y+1 == npc.y)) ||
+                        (player.y == npc.y && (player.x-1 == npc.x || player.x+1 == npc.x));
+    }
+
+    private void move(NPC npc) {
+        switch(random.nextInt(4)) {
+            case 0:
+                north(npc);
+                break;
+            case 1:
+                east(npc);
+                break;
+            case 2:
+                west(npc);
+                break;
+            case 3:
+                south(npc);
+                break;
+        }
+    }
+
     private void gameOver() {
         gameRunning = false;
     }
 
-    private boolean inBounds(int x, int y) {
-        return x >= 0 && x <= MAX_X && y >= 0 && y <= MAX_Y;
-    }
-
-    private void addExperience(int points) {
-        player.experience += points;
+    public void switchMap(String map, int startX, int startY) {
+        loadMap(map);
+        player.x = startX;
+        player.y = startY;
     }
 
     @Override
@@ -1055,5 +684,21 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }
