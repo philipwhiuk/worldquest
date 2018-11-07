@@ -3,10 +3,9 @@ package com.whiuk.philip.worldquest;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -64,6 +63,10 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
 
     static class Item {
+        static Item parseItem(String itemData) {
+            return new Item(itemData);
+        }
+
         final String name;
         Item(String name) {
             this.name = name;
@@ -76,12 +79,21 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         public boolean canEquip() {
             return false;
         }
+
+        public String print() {
+            return this.name;
+        }
     }
 
     enum Slot { CHEST }
 
     static class Armour extends Item {
         private final Slot slot;
+
+        static Armour parseItem(String itemData) {
+            String[] itemDataFields = itemData.split(",");
+            return new Armour(itemDataFields[0], Slot.valueOf(itemDataFields[1]));
+        }
 
         Armour(String name, Slot slot) {
             super(name);
@@ -97,10 +109,20 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         public boolean canEquip() {
             return true;
         }
+
+        @Override
+        public String print() {
+            return super.print()+","+slot;
+        }
     }
 
     static class Weapon extends Item {
         public final int damage;
+
+        static Weapon parseItem(String itemData) {
+            String[] itemDataFields = itemData.split(",");
+            return new Weapon(itemDataFields[0], Integer.parseInt(itemDataFields[1]));
+        }
 
         Weapon(String name, int damage) {
             super(name);
@@ -116,17 +138,32 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         public boolean canEquip() {
             return true;
         }
+
+        @Override
+        public String print() {
+            return super.print()+","+damage;
+        }
     }
 
     static class Hatchet extends Weapon {
+
+        static Hatchet parseItem(String itemData) {
+            String[] itemDataFields = itemData.split(",");
+            return new Hatchet(itemDataFields[0], Integer.parseInt(itemDataFields[1]));
+        }
 
         Hatchet(String name, int damage) {
             super(name, damage);
         }
 
         @Override
-        public Weapon copy() {
+        public Hatchet copy() {
             return new Hatchet(this.name, damage);
+        }
+
+        @Override
+        public String print() {
+            return super.print();
         }
     }
 
@@ -136,9 +173,10 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
     private Tile[][] map;
+    private String mapName;
     private List<NPC> npcs;
     private Player player;
-    private ArrayList<String> eventHistory;
+    private List<String> eventHistory;
     private boolean gameStarted = false;
     private boolean gameRunning = false;
 
@@ -153,7 +191,31 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         ScheduledExecutorService renderQueue = Executors.newSingleThreadScheduledExecutor();
         add(canvas);
         pack();
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                String[] options = {"Save", "Quit", "Cancel"};
+                int option = JOptionPane.showOptionDialog(
+                        WorldQuest.this,
+                        "Save before quitting?",
+                        "Save?",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+                switch (option) {
+                    case 0:
+                        saveGame();
+                        System.exit(0);
+                    case 1:
+                        System.exit(0);
+                    case 2:
+                }
+            }
+        });
         renderQueue.scheduleAtFixedRate(canvas, 0, 16, TimeUnit.MILLISECONDS);
         setVisible(true);
         addKeyListener(this);
@@ -161,7 +223,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         new Thread(() -> {
             try {
                 loadScenario();
-                newGame();
+                if (new File("saves/save.dat").exists()) {
+                    loadGame();
+                } else {
+                    newGame();
+                }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(WorldQuest.this,
                         e.getMessage(),
@@ -180,10 +246,70 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private void newGame() {
         loadMap("map");
-        createPlayer();
+        this.player = PlayerProvider.createPlayer();
         eventHistory = new ArrayList<>();
         gameStarted = true;
         gameRunning = true;
+    }
+
+    private void loadGame() {
+        //TODO: Multiple save files
+        String savePathname = "saves"+File.separator+"save.dat";
+        File saveFile = new File(savePathname);
+        if (!saveFile.exists()) {
+            throw new RuntimeException("Unable to load save data: Save data file not found");
+        }
+        if (!saveFile.canRead()) {
+            throw new RuntimeException("Unable to read save file");
+        }
+        try(
+                InputStream mapDataStream = new FileInputStream(saveFile);
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
+            String mapName = buffer.readLine();
+            loadMap(mapName);
+            this.player = PlayerProvider.loadPlayer(buffer);
+            int eventHistoryItems = Integer.parseInt(buffer.readLine());
+            List<String> eventHistory = new ArrayList<>();
+            for (int i = 0; i < eventHistoryItems; i++) {
+                eventHistory.add(buffer.readLine());
+            }
+            this.eventHistory = eventHistory;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load map.dat data: " + e.getMessage(), e);
+        }
+        gameStarted = true;
+        gameRunning = true;
+    }
+
+    private void saveGame() {
+        String savePathname = "saves"+File.separator+"save.dat";
+        File saveFile = new File(savePathname);
+        try {
+            Files.createDirectories(Paths.get(saveFile.getParent()));
+            if (!saveFile.exists()) {
+                saveFile.createNewFile();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to create save file: " + e.getMessage(), e);
+        }
+        if (saveFile.exists() && !saveFile.canWrite()) {
+            throw new RuntimeException("Unable to update save file");
+        }
+        try(
+                OutputStream mapDataStream = new FileOutputStream(saveFile);
+                BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
+            buffer.write(mapName);
+            buffer.newLine();
+            PlayerProvider.savePlayer(buffer, player);
+            buffer.write(""+eventHistory.size());
+            buffer.newLine();
+            for (String line : eventHistory) {
+                buffer.write(line);
+                buffer.newLine();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to save: " + e.getMessage(), e);
+        }
     }
 
     private void loadTileTypes() {
@@ -197,77 +323,27 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private void loadMap(String mapResourceName) {
         //TODO: Map format not very efficient but easy to read
-        InputStream mapDataStream = getClass().getResourceAsStream(mapResourceName);
-        if (mapDataStream == null) {
-            throw new RuntimeException("Unable to load map data: Map data file not found");
+        String mapPathname = "maps"+File.separator+mapResourceName+".dat";
+        File mapFile = new File(mapPathname);
+        if (!mapFile.exists()) {
+            throw new RuntimeException(
+                    "Unable to load map data: Map data file not found: " + mapFile.getAbsolutePath());
         }
-        try(BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
-            Tile[][] newMap = processMap(buffer);
-            List<NPC> npcs = processNPCs(buffer);
-            processGameObjects(buffer, newMap);
+        if (!mapFile.canRead()) {
+            throw new RuntimeException("Unable to read map file");
+        }
+        try(
+                InputStream mapDataStream = new FileInputStream(mapFile);
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
+            Tile[][] newMap = MapTileLoader.loadMapTiles(tileTypes, buffer);
+            List<NPC> npcs = NPCLoader.loadNPCs(npcTypes, buffer);
+            GameObjectLoader.loadGameObjects(gameObjectBuilders, buffer, newMap);
             this.npcs = npcs;
             this.map = newMap;
+            this.mapName = mapResourceName;
         } catch (Exception e) {
             throw new RuntimeException("Unable to load map data: " + e.getMessage(), e);
         }
-    }
-
-    private Tile[][] processMap(BufferedReader buffer) throws IOException {
-        Tile[][] newMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
-        int mapLines = Integer.parseInt(buffer.readLine());
-        if (mapLines != MAP_HEIGHT) {
-            throw new RuntimeException("Invalid map size");
-        }
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            String mapLine = buffer.readLine();
-            if (mapLine != null) {
-                processMapLine(newMap, y, mapLine);
-            }
-        }
-        return newMap;
-    }
-
-    private void processMapLine(Tile[][] map, int y, String mapLine) {
-        String[] tileData = mapLine.split(",");
-        for (int x = 0; x < tileData.length; x++) {
-            //Currently the per tile data is just the tileType.
-            String tileTypeName = tileData[x];
-            TileType tileType = tileTypes.get(tileTypeName);
-            if (tileType == null) {
-                throw new RuntimeException("Invalid tile type: " + tileTypeName);
-            }
-            map[x][y] = new Tile(tileType);
-        }
-    }
-
-    private List<NPC> processNPCs(BufferedReader buffer) throws IOException {
-        int npcCount = Integer.parseInt(buffer.readLine());
-        List<NPC> npcs = new ArrayList<>(npcCount);
-        for (int i = 0; i < npcCount; i++) {
-            String[] npcData = buffer.readLine().split(",");
-            NPCType npcType = npcTypes.get(npcData[0]);
-            npcs.add(new NPC(npcType, Integer.parseInt(npcData[1]), Integer.parseInt(npcData[2])));
-        }
-        return npcs;
-    }
-
-    private void processGameObjects(BufferedReader buffer, Tile[][] newMap) throws IOException {
-        int gameObjectsCount = Integer.parseInt(buffer.readLine());
-        for (int i = 0; i < gameObjectsCount; i++) {
-            String[] gameObjectData = buffer.readLine().split(",");
-
-            int x = Integer.parseInt(gameObjectData[0]);
-            int y = Integer.parseInt(gameObjectData[1]);
-            String[] args = (gameObjectData.length > 3) ? gameObjectData[3].split(":") : new String[]{};
-            newMap[x][y].objects.add(gameObjectBuilders.get(gameObjectData[2]).build(args));
-        }
-    }
-
-    private void createPlayer() {
-        Player player = new Player();
-        player.x = 10;
-        player.y = 10;
-        this.player = player;
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {

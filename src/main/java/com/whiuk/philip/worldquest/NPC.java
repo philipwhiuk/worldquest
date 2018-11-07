@@ -5,11 +5,8 @@ public class NPC extends GameCharacter {
     final int experience = 10;
 
     NPC(NPCType type, int x, int y) {
+        super(type.color, x, y, type.health, type.health);
         this.type = type;
-        this.color = type.color;
-        this.x = x;
-        this.y = y;
-        this.health = type.health;
     }
 
     boolean canFight() {

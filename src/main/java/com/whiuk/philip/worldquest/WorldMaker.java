@@ -47,7 +47,7 @@ public class WorldMaker extends JFrame implements KeyListener, MouseListener {
         new Thread(() -> {
             try {
                 loadScenario();
-                loadMap("map");
+                loadMap("map.dat");
                 mapLoaded = true;
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
@@ -78,7 +78,7 @@ public class WorldMaker extends JFrame implements KeyListener, MouseListener {
         //TODO: Map format not very efficient but easy to read
         InputStream mapDataStream = getClass().getResourceAsStream(mapResourceName);
         if (mapDataStream == null) {
-            throw new RuntimeException("Unable to load map data: Map data file not found");
+            throw new RuntimeException("Unable to load map.dat data: Map data file not found");
         }
         try(BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
             Tile[][] newMap = processMap(buffer);
@@ -87,7 +87,7 @@ public class WorldMaker extends JFrame implements KeyListener, MouseListener {
             this.npcs = npcs;
             this.map = newMap;
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load map data: " + e.getMessage(), e);
+            throw new RuntimeException("Unable to load map.dat data: " + e.getMessage(), e);
         }
     }
 
@@ -97,7 +97,7 @@ public class WorldMaker extends JFrame implements KeyListener, MouseListener {
         Tile[][] newMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
         int mapLines = Integer.parseInt(buffer.readLine());
         if (mapLines != MAP_HEIGHT) {
-            throw new RuntimeException("Invalid map size");
+            throw new RuntimeException("Invalid map.dat size");
         }
         for (int y = 0; y < MAP_HEIGHT; y++) {
             String mapLine = buffer.readLine();

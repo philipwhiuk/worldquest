@@ -4,22 +4,38 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Player extends GameCharacter {
     HashMap<WorldQuest.Slot, WorldQuest.Armour> armour;
     WorldQuest.Weapon mainHandWeapon;
     List<WorldQuest.Item> inventory;
     int money;
-    private int baseDamage;
+    int baseDamage;
     int experience;
 
-    Player() {
-        this.color = Color.YELLOW;
-        this.maxHealth = 10;
-        this.health = 10;
+    Player(int x, int y) {
+        super(Color.YELLOW, x, y, 10, 10);
         this.baseDamage = 3;
         this.armour = new HashMap<>();
         this.inventory = new ArrayList<>();
+    }
+
+    Player(
+            int maxHealth, int health, int money, int experience, int baseDamage,
+            WorldQuest.Weapon mainHandWeapon, Map<WorldQuest.Slot, WorldQuest.Armour> armour,
+            List<WorldQuest.Item> inventory,
+            int x, int y) {
+        this(x, y);
+        this.maxHealth = maxHealth;
+        this.health = health;
+        this.money = money;
+        this.experience = experience;
+        this.baseDamage = baseDamage;
+        this.mainHandWeapon = mainHandWeapon;
+        this.armour = new HashMap<>();
+        this.armour.putAll(armour);
+        this.inventory = inventory;
     }
 
     void actionOnNpc(WorldQuest game, NPC npc) {
@@ -44,5 +60,10 @@ public class Player extends GameCharacter {
 
     void addMoney(int money) {
         this.money = money;
+    }
+
+    public void setLocation(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 }
