@@ -13,6 +13,7 @@ public class Player extends GameCharacter {
     int money;
     int baseDamage;
     int experience;
+    int itemBeingUsed = -1;
 
     Player(int x, int y) {
         super(Color.YELLOW, x, y, 10, 10);

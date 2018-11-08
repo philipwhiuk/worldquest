@@ -28,12 +28,19 @@ public class GameData {
             5,
             2*DIFFICULTY,
             new GObjects.ItemDrop[]{
-                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze dagger",2)),
-                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze sword",4)),
-                    new GObjects.ItemDrop(new WorldQuest.Hatchet("Bronze hatchet",3)),
-                    new GObjects.ItemDrop(new WorldQuest.Armour("Leather tunic", WorldQuest.Slot.CHEST)),
-                    new GObjects.ItemDrop(new WorldQuest.Item("Oak logs")),
+                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze dagger", false,2)),
+                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze sword", false,4)),
+                    new GObjects.ItemDrop(new WorldQuest.Hatchet("Bronze hatchet", false,3)),
+                    new GObjects.ItemDrop(new WorldQuest.Armour("Leather tunic", false, WorldQuest.Slot.CHEST)),
+                    new GObjects.ItemDrop(new WorldQuest.Item("Steel & flint", true)),
                     new GObjects.ItemDrop(5),
                     new GObjects.ItemDrop(10),
             });
+    static ItemAction Firemaking = new ItemAction() {
+        @Override
+        void perform(WorldQuest game, Player player, int firemakingTool, int logs) {
+            player.inventory.remove(logs);
+            game.spawn(new GObjects.Fire(), player.x, player.y);
+        }
+    };
 }

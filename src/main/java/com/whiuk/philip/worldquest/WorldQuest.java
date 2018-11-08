@@ -27,9 +27,15 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     }
 
+    public void spawn(GObjects.GameObject object, int x, int y) {
+        map[x][y].objects.add(object);
+    }
+
     enum Action {
-        NORTH, EAST, SOUTH, WEST, STAIRS, EQUIP_0, DROP_0,
-        EQUIP_1, DROP_1, EQUIP_2, DROP_2, EXIT, NEW_GAME
+        NORTH, EAST, SOUTH, WEST, STAIRS,
+        USE_0, EQUIP_0, DROP_0,
+        USE_1, EQUIP_1, DROP_1,
+        USE_2, EQUIP_2, DROP_2, EXIT, NEW_GAME
     }
 
     static {
@@ -48,14 +54,21 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         keymap.put('Y', Action.NEW_GAME);
     }
 
+
+    private Rectangle INVENTORY_USE_0 = new Rectangle(
+            433,227, 15, 15);
     private Rectangle INVENTORY_EQUIP_0 = new Rectangle(
             450,227, 15, 15);
     private Rectangle INVENTORY_DROP_0 = new Rectangle(
             467,227, 15, 15);
+    private Rectangle INVENTORY_USE_1 = new Rectangle(
+            433,247, 15, 15);
     private Rectangle INVENTORY_EQUIP_1 = new Rectangle(
             450,247, 15, 15);
     private Rectangle INVENTORY_DROP_1 = new Rectangle(
             467,247, 15, 15);
+    private Rectangle INVENTORY_USE_2 = new Rectangle(
+            433,267, 15, 15);
     private Rectangle INVENTORY_EQUIP_2 = new Rectangle(
             450,267, 15, 15);
     private Rectangle INVENTORY_DROP_2 = new Rectangle(
@@ -64,16 +77,24 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     static class Item {
         static Item parseItem(String itemData) {
-            return new Item(itemData);
+            String[] data = itemData.split(",");
+            return new Item(data[0], Boolean.parseBoolean(data[1]));
         }
 
         final String name;
-        Item(String name) {
+        final boolean useable;
+
+        Item(String name, boolean useable) {
             this.name = name;
+            this.useable = useable;
         }
 
         public Item copy() {
-            return new Item(this.name);
+            return new Item(this.name, this.useable);
+        }
+
+        public boolean canUse() {
+            return useable;
         }
 
         public boolean canEquip() {
@@ -81,7 +102,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
 
         public String print() {
-            return this.name;
+            return this.name+","+useable;
         }
     }
 
@@ -92,17 +113,17 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
         static Armour parseItem(String itemData) {
             String[] itemDataFields = itemData.split(",");
-            return new Armour(itemDataFields[0], Slot.valueOf(itemDataFields[1]));
+            return new Armour(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Slot.valueOf(itemDataFields[2]));
         }
 
-        Armour(String name, Slot slot) {
-            super(name);
+        Armour(String name, boolean useable, Slot slot) {
+            super(name, useable);
             this.slot = slot;
         }
 
         @Override
         public Armour copy() {
-            return new Armour(this.name, slot);
+            return new Armour(name, useable, slot);
         }
 
         @Override
@@ -121,17 +142,17 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
         static Weapon parseItem(String itemData) {
             String[] itemDataFields = itemData.split(",");
-            return new Weapon(itemDataFields[0], Integer.parseInt(itemDataFields[1]));
+            return new Weapon(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[2]));
         }
 
-        Weapon(String name, int damage) {
-            super(name);
+        Weapon(String name, boolean useable, int damage) {
+            super(name, useable);
             this.damage = damage;
         }
 
         @Override
         public Weapon copy() {
-            return new Weapon(this.name, damage);
+            return new Weapon(this.name, this.useable, damage);
         }
 
         @Override
@@ -149,16 +170,16 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
         static Hatchet parseItem(String itemData) {
             String[] itemDataFields = itemData.split(",");
-            return new Hatchet(itemDataFields[0], Integer.parseInt(itemDataFields[1]));
+            return new Hatchet(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[2]));
         }
 
-        Hatchet(String name, int damage) {
-            super(name, damage);
+        Hatchet(String name, boolean useable, int damage) {
+            super(name, useable, damage);
         }
 
         @Override
         public Hatchet copy() {
-            return new Hatchet(this.name, damage);
+            return new Hatchet(this.name, this.useable, damage);
         }
 
         @Override
@@ -171,6 +192,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private Map<String, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
+    private Map<String, ItemAction> itemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
     private Tile[][] map;
     private String mapName;
@@ -241,6 +263,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private void loadScenario() {
         loadTileTypes();
+        loadItemUses();
         gameObjectBuilders = GObjects.provideBuilders();
     }
 
@@ -319,6 +342,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         tileTypes.put("Floor", GameData.Floor);
         tileTypes.put("Door", GameData.Door);
         npcTypes.put("Goblin", GameData.Goblin);
+    }
+
+    private void loadItemUses() {
+        //TODO: At some point this will come from a file too, but right now there's not much to load.
+        itemUses.put("Steel & flint,Oak logs", GameData.Firemaking);
     }
 
     private void loadMap(String mapResourceName) {
@@ -490,6 +518,14 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
 
         private void listItem(Graphics2D g, Item item, int y) {
+            if (item.canUse()) {
+                g.setColor(Color.DARK_GRAY);
+                g.fillRoundRect(433, y - 13, 15, 14, 2, 2);
+                g.setColor(Color.BLUE);
+                g.drawRoundRect(433, y - 13, 15, 14, 2, 2);
+                g.drawString("o", 437, y - 3);
+            }
+
             if (item.canEquip()) {
                 g.setColor(Color.DARK_GRAY);
                 g.fillRoundRect(450, y - 13, 15, 14, 2, 2);
@@ -524,22 +560,23 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         Action action = null;
-        if (INVENTORY_EQUIP_0.contains(e.getPoint()) && player.inventory.size() >= 1) {
+        if (INVENTORY_USE_0.contains(e.getPoint()) && player.inventory.size() >= 1) {
+            action = Action.USE_0;
+        } else if (INVENTORY_USE_1.contains(e.getPoint()) && player.inventory.size() >= 2) {
+            action = Action.USE_1;
+        } else if (INVENTORY_USE_2.contains(e.getPoint()) && player.inventory.size() >= 3) {
+            action = Action.USE_2;
+        } else if (INVENTORY_EQUIP_0.contains(e.getPoint()) && player.inventory.size() >= 1) {
             action = Action.EQUIP_0;
-        }
-        if (INVENTORY_EQUIP_1.contains(e.getPoint()) && player.inventory.size() >= 2) {
+        } else if (INVENTORY_EQUIP_1.contains(e.getPoint()) && player.inventory.size() >= 2) {
             action = Action.EQUIP_1;
-        }
-        if (INVENTORY_EQUIP_2.contains(e.getPoint()) && player.inventory.size() >= 3) {
+        } else if (INVENTORY_EQUIP_2.contains(e.getPoint()) && player.inventory.size() >= 3) {
             action = Action.EQUIP_2;
-        }
-        if (INVENTORY_DROP_0.contains(e.getPoint()) && player.inventory.size() >= 1) {
+        } else if (INVENTORY_DROP_0.contains(e.getPoint()) && player.inventory.size() >= 1) {
             action = Action.DROP_0;
-        }
-        if (INVENTORY_DROP_1.contains(e.getPoint()) && player.inventory.size() >= 2) {
+        } else if (INVENTORY_DROP_1.contains(e.getPoint()) && player.inventory.size() >= 2) {
             action = Action.DROP_1;
-        }
-        if (INVENTORY_DROP_2.contains(e.getPoint()) && player.inventory.size() >= 3) {
+        } else if (INVENTORY_DROP_2.contains(e.getPoint()) && player.inventory.size() >= 3) {
             action = Action.DROP_2;
         }
         if (action != null) {
@@ -582,6 +619,15 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                         ((GObjects.Stairs) object).go(this);
                     }
                 }
+                break;
+            case USE_0:
+                useItem(0);
+                break;
+            case USE_1:
+                useItem(1);
+                break;
+            case USE_2:
+                useItem(2);
                 break;
             case EQUIP_0:
                 equipItem(0);
@@ -682,6 +728,32 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                 player.inventory.add(removed);
             }
             player.inventory.remove(a);
+        }
+    }
+
+    private void useItem(int index) {
+        if (player.itemBeingUsed == index) {
+            player.itemBeingUsed = -1;
+        } else if (player.itemBeingUsed == -1) {
+            System.out.println("Using item: " + player.inventory.get(index).name);
+            player.itemBeingUsed = index;
+        } else {
+            int firstItem = player.itemBeingUsed;
+            player.itemBeingUsed = -1;
+            useItems(firstItem, index);
+        }
+    }
+
+    private void useItems(int firstItemIndex, int secondItemIndex) {
+        System.out.println("Using items: " + player.inventory.get(firstItemIndex).name + " with " + player.inventory.get(secondItemIndex).name);
+        ItemAction action = itemUses.get(player.inventory.get(firstItemIndex).name+","+player.inventory.get(secondItemIndex).name);
+        if (action != null) {
+            action.perform(this, player, firstItemIndex, secondItemIndex);
+        } else {
+            action = itemUses.get(player.inventory.get(secondItemIndex).name+","+player.inventory.get(firstItemIndex).name);
+            if (action != null) {
+                action.perform(this, player, secondItemIndex, firstItemIndex);
+            }
         }
     }
 

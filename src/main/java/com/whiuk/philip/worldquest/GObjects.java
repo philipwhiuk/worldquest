@@ -117,8 +117,26 @@ public class GObjects {
             if (player.mainHandWeapon instanceof WorldQuest.Hatchet) {
                 cutDown = true;
                 ticksToRegrow = 10;
-                player.inventory.add(new WorldQuest.Item("Oak logs"));
+                player.inventory.add(new WorldQuest.Item("Oak logs", true));
             }
+        }
+    }
+
+    static class Fire extends GameObject {
+
+        @Override
+        public boolean canMoveTo() {
+            return true;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(Color.ORANGE);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 2, MAP_SPACING + (y * TILE_HEIGHT) + 2,
+                    TILE_WIDTH - 4, TILE_HEIGHT - 4);
+            g.setColor(Color.RED);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 3,
+                    TILE_WIDTH - 6, TILE_HEIGHT - 6);
         }
     }
 
