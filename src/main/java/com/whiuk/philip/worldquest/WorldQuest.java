@@ -662,31 +662,31 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    void north(GameCharacter subject) {
+    private void north(GameCharacter subject) {
         if (inBounds(subject.x, subject.y - 1)) {
             directionAction(subject, subject.x, subject.y - 1);
         }
     }
 
-    void south(GameCharacter subject) {
+    private void south(GameCharacter subject) {
         if (inBounds(subject.x, subject.y + 1)) {
             directionAction(subject, subject.x, subject.y + 1);
         }
     }
 
-    void east(GameCharacter subject) {
+    private void east(GameCharacter subject) {
         if (inBounds(subject.x + 1, subject.y)) {
             directionAction(subject, subject.x + 1, subject.y);
         }
     }
 
-    void west(GameCharacter subject) {
+    private void west(GameCharacter subject) {
         if (inBounds(subject.x - 1, subject.y)) {
             directionAction(subject,subject.x - 1, subject.y);
         }
     }
 
-    boolean inBounds(int x, int y) {
+    private boolean inBounds(int x, int y) {
         return x >= 0 && x <= MAX_X && y >= 0 && y <= MAX_Y;
     }
 
@@ -783,7 +783,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    void tickNPC(NPC npc) {
+    private void tickNPC(NPC npc) {
         if (nextToPlayer(npc)) {
             attackPlayer(npc);
         } else if(random.nextBoolean()) {
@@ -791,7 +791,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    void attackPlayer(NPC npc) {
+    private void attackPlayer(NPC npc) {
         npc.attack(player);
         if (player.isDead()) {
             eventHistory.add("Killed by a "+npc.type.name);
