@@ -499,7 +499,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             y += 20;
 
             for (int i = 0; i < player.inventory.size(); i++) {
-                listItem(g, player.inventory.get(i), y);
+                listItem(g, player.inventory.get(i), y, i);
                 y += 20;
             }
 
@@ -517,11 +517,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             }
         }
 
-        private void listItem(Graphics2D g, Item item, int y) {
+        private void listItem(Graphics2D g, Item item, int y, int index) {
             if (item.canUse()) {
-                g.setColor(Color.DARK_GRAY);
+                g.setColor(player.itemBeingUsed == index ? Color.BLUE : Color.DARK_GRAY);
                 g.fillRoundRect(433, y - 13, 15, 14, 2, 2);
-                g.setColor(Color.BLUE);
+                g.setColor(player.itemBeingUsed == index ? Color.DARK_GRAY : Color.BLUE);
                 g.drawRoundRect(433, y - 13, 15, 14, 2, 2);
                 g.drawString("o", 437, y - 3);
             }
@@ -621,13 +621,13 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                 }
                 break;
             case USE_0:
-                useItem(0);
+                shouldTick = useItem(0);
                 break;
             case USE_1:
-                useItem(1);
+                shouldTick = useItem(1);
                 break;
             case USE_2:
-                useItem(2);
+                shouldTick = useItem(2);
                 break;
             case EQUIP_0:
                 equipItem(0);
@@ -731,30 +731,35 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    private void useItem(int index) {
+    private boolean useItem(int index) {
         if (player.itemBeingUsed == index) {
             player.itemBeingUsed = -1;
+            return false;
         } else if (player.itemBeingUsed == -1) {
             System.out.println("Using item: " + player.inventory.get(index).name);
             player.itemBeingUsed = index;
+            return false;
         } else {
             int firstItem = player.itemBeingUsed;
             player.itemBeingUsed = -1;
-            useItems(firstItem, index);
+            return useItems(firstItem, index);
         }
     }
 
-    private void useItems(int firstItemIndex, int secondItemIndex) {
+    private boolean useItems(int firstItemIndex, int secondItemIndex) {
         System.out.println("Using items: " + player.inventory.get(firstItemIndex).name + " with " + player.inventory.get(secondItemIndex).name);
         ItemAction action = itemUses.get(player.inventory.get(firstItemIndex).name+","+player.inventory.get(secondItemIndex).name);
         if (action != null) {
             action.perform(this, player, firstItemIndex, secondItemIndex);
+            return true;
         } else {
             action = itemUses.get(player.inventory.get(secondItemIndex).name+","+player.inventory.get(firstItemIndex).name);
             if (action != null) {
                 action.perform(this, player, secondItemIndex, firstItemIndex);
+                return true;
             }
         }
+        return false;
     }
 
     private void dropItem(int index) {
