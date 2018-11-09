@@ -2,7 +2,7 @@ package com.whiuk.philip.worldquest;
 
 import java.awt.*;
 
-abstract class GameCharacter extends Entity {
+abstract class GameCharacter {
     Color color;
     int x;
     int y;

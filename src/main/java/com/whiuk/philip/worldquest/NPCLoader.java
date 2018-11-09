@@ -14,6 +14,9 @@ public class NPCLoader {
         for (int i = 0; i < npcCount; i++) {
             String[] npcData = buffer.readLine().split(",");
             NPCType npcType = npcTypes.get(npcData[0]);
+            if (npcType == null) {
+                throw new IllegalArgumentException("Unknown NPC type: " + npcData[0]);
+            }
             npcs.add(new NPC(npcType, Integer.parseInt(npcData[1]), Integer.parseInt(npcData[2])));
         }
         return npcs;

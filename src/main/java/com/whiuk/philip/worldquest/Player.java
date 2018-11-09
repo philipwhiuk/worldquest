@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Player extends GameCharacter {
-    HashMap<WorldQuest.Slot, WorldQuest.Armour> armour;
-    WorldQuest.Weapon mainHandWeapon;
-    List<WorldQuest.Item> inventory;
+    HashMap<Slot, Armour> armour;
+    Weapon mainHandWeapon;
+    List<Item> inventory;
     int money;
     int baseDamage;
     int experience;
@@ -24,8 +24,8 @@ public class Player extends GameCharacter {
 
     Player(
             int maxHealth, int health, int money, int experience, int baseDamage,
-            WorldQuest.Weapon mainHandWeapon, Map<WorldQuest.Slot, WorldQuest.Armour> armour,
-            List<WorldQuest.Item> inventory,
+            Weapon mainHandWeapon, Map<Slot, Armour> armour,
+            List<Item> inventory,
             int x, int y) {
         this(x, y);
         this.maxHealth = maxHealth;

@@ -1,9 +1,10 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
+import java.util.Arrays;
 
 public class GameData {
-    static final int DIFFICULTY = 1;
+    private static final int DIFFICULTY = 1;
 
     static TileType Grass = new TileType(
             new Color(0,100,0),
@@ -25,17 +26,37 @@ public class GameData {
             "Goblin",
             Color.RED,
             true,
+            true,
             5,
             2*DIFFICULTY,
             new GObjects.ItemDrop[]{
-                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze dagger", false,2)),
-                    new GObjects.ItemDrop(new WorldQuest.Weapon("Bronze sword", false,4)),
-                    new GObjects.ItemDrop(new WorldQuest.Hatchet("Bronze hatchet", false,3)),
-                    new GObjects.ItemDrop(new WorldQuest.Armour("Leather tunic", false, WorldQuest.Slot.CHEST)),
-                    new GObjects.ItemDrop(new WorldQuest.Item("Steel & flint", true)),
+                    new GObjects.ItemDrop(new Weapon("Bronze dagger", false,2)),
+                    new GObjects.ItemDrop(new Weapon("Bronze sword", false,4)),
+                    new GObjects.ItemDrop(new Hatchet("Bronze hatchet", false,3)),
+                    new GObjects.ItemDrop(new Armour("Leather tunic", false, Slot.CHEST)),
+                    new GObjects.ItemDrop(new Item("Steel & flint", true)),
                     new GObjects.ItemDrop(5),
                     new GObjects.ItemDrop(10),
-            });
+            },
+            false,
+            null,
+            null);
+    static NPCType ShopKeeper = new NPCType(
+            "Shopkeeper",
+            Color.WHITE,
+            false,
+            false,
+            10,
+            0,
+            new GObjects.ItemDrop[]{},
+            true,
+            new ConversationChoice(null, "Hello and welcome to my shop!",
+                    new ShopDisplay()),
+            new Shop("General Store", Arrays.asList(
+                    new ShopListing(
+                            new Item("Hammer", false),
+                            1, 1, 5)))
+    );
     static ItemAction Firemaking = new ItemAction() {
         @Override
         void perform(WorldQuest game, Player player, int firemakingTool, int logs) {

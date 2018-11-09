@@ -1,7 +1,5 @@
 package com.whiuk.philip.worldquest;
 
-import com.whiuk.philip.worldquest.WorldQuest.Slot;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,18 +17,18 @@ public class PlayerProvider {
     public static Player loadPlayer(BufferedReader buffer) throws IOException {
         String playerStats[] = buffer.readLine().split(",");
         String mainHandWeaponString = buffer.readLine();
-        WorldQuest.Weapon weapon = null;
+        Weapon weapon = null;
         if (!mainHandWeaponString.isEmpty()) {
-            weapon = (WorldQuest.Weapon) parseItem(mainHandWeaponString);
+            weapon = (Weapon) parseItem(mainHandWeaponString);
         }
         int armourCount = Integer.parseInt(buffer.readLine());
-        Map<Slot, WorldQuest.Armour> armour = new HashMap<>();
+        Map<Slot, Armour> armour = new HashMap<>();
         for (int i = 0; i < armourCount; i++) {
             String[] armourData = buffer.readLine().split(":");
-            armour.put(Slot.valueOf(armourData[0]), (WorldQuest.Armour) parseItem(armourData[1]));
+            armour.put(Slot.valueOf(armourData[0]), (Armour) parseItem(armourData[1]));
         }
         int inventoryCount = Integer.parseInt(buffer.readLine());
-        List<WorldQuest.Item> inventory = new ArrayList<>();
+        List<Item> inventory = new ArrayList<>();
         for (int i = 0; i < inventoryCount; i++) {
             inventory.add(parseItem(buffer.readLine()));
         }
@@ -55,34 +53,34 @@ public class PlayerProvider {
         buffer.newLine();
         buffer.write(""+player.armour.size());
         buffer.newLine();
-        for (Map.Entry<Slot, WorldQuest.Armour> entry : player.armour.entrySet()) {
+        for (Map.Entry<Slot, Armour> entry : player.armour.entrySet()) {
             buffer.write(entry.getKey().name()+":"+printItem(entry.getValue()));
             buffer.newLine();
         }
         buffer.write(""+player.inventory.size());
         buffer.newLine();
-        for (WorldQuest.Item item : player.inventory) {
+        for (Item item : player.inventory) {
             buffer.write(printItem(item));
             buffer.newLine();
         }
     }
 
-    private static WorldQuest.Item parseItem(String itemData) {
+    private static Item parseItem(String itemData) {
         String[] itemClassData = itemData.split(",", 2);
         switch (itemClassData[0]) {
             case "Item":
-                return WorldQuest.Item.parseItem(itemClassData[1]);
+                return Item.parseItem(itemClassData[1]);
             case "Weapon":
-                return WorldQuest.Weapon.parseItem(itemClassData[1]);
+                return Weapon.parseItem(itemClassData[1]);
             case "Armour":
-                return WorldQuest.Armour.parseItem(itemClassData[1]);
+                return Armour.parseItem(itemClassData[1]);
             case "Hatchet":
-                return WorldQuest.Hatchet.parseItem(itemClassData[1]);
+                return Hatchet.parseItem(itemClassData[1]);
         }
         throw new IllegalArgumentException(itemClassData[0]);
     }
 
-    private static String printItem(WorldQuest.Item item) {
+    private static String printItem(Item item) {
         return item.getClass().getSimpleName()+","+item.print();
     }
 }

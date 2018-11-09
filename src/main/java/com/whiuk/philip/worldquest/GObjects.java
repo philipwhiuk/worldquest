@@ -114,10 +114,10 @@ public class GObjects {
 
         @Override
         public void doAction(Player player) {
-            if (player.mainHandWeapon instanceof WorldQuest.Hatchet) {
+            if (player.mainHandWeapon instanceof Hatchet) {
                 cutDown = true;
                 ticksToRegrow = 10;
-                player.inventory.add(new WorldQuest.Item("Oak logs", true));
+                player.inventory.add(new Item("Oak logs", true));
             }
         }
     }
@@ -141,10 +141,10 @@ public class GObjects {
     }
 
     static class ItemDrop extends GObjects.GameObject {
-        private WorldQuest.Item item;
+        private Item item;
         private int money;
 
-        ItemDrop(WorldQuest.Item i) {
+        ItemDrop(Item i) {
             this.item = i;
         }
 
