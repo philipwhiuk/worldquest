@@ -58,25 +58,32 @@ public class SidebarPainter {
 
     private static void listItem(Graphics2D g, Player player, Item item, int y, int index) {
         if (item.canUse()) {
-            g.setColor(player.itemBeingUsed == index ? Color.BLUE : Color.DARK_GRAY);
-            g.fillRoundRect(433, y - 13, 15, 14, 2, 2);
-            g.setColor(player.itemBeingUsed == index ? Color.DARK_GRAY : Color.BLUE);
-            g.drawRoundRect(433, y - 13, 15, 14, 2, 2);
-            g.drawString("o", 437, y - 3);
+            ButtonPainter.paintButton(g,
+                    player.itemBeingUsed != index ? Color.BLUE : Color.DARK_GRAY,
+                    player.itemBeingUsed != index ? Color.DARK_GRAY : Color.BLUE,
+                    433,
+                    y-13,
+                    "o"
+            );
         }
 
         if (item.canEquip()) {
-            g.setColor(Color.DARK_GRAY);
-            g.fillRoundRect(450, y - 13, 15, 14, 2, 2);
-            g.setColor(Color.GREEN);
-            g.drawRoundRect(450, y - 13, 15, 14, 2, 2);
-            g.drawString("+", 453, y - 3);
+            ButtonPainter.paintButton(g,
+                    Color.GREEN,
+                    Color.DARK_GRAY,
+                    450,
+                    y-13,
+                    "+"
+            );
         }
-        g.setColor(Color.DARK_GRAY);
-        g.fillRoundRect(467, y - 13, 15, 14, 2, 2);
-        g.setColor(Color.RED);
-        g.drawRoundRect(467, y - 13, 15, 14, 2, 2);
-        g.drawString("-", 470, y - 3);
+
+        ButtonPainter.paintButton(g,
+                Color.RED,
+                Color.DARK_GRAY,
+                467,
+                y-13,
+                "-"
+        );
 
         g.setColor(Color.WHITE);
         g.drawString(item.name, 500, y);
@@ -89,11 +96,13 @@ public class SidebarPainter {
 
         for (NPC npc : visibleNpcs) {
             if (npc.canTalk()) {
-                g.setColor(npc.currentConversation != null ? Color.BLUE : Color.DARK_GRAY);
-                g.fillRoundRect(433, y - 13, 15, 14, 2, 2);
-                g.setColor(npc.currentConversation != null ? Color.DARK_GRAY : Color.BLUE);
-                g.drawRoundRect(433, y - 13, 15, 14, 2, 2);
-                g.drawString("o", 437, y - 3);
+                ButtonPainter.paintButton(g,
+                        npc.currentConversation != null ? Color.DARK_GRAY : Color.BLUE,
+                        npc.currentConversation != null ? Color.BLUE : Color.DARK_GRAY,
+                        433,
+                        y-13,
+                        "o"
+                );
             }
 
             //TODO: canFight vs canDie

@@ -1,7 +1,5 @@
 package com.whiuk.philip.worldquest;
 
-import sun.plugin2.message.Conversation;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -29,8 +27,8 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         USE_0, EQUIP_0, DROP_0,
         USE_1, EQUIP_1, DROP_1,
         USE_2, EQUIP_2, DROP_2,
-        TALK_0,
-        TALK_CONTINUE,
+        TALK_0, TALK_1, TALK_2,
+        TALK_CONTINUE, CLOSE_SHOP,
         EXIT, NEW_GAME
     }
 
@@ -341,10 +339,15 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         return new Rectangle(433,227+offset, 15, 15);
     }
 
+    private Rectangle shopCloseLocation() {
+        return new Rectangle(19+BORDER_WIDTH-35,SHOP_Y+40, 15, 15);
+    }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
         Action action = null;
+        System.out.println(e.getPoint());
         if (inventoryButtonUseLocation(0).contains(e.getPoint()) && player.inventory.size() >= 1) {
             action = Action.USE_0;
         } else if (inventoryButtonUseLocation(1).contains(e.getPoint()) && player.inventory.size() >= 2) {
@@ -363,8 +366,15 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             action = Action.DROP_1;
         } else if (inventoryButtonDropLocation(2).contains(e.getPoint()) && player.inventory.size() >= 3) {
             action = Action.DROP_2;
-        } else if (npcButtonTalkLocation(0).contains(e.getPoint()) && player.inventory.size() >= 1) {
+        } else if (npcButtonTalkLocation(0).contains(e.getPoint()) && visibleNpcs.size() >= 1) {
             action = Action.TALK_0;
+        } else if (npcButtonTalkLocation(1).contains(e.getPoint()) && visibleNpcs.size() >= 2) {
+            action = Action.TALK_1;
+        } else {
+            boolean inShop = shopCloseLocation().contains(e.getPoint());
+            if (inShop && currentShop != null) {
+                action = Action.CLOSE_SHOP;
+            }
         }
         if (action != null) {
             processAction(action);
@@ -376,6 +386,8 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             processActionWhileRunning(a);
         } else if (gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
             processActionWhileTalking(a);
+        } else if (gameState == SHOP) {
+            processActionWhileShopping(a);
         } else if (gameState == DEAD) {
             processActionWhileGameOver(a);
         }
@@ -446,6 +458,14 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                 talkTo(0);
                 shouldTick = true;
                 break;
+            case TALK_1:
+                talkTo(1);
+                shouldTick = true;
+                break;
+            case TALK_2:
+                talkTo(2);
+                shouldTick = true;
+                break;
         }
         if (shouldTick) {
             tick(initialPlayerHealth);
@@ -457,6 +477,14 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         switch(action) {
             case TALK_CONTINUE:
                 progressConversation();
+                break;
+        }
+    }
+
+    private void processActionWhileShopping(Action action) {
+        switch(action) {
+            case CLOSE_SHOP:
+                closeShop();
                 break;
         }
     }
@@ -686,6 +714,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     public void showShop(Shop shop) {
         currentShop = shop;
         gameState = SHOP;
+    }
+
+    public void closeShop() {
+        currentShop = null;
+        gameState = RUNNING;
     }
 
     boolean isVisible(int x, int y) {
