@@ -1,6 +1,8 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 abstract class GameCharacter {
     Color color;
@@ -8,6 +10,7 @@ abstract class GameCharacter {
     int y;
     int maxHealth;
     int health;
+    Map<String,Experience> skills;
 
     GameCharacter(Color color, int x, int y, int maxHealth, int health) {
         this.color = color;
@@ -15,6 +18,7 @@ abstract class GameCharacter {
         this.y = y;
         this.maxHealth = maxHealth;
         this.health = health;
+        this.skills = new HashMap<>();
     }
 
     abstract void actionOnNpc(WorldQuest game, NPC npc);
@@ -25,8 +29,13 @@ abstract class GameCharacter {
 
     void attack(GameCharacter c) {
         if (RandomSource.getRandom().nextBoolean()) {
-            c.takeHit(this.calculateDamage());
+            int damage = this.calculateDamage();
+            c.takeHit(damage);
+            attackSuccessful(damage);
         }
+    }
+
+    void attackSuccessful(int damageCaused) {
     }
 
     abstract int calculateDamage();
@@ -41,5 +50,15 @@ abstract class GameCharacter {
 
     boolean isDead() {
         return health <= 0;
+    }
+}
+
+class Experience {
+    int level;
+    int experience;
+
+    Experience(int experience) {
+        this.level = ExperienceTable.getLevel(experience);
+        this.experience = experience;
     }
 }

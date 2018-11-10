@@ -34,13 +34,23 @@ public class NPC extends GameCharacter {
 
     @Override
     int calculateDamage() {
-        return type.damage;
+        return RandomSource.getRandom().nextInt(type.damage);
     }
 
     public GObjects.ItemDrop dropItem() {
         return type.dropTable[RandomSource.getRandom().nextInt(type.dropTable.length)].copy();
     }
+
+    public boolean isAggressive() {
+        return true; //TODO: Is monster aggressive
+    }
+
+    public boolean hasBeenAttacked() {
+        return false; //TODO: Store whether player has attacked recently
+    }
 }
+
+//TODO: Random item listings?
 
 class Shop {
     final String name;

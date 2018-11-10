@@ -42,4 +42,8 @@ class Tile {
         objects.forEach(obj -> obj.onMoveTo(player));
         objects.removeIf(GObjects.GameObject::isDeleted);
     }
+
+    public boolean isOutdoors() {
+        return type.isOutdoors;
+    }
 }

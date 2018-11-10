@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.MapConstants.*;
+import static com.whiuk.philip.worldquest.SidebarViewState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 
 public class WorldQuest extends JFrame implements KeyListener, MouseListener {
@@ -23,13 +24,20 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
 
     enum Action {
-        NORTH, EAST, SOUTH, WEST, STAIRS,
-        USE_0, EQUIP_0, DROP_0,
-        USE_1, EQUIP_1, DROP_1,
-        USE_2, EQUIP_2, DROP_2,
-        TALK_0, TALK_1, TALK_2,
-        TALK_CONTINUE, CLOSE_SHOP,
-        EXIT, NEW_GAME
+        NORTH(false), EAST(false), SOUTH(false), WEST(false), STAIRS(false),
+        USE_0(false), EQUIP_0(false), DROP_0(false),
+        USE_1(false), EQUIP_1(false), DROP_1(false),
+        USE_2(false), EQUIP_2(false), DROP_2(false),
+        TALK_0(false), TALK_1(false), TALK_2(false),
+        TALK_CONTINUE(false), CLOSE_SHOP(false),
+        SWITCH_TO_SKILLS(true), SWITCH_TO_ITEMS(true), SWITCH_TO_EQUIPMENT(true), SWITCH_TO_NPCS(true),
+        EXIT(false), NEW_GAME(false);
+
+        private boolean isSidebarViewAction;
+
+        Action(boolean isSidebarViewAction) {
+            this.isSidebarViewAction = isSidebarViewAction;
+        }
     }
 
     enum GameState {
@@ -69,10 +77,12 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private Player player;
     private List<String> eventHistory;
     GameState gameState = LAUNCHING;
+    private SidebarViewState sidebarViewState = SKILLS;
     private NPC talkingTo;
     private Shop currentShop;
 
     public static void main(String[] args) {
+        ExperienceTable.initializeExpTable();
         new WorldQuest();
     }
 
@@ -275,7 +285,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
                     if (gameState == RUNNING || gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
                         MapViewPainter.paintMapView(g, WorldQuest.this, map, visibleNpcs, player);
                     }
-                    SidebarPainter.paintSidebar(g, WorldQuest.this, player, visibleNpcs);
+                    SidebarPainter.paintSidebar(g, sidebarViewState, WorldQuest.this, player, visibleNpcs);
                     if (gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
                         ConversationPainter.paintConversation(g, gameState, talkingTo);
                     } else if (gameState == SHOP) {
@@ -322,20 +332,27 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
+    private Rectangle sidebarLocation() {
+        return new Rectangle(420, 0, 260, 480);
+    }
+
     private Rectangle inventoryButtonUseLocation(int index) {
-        return new Rectangle(433,227+(20*index), 15, 15);
+        int offset = 20*(player.skills.size()+index);
+        return new Rectangle(433,227+offset, 15, 15);
     }
 
     private Rectangle inventoryButtonEquipLocation(int index) {
-        return new Rectangle(450,227+(20*index), 15, 15);
+        int offset = 20*(player.skills.size()+index);
+        return new Rectangle(450,227+offset, 15, 15);
     }
 
     private Rectangle inventoryButtonDropLocation(int index) {
-        return new Rectangle(467,227+(20*index), 15, 15);
+        int offset = 20*(player.skills.size()+index);
+        return new Rectangle(467,227+offset, 15, 15);
     }
 
     private Rectangle npcButtonTalkLocation(int index) {
-        int offset = 20*(player.inventory.size()+index+2);
+        int offset = 20*(player.inventory.size()+index+2+player.skills.size());
         return new Rectangle(433,227+offset, 15, 15);
     }
 
@@ -346,42 +363,80 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Action action = null;
-        System.out.println(e.getPoint());
-        if (inventoryButtonUseLocation(0).contains(e.getPoint()) && player.inventory.size() >= 1) {
-            action = Action.USE_0;
-        } else if (inventoryButtonUseLocation(1).contains(e.getPoint()) && player.inventory.size() >= 2) {
-            action = Action.USE_1;
-        } else if (inventoryButtonUseLocation(2).contains(e.getPoint()) && player.inventory.size() >= 3) {
-            action = Action.USE_2;
-        } else if (inventoryButtonEquipLocation(0).contains(e.getPoint()) && player.inventory.size() >= 1) {
-            action = Action.EQUIP_0;
-        } else if (inventoryButtonEquipLocation(1).contains(e.getPoint()) && player.inventory.size() >= 2) {
-            action = Action.EQUIP_1;
-        } else if (inventoryButtonEquipLocation(2).contains(e.getPoint()) && player.inventory.size() >= 3) {
-            action = Action.EQUIP_2;
-        } else if (inventoryButtonDropLocation(0).contains(e.getPoint()) && player.inventory.size() >= 1) {
-            action = Action.DROP_0;
-        } else if (inventoryButtonDropLocation(1).contains(e.getPoint()) && player.inventory.size() >= 2) {
-            action = Action.DROP_1;
-        } else if (inventoryButtonDropLocation(2).contains(e.getPoint()) && player.inventory.size() >= 3) {
-            action = Action.DROP_2;
-        } else if (npcButtonTalkLocation(0).contains(e.getPoint()) && visibleNpcs.size() >= 1) {
-            action = Action.TALK_0;
-        } else if (npcButtonTalkLocation(1).contains(e.getPoint()) && visibleNpcs.size() >= 2) {
-            action = Action.TALK_1;
-        } else {
-            boolean inShop = shopCloseLocation().contains(e.getPoint());
-            if (inShop && currentShop != null) {
-                action = Action.CLOSE_SHOP;
-            }
-        }
+        Action action = checkInterceptions(e.getPoint());
         if (action != null) {
             processAction(action);
         }
     }
 
+    private Action checkInterceptions(Point p) {
+        if (sidebarLocation().contains(p)) {
+            System.out.println("Sidebar clicked");
+            return checkSidebarInterceptions(p);
+        } else if (gameState == SHOP) {
+            if (shopCloseLocation().contains(p)) {
+                return Action.CLOSE_SHOP;
+            }
+        }
+        return null;
+    }
+
+    private Action checkSidebarInterceptions(Point p) {
+        System.out.println(p);
+
+        if (sidebarTabButton(0, 0).contains(p)) {
+            return Action.SWITCH_TO_SKILLS;
+        } else if (sidebarTabButton(1, 0).contains(p)) {
+            return Action.SWITCH_TO_EQUIPMENT;
+        } else if (sidebarTabButton(2, 0).contains(p)) {
+            return Action.SWITCH_TO_ITEMS;
+        } else if (sidebarTabButton(0, 1).contains(p)) {
+            return Action.SWITCH_TO_NPCS;
+        }
+
+        switch (sidebarViewState) {
+            case SKILLS:
+                return null;
+            case ITEMS:
+                if (inventoryButtonUseLocation(0).contains(p) && player.inventory.size() >= 1) {
+                    return Action.USE_0;
+                } else if (inventoryButtonUseLocation(1).contains(p) && player.inventory.size() >= 2) {
+                    return Action.USE_1;
+                } else if (inventoryButtonUseLocation(2).contains(p) && player.inventory.size() >= 3) {
+                    return Action.USE_2;
+                } else if (inventoryButtonEquipLocation(0).contains(p) && player.inventory.size() >= 1) {
+                    return Action.EQUIP_0;
+                } else if (inventoryButtonEquipLocation(1).contains(p) && player.inventory.size() >= 2) {
+                    return Action.EQUIP_1;
+                } else if (inventoryButtonEquipLocation(2).contains(p) && player.inventory.size() >= 3) {
+                    return Action.EQUIP_2;
+                } else if (inventoryButtonDropLocation(0).contains(p) && player.inventory.size() >= 1) {
+                    return Action.DROP_0;
+                } else if (inventoryButtonDropLocation(1).contains(p) && player.inventory.size() >= 2) {
+                    return Action.DROP_1;
+                } else if (inventoryButtonDropLocation(2).contains(p) && player.inventory.size() >= 3) {
+                    return Action.DROP_2;
+                }
+                return null;
+            case NPCS:
+                if (npcButtonTalkLocation(0).contains(p) && visibleNpcs.size() >= 1) {
+                    return Action.TALK_0;
+                } else if (npcButtonTalkLocation(1).contains(p) && visibleNpcs.size() >= 2) {
+                    return Action.TALK_1;
+                }
+                return null;
+        }
+        return null;
+    }
+
+    private Rectangle sidebarTabButton(int x, int y) {
+        return new Rectangle(425+(x*50), 105+(y*25), 45, 20);
+    }
+
     private void processAction(Action a) {
+        if (a.isSidebarViewAction) {
+            processSidebarViewAction(a);
+        }
         if (gameState == RUNNING) {
             processActionWhileRunning(a);
         } else if (gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
@@ -390,6 +445,22 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             processActionWhileShopping(a);
         } else if (gameState == DEAD) {
             processActionWhileGameOver(a);
+        }
+    }
+
+    private void processSidebarViewAction(Action a) {
+        switch (a) {
+            case SWITCH_TO_EQUIPMENT:
+                sidebarViewState = EQUIPMENT;
+                break;
+            case SWITCH_TO_ITEMS:
+                sidebarViewState = ITEMS;
+                break;
+            case SWITCH_TO_NPCS:
+                sidebarViewState = NPCS;
+                break;
+            case SWITCH_TO_SKILLS:
+                sidebarViewState = SKILLS;
         }
     }
 
@@ -586,13 +657,13 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         ItemAction action = itemUses.get(
                 player.inventory.get(firstItemIndex).name+","+player.inventory.get(secondItemIndex).name);
         if (action != null) {
-            action.perform(this, player, firstItemIndex, secondItemIndex);
+            action.perform(this, map[player.x][player.y], player, firstItemIndex, secondItemIndex);
             return true;
         } else {
             action = itemUses.get(
                     player.inventory.get(secondItemIndex).name+","+player.inventory.get(firstItemIndex).name);
             if (action != null) {
-                action.perform(this, player, secondItemIndex, firstItemIndex);
+                action.perform(this, map[player.x][player.y], player, secondItemIndex, firstItemIndex);
                 return true;
             }
         }
@@ -647,7 +718,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     }
 
     private void tickNPC(NPC npc) {
-        if (nextToPlayer(npc)) {
+        if (nextToPlayer(npc) && npc.canFight() && (npc.isAggressive() || npc.hasBeenAttacked())) {
             attackPlayer(npc);
         } else if(npc.canMove() && random.nextBoolean()) {
             move(npc);
@@ -696,7 +767,6 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     public void npcAttacked(NPC npc) {
         if (npc.isDead()) {
-            player.addExperience(npc.experience);
             map[npc.x][npc.y].objects.add(npc.dropItem());
             eventHistory.add("Killed a "+npc.type.name);
         }

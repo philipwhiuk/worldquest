@@ -38,6 +38,9 @@ public class ShopPainter {
                     + " ("+listing.quantity+"/"+listing.maxQuantity+")"
                     + "         " + listing.getPrice()+" coins";
             g.drawString(text, 40, 100+(i*20));
+
+            //TODO: Buying
+            //TODO: Haggling
         }
     }
 }

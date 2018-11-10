@@ -35,21 +35,26 @@ enum Slot { CHEST }
 
 class Armour extends Item {
     final Slot slot;
+    final int protection;
 
     static Armour parseItem(String itemData) {
         String[] itemDataFields = itemData.split(",");
-        return new Armour(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Slot.valueOf(itemDataFields[2]));
+        return new Armour(itemDataFields[0],
+                Boolean.parseBoolean(itemDataFields[1]),
+                Slot.valueOf(itemDataFields[2]),
+                Integer.parseInt(itemDataFields[3]));
     }
 
-    Armour(String name, boolean useable, Slot slot) {
+    Armour(String name, boolean useable, Slot slot, int protection) {
         super(name, useable);
         this.slot = slot;
-        //TODO: Armour bonuses
+        //TODO: Attack type bonuses
+        this.protection = protection;
     }
 
     @Override
     public Armour copy() {
-        return new Armour(name, useable, slot);
+        return new Armour(name, useable, slot, protection);
     }
 
     @Override
@@ -59,26 +64,32 @@ class Armour extends Item {
 
     @Override
     public String print() {
-        return super.print()+","+slot;
+        return super.print()+","+slot+","+protection;
     }
 }
 
 class Weapon extends Item {
+    public final String type;
     public final int damage;
 
     static Weapon parseItem(String itemData) {
         String[] itemDataFields = itemData.split(",");
-        return new Weapon(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[2]));
+        return new Weapon(
+                itemDataFields[0],
+                Boolean.parseBoolean(itemDataFields[1]),
+                itemDataFields[2],
+                Integer.parseInt(itemDataFields[3]));
     }
 
-    Weapon(String name, boolean useable, int damage) {
+        Weapon(String name, boolean useable, String type, int damage) {
         super(name, useable);
+        this.type = type;
         this.damage = damage;
     }
 
     @Override
     public Weapon copy() {
-        return new Weapon(this.name, this.useable, damage);
+        return new Weapon(this.name, this.useable, this.type, damage);
     }
 
     @Override
@@ -88,7 +99,7 @@ class Weapon extends Item {
 
     @Override
     public String print() {
-        return super.print()+","+damage;
+        return super.print()+","+type+","+damage;
     }
 }
 
@@ -96,11 +107,11 @@ class Hatchet extends Weapon {
 
     static Hatchet parseItem(String itemData) {
         String[] itemDataFields = itemData.split(",");
-        return new Hatchet(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[2]));
+        return new Hatchet(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[3]));
     }
 
     Hatchet(String name, boolean useable, int damage) {
-        super(name, useable, damage);
+        super(name, useable, "Hatchet", damage);
     }
 
     @Override
