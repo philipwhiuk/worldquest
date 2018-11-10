@@ -10,4 +10,14 @@ public class ButtonPainter {
         g.drawRoundRect(x, y , 15, 14, 2, 2);
         g.drawString(symbol, x+4, y + 10);
     }
+
+    public static void paintTextButton(
+            Graphics2D g, Color primaryColor,
+            Color backgroundColor, int x, int y, String text, boolean toggle) {
+        g.setColor(toggle ? primaryColor : backgroundColor);
+        g.fillRoundRect(x, y, 45, 20, 2, 2);
+        g.setColor(toggle ? backgroundColor : primaryColor);
+        g.drawRoundRect(x, y , 45, 20, 2, 2);
+        g.drawString(text, x+5, y + 14);
+    }
 }
