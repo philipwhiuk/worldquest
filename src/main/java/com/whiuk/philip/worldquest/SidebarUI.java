@@ -248,6 +248,7 @@ class SidebarUI extends Rectangle implements UI {
                 }
                 String npcHealth = npc.canFight() ? ": " + npc.health + "/" + npc.type.health : "";
                 String npcInfo = npc.type.name + npcHealth;
+                g.setColor(Color.WHITE);
                 g.drawString(npcInfo, 500, offset);
                 offset += 20;
             }
