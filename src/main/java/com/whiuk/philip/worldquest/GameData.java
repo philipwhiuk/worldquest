@@ -75,6 +75,20 @@ public class GameData {
             false,
             null,
             null);
+    private static NPCType GoblinKing = new NPCType(
+            "GoblinKing",
+            Color.PINK,
+            true,
+            true,
+            true,
+            50,
+            10*DIFFICULTY,
+            new GObjects.ItemDrop[]{
+                    new GObjects.ItemDrop(100),
+            },
+            false,
+            null,
+            null);
     private static NPCType ShopKeeper = new NPCType(
             "Shopkeeper",
             Color.WHITE,
@@ -148,6 +162,7 @@ public class GameData {
     static Map<String, NPCType> npcTypes = new HashMap<>();
     static {
         npcTypes.put("Goblin", GameData.Goblin);
+        npcTypes.put("GoblinKing", GameData.GoblinKing);
         npcTypes.put("Shopkeeper", GameData.ShopKeeper);
     }
     static Map<String, ItemAction> itemUses = new HashMap<>();
