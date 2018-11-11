@@ -89,9 +89,16 @@ public class WorldQuest extends JFrame {
             try {
                 gameState = LOADING;
                 loadScenario();
-                if (new File("saves/save.dat").exists()) {
+                if (new File("saves/save").exists()) {
                     loadGame();
                 } else {
+                    Files.createDirectories(new File("saves/save").toPath());
+                    Files.copy(
+                            new File("scenario/default/map.dat").toPath(),
+                            new File("saves/save/map.dat").toPath());
+                    Files.copy(
+                            new File("scenario/default/map2.dat").toPath(),
+                            new File("saves/save/map2.dat").toPath());
                     newGame();
                 }
                 continueGame();
@@ -155,7 +162,7 @@ public class WorldQuest extends JFrame {
     }
 
     void saveGame() {
-        String savePathname = "saves"+File.separator+"save.dat";
+        String savePathname = "save"+File.separator+"save"+File.separator+"/player.dat";
         File saveFile = new File(savePathname);
         try {
             Files.createDirectories(Paths.get(saveFile.getParent()));
@@ -199,7 +206,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadMap(String mapResourceName) {
-        String mapPathname = "maps"+File.separator+mapResourceName+".dat";
+        String mapPathname = "saves"+File.separator+"save"+File.separator+mapResourceName+".dat";
         File mapFile = new File(mapPathname);
         if (!mapFile.exists()) {
             throw new RuntimeException(
