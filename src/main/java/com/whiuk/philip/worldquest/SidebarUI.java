@@ -246,7 +246,6 @@ class SidebarUI extends Rectangle implements UI {
                             "o"
                     );
                 }
-
                 String npcHealth = npc.canFight() ? ": " + npc.health + "/" + npc.type.health : "";
                 String npcInfo = npc.type.name + npcHealth;
                 g.drawString(npcInfo, 500, offset);
@@ -257,7 +256,9 @@ class SidebarUI extends Rectangle implements UI {
         @Override
         public void onClick(MouseEvent e) {
             Action a = calculateAction(e.getPoint());
-            game.processAction(a);
+            if (a != null) {
+                game.processAction(a);
+            }
         }
 
         private Action calculateAction(Point p) {
