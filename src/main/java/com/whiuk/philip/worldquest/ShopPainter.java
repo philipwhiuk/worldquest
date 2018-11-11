@@ -36,6 +36,7 @@ public class ShopPainter {
             String text = listing.item.name
                     + " ("+listing.quantity+"/"+listing.maxQuantity+")"
                     + "         " + listing.getPrice()+" coins";
+            g.setColor(Color.WHITE);
             g.drawString(text, 40, 100+(i*20));
 
             ButtonPainter.paintButton(g, Color.GREEN, Color.BLACK, 250, (i*20)+88, "+");

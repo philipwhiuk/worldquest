@@ -6,21 +6,15 @@ import java.awt.event.MouseListener;
 public class WorldQuestMouseListener implements MouseListener {
 
     private final WorldQuest game;
+    private final UI ui;
 
-    WorldQuestMouseListener(WorldQuest game) {
+    WorldQuestMouseListener(WorldQuest game, UI ui) {
         this.game = game;
+        this.ui = ui;
     }
     @Override
     public void mouseClicked(MouseEvent e) {
-        Action action = game.checkForActionInterception(e.getPoint());
-        if (action != null) {
-            game.processAction(action);
-            return;
-        }
-        Tile tile = game.checkForTileInterception(e.getPoint());
-        if (tile != null) {
-            game.processTileClick(tile);
-        }
+        ui.onClick(e);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.whiuk.philip.worldquest;
 
+import org.w3c.dom.css.Rect;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,8 +17,10 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.MapConstants.*;
-import static com.whiuk.philip.worldquest.SidebarViewState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
+import static com.whiuk.philip.worldquest.WorldQuest.MessageState.CHATBOX;
+import static com.whiuk.philip.worldquest.WorldQuest.MessageState.NPC_TALKING;
+import static com.whiuk.philip.worldquest.WorldQuest.MessageState.PLAYER_TALKING;
 
 public class WorldQuest extends JFrame {
 
@@ -29,13 +33,22 @@ public class WorldQuest extends JFrame {
         map[tile.x][tile.y] = newTile;
     }
 
+    public void endConversation(NPC npc) {
+        npc.currentConversation = null;
+        messageState = CHATBOX;
+    }
+
     enum GameState {
         LAUNCHING, LOADING,
         RUNNING,
-        PLAYER_TALKING, NPC_TALKING,
         @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
         DEAD
     }
+
+    enum MessageState {
+        CHATBOX,
+        PLAYER_TALKING, NPC_TALKING
+    };
 
     static {
         keymap.put('w', Action.NORTH);
@@ -60,16 +73,20 @@ public class WorldQuest extends JFrame {
     private Map<String, ItemAction> tileItemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
 
+    private GameUI gameUI;
+    private LoadingScreen loadingScreen;
+    private GameScreen gameScreen;
+    private SidebarUI sidebar;
+    private MessageDisplay messages;
+    private MessageState messageState;
     private Tile[][] map;
     private String mapName;
     private List<NPC> npcs;
-    private List<NPC> visibleNpcs;
-    private Player player;
+    List<NPC> visibleNpcs;
+    Player player;
     private List<String> eventHistory;
     GameState gameState = LAUNCHING;
-    private SidebarViewState sidebarViewState = SKILLS;
     private NPC talkingTo;
-    private Shop currentShop;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -80,13 +97,16 @@ public class WorldQuest extends JFrame {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
         WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
-        WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this);
+        gameUI = new GameUI();
+        WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this, gameUI);
         WorldQuestCanvas canvas = new WorldQuestCanvas(keyListener, mouseListener);
         ScheduledExecutorService renderQueue = Executors.newSingleThreadScheduledExecutor();
         getContentPane().add(canvas);
         pack();
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WorldQuestWindowAdapter(this));
+        loadingScreen = new LoadingScreen();
+
         renderQueue.scheduleAtFixedRate(canvas, 0, 16, TimeUnit.MILLISECONDS);
         setVisible(true);
         new Thread(() -> {
@@ -151,6 +171,10 @@ public class WorldQuest extends JFrame {
 
     private void continueGame() {
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
+        gameUI = new GameUI();
+        gameScreen = new GameScreen(new MapView());
+        sidebar = new SidebarUI(this);
+        messages = new MessageDisplay();
         gameState = RUNNING;
     }
 
@@ -186,6 +210,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadTileTypes() {
+        System.out.println(GameData.tileTypes.size());
         tileTypes.putAll(GameData.tileTypes);
     }
 
@@ -239,32 +264,89 @@ public class WorldQuest extends JFrame {
                 Graphics2D g = (Graphics2D) gBase;
                 g.setColor(Color.black);
                 g.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
-                if (gameState == LAUNCHING || gameState == LOADING) {
-                    paintLoading(g);
-                } else {
-                    //System.exit(0);
-                    if (gameState == RUNNING || gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
-                        MapViewPainter.paintMapView(g, WorldQuest.this, map, visibleNpcs, player);
-                    }
-                    SidebarPainter.paintSidebar(g, sidebarViewState, WorldQuest.this, player, visibleNpcs);
-                    if (gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
-                        ConversationPainter.paintConversation(g, gameState, talkingTo);
-                    } else if (gameState == SHOP) {
-                        ShopPainter.paintShop(g, currentShop);
-                    } else if (gameState == DEAD) {
-                        paintEventHistory(g);
-                    }
-                }
+                gameUI.render(g);
             } catch (Exception e) {
-                e.printStackTrace();
+                new Exception("Render failed", e).printStackTrace();
+                System.exit(1);
             }
         }
 
-        private void paintLoading(Graphics2D g) {
+        @Override
+        public void run() {
+            repaint();
+        }
+    }
+
+    class GameUI implements UI {
+
+        @Override
+        public void render(Graphics2D g) {
+            if (gameState == LAUNCHING || gameState == LOADING) {
+                loadingScreen.render(g);
+            } else {
+                gameScreen.render(g);
+                sidebar.render(g);
+                messages.render(g);
+            }
+        }
+
+        @Override
+        public void onClick(MouseEvent e) {
+            if (gameState == LAUNCHING || gameState == LOADING) {
+                loadingScreen.onClick(e);
+            } else {
+                if (gameScreen.contains(e.getPoint())) {
+                    gameScreen.onClick(e);
+                } else if (sidebar.contains(e.getPoint())) {
+                    sidebar.onClick(e);
+                } else if (messages.contains(e.getPoint())) {
+                    messages.onClick(e);
+                }
+            }
+        }
+    }
+
+    class LoadingScreen implements UI {
+
+        @Override
+        public void render(Graphics2D g) {
             g.setColor(Color.WHITE);
             g.drawRect(9,9, BORDER_WIDTH, BORDER_HEIGHT);
             g.drawString("Loading game", 200, 200);
         }
+
+        @Override
+        public void onClick(MouseEvent e) {}
+    }
+
+    class MapView implements UI {
+
+        @Override
+        public void render(Graphics2D g) {
+            MapViewPainter.paintMapView(g, WorldQuest.this, map, visibleNpcs, player);
+        }
+
+        @Override
+        public void onClick(MouseEvent e) {
+            Tile t = checkForTileInterception(e.getPoint());
+            if (t != null) {
+                processTileClick(t);
+            }
+        }
+
+        Tile checkForTileInterception(Point p) {
+            double x = p.getX();
+            double y = p.getY();
+            if (x > MAP_SPACING && x < MAP_SPACING+MAP_WIDTH & y > MAP_SPACING & y < MAP_SPACING+MAP_HEIGHT) {
+                int tileX = (int) Math.floor((x - MAP_SPACING)/TILE_WIDTH);
+                int tileY = (int) Math.floor((y - MAP_SPACING)/TILE_HEIGHT);
+                return map[tileX][tileY];
+            }
+            return null;
+        }
+    }
+
+    class DeathScreen implements UI {
 
         private void paintEventHistory(Graphics2D g) {
             g.setColor(Color.BLACK);
@@ -280,24 +362,35 @@ public class WorldQuest extends JFrame {
         }
 
         @Override
-        public void run() {
-            repaint();
+        public void render(Graphics2D g) {
+            paintEventHistory(g);
+        }
+
+        @Override
+        public void onClick(MouseEvent e) {
+
+        }
+    }
+
+
+
+    class MessageDisplay extends Rectangle implements UI {
+
+        @Override
+        public void render(Graphics2D g) {
+            if (messageState == PLAYER_TALKING || messageState == NPC_TALKING) {
+                ConversationPainter.paintConversation(g, messageState, talkingTo);
+            }
+        }
+
+        @Override
+        public void onClick(MouseEvent e) {
+
         }
     }
 
     private Rectangle sidebarLocation() {
         return new Rectangle(420, 0, 260, 480);
-    }
-
-    private Rectangle inventoryButtonLocation(int index, int button) {
-        int xOffset = button*17;
-        int offset = 20*index;
-        return new Rectangle(433+xOffset,155+offset, 15, 15);
-    }
-
-    private Rectangle npcButtonTalkLocation(int index) {
-        int offset = 20*index;
-        return new Rectangle(433,155+offset, 15, 15);
     }
 
     private Rectangle shopCloseLocation() {
@@ -312,94 +405,22 @@ public class WorldQuest extends JFrame {
         return keyPressMap.get(code);
     }
 
-    Action checkForActionInterception(Point point) {
-        if (sidebarLocation().contains(point)) {
-            return checkSidebarInterceptions(point);
-        } else if (gameState == SHOP) {
-            if (shopCloseLocation().contains(point)) {
-                return Action.CLOSE_SHOP;
-            }
-        }
-        return null;
-    }
-
-    Tile checkForTileInterception(Point p) {
-        double x = p.getX();
-        double y = p.getY();
-        if (x > MAP_SPACING && x < MAP_SPACING+MAP_WIDTH & y > MAP_SPACING & y < MAP_SPACING+MAP_HEIGHT) {
-            int tileX = (int) Math.floor((x - MAP_SPACING)/TILE_WIDTH);
-            int tileY = (int) Math.floor((y - MAP_SPACING)/TILE_HEIGHT);
-            return map[tileX][tileY];
-        }
-        return null;
-    }
-
-    private Action checkSidebarInterceptions(Point p) {
-        if (sidebarTabButton(0, 0).contains(p)) {
-            return Action.SWITCH_TO_SKILLS;
-        } else if (sidebarTabButton(1, 0).contains(p)) {
-            return Action.SWITCH_TO_EQUIPMENT;
-        } else if (sidebarTabButton(2, 0).contains(p)) {
-            return Action.SWITCH_TO_ITEMS;
-        } else if (sidebarTabButton(0, 1).contains(p)) {
-            return Action.SWITCH_TO_NPCS;
-        }
-
-        switch (sidebarViewState) {
-            case SKILLS:
-                return null;
-            case ITEMS:
-                if (inventoryButtonLocation(0,0).contains(p) && player.inventory.size() >= 1) {
-                    return Action.USE_0;
-                } else if (inventoryButtonLocation(1,0).contains(p) && player.inventory.size() >= 2) {
-                    return Action.USE_1;
-                } else if (inventoryButtonLocation(2,0).contains(p) && player.inventory.size() >= 3) {
-                    return Action.USE_2;
-                } else if (inventoryButtonLocation(0,1).contains(p) && player.inventory.size() >= 1) {
-                    return Action.EQUIP_0;
-                } else if (inventoryButtonLocation(1,1).contains(p) && player.inventory.size() >= 2) {
-                    return Action.EQUIP_1;
-                } else if (inventoryButtonLocation(2,1).contains(p) && player.inventory.size() >= 3) {
-                    return Action.EQUIP_2;
-                } else if (inventoryButtonLocation(0,2).contains(p) && player.inventory.size() >= 1) {
-                    return Action.DROP_0;
-                } else if (inventoryButtonLocation(1,2).contains(p) && player.inventory.size() >= 2) {
-                    return Action.DROP_1;
-                } else if (inventoryButtonLocation(2,2).contains(p) && player.inventory.size() >= 3) {
-                    return Action.DROP_2;
-                }
-                return null;
-            case NPCS:
-                if (npcButtonTalkLocation(0).contains(p) && visibleNpcs.size() >= 1) {
-                    return Action.TALK_0;
-                } else if (npcButtonTalkLocation(1).contains(p) && visibleNpcs.size() >= 2) {
-                    return Action.TALK_1;
-                }
-                return null;
-        }
-        return null;
-    }
-
-    private Rectangle sidebarTabButton(int x, int y) {
-        return new Rectangle(425+(x*50), 75+(y*30), 45, 30);
-    }
-
     void processAction(Action a) {
-        if (a.isSidebarViewAction()) {
-            processSidebarViewAction(a);
-        }
         if (gameState == RUNNING) {
-            processActionWhileRunning(a);
-        } else if (gameState == PLAYER_TALKING || gameState == NPC_TALKING) {
-            processActionWhileTalking(a);
-        } else if (gameState == SHOP) {
+            if (messageState == PLAYER_TALKING || messageState == NPC_TALKING) {
+                processActionWhileTalking(a);
+            } else {
+                processActionWhileRunning(a);
+            }
+        } else  if (gameState == SHOP) {
             processActionWhileShopping(a);
         } else if (gameState == DEAD) {
             processActionWhileGameOver(a);
         }
     }
 
-    void processTileClick(Tile tile) {
+    private void processTileClick(Tile tile) {
+        System.out.println("tileClick");
         processPlayerInputWhileRunning(() -> {
             if (player.itemBeingUsed != -1) {
                 int item = player.itemBeingUsed;
@@ -408,22 +429,6 @@ public class WorldQuest extends JFrame {
             }
             return false;
         });
-    }
-
-    private void processSidebarViewAction(Action a) {
-        switch (a) {
-            case SWITCH_TO_EQUIPMENT:
-                sidebarViewState = EQUIPMENT;
-                break;
-            case SWITCH_TO_ITEMS:
-                sidebarViewState = ITEMS;
-                break;
-            case SWITCH_TO_NPCS:
-                sidebarViewState = NPCS;
-                break;
-            case SWITCH_TO_SKILLS:
-                sidebarViewState = SKILLS;
-        }
     }
 
     private void processActionWhileRunning(Action action) {
@@ -569,7 +574,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private void equipItem(int index) {
+    void equipItem(int index) {
         Item i = player.inventory.get(index);
         if (i instanceof Weapon) {
             Weapon w = (Weapon) i;
@@ -589,7 +594,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private boolean useItem(int index) {
+    boolean useItem(int index) {
         if (player.itemBeingUsed == index) {
             player.itemBeingUsed = -1;
             return false;
@@ -630,7 +635,7 @@ public class WorldQuest extends JFrame {
         return false;
     }
 
-    private void dropItem(int index) {
+    void dropItem(int index) {
         map[player.x][player.y].objects.add(new GObjects.ItemDrop(player.inventory.remove(index)));
     }
 
@@ -646,15 +651,15 @@ public class WorldQuest extends JFrame {
 
     private void displayConversation() {
         if (talkingTo.currentConversation.playerText != null) {
-            gameState = PLAYER_TALKING;
+            messageState = PLAYER_TALKING;
         } else {
-            gameState = NPC_TALKING;
+            messageState = NPC_TALKING;
         }
     }
 
     private void progressConversation() {
-        if (gameState == PLAYER_TALKING) {
-            gameState = NPC_TALKING;
+        if (messageState == PLAYER_TALKING) {
+            messageState = NPC_TALKING;
         } else {
             talkingTo.currentConversation.npcAction.doAction(this, talkingTo);
         }
@@ -742,12 +747,10 @@ public class WorldQuest extends JFrame {
     }
 
     void showShop(Shop shop) {
-        currentShop = shop;
-        gameState = SHOP;
+        gameScreen.showWindow(new ShopWindow(shop));
     }
 
     private void closeShop() {
-        currentShop = null;
         gameState = RUNNING;
     }
 
@@ -755,5 +758,4 @@ public class WorldQuest extends JFrame {
         boolean isVisible = x >= player.x - 5 && x <= player.x + 5 && y >= player.y - 5 && y <= player.y + 5;
         return isVisible;
     }
-
-}
+    }

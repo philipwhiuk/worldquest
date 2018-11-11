@@ -2,87 +2,60 @@ package com.whiuk.philip.worldquest;
 
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GameData {
     private static final int DIFFICULTY = 1;
 
-    static Item BronzeDagger = new Weapon("Bronze dagger", false,"Dagger", 2);
-    static Item BronzeSword = new Weapon("Bronze sword", false,"Sword", 4);
-    static Item BronzeHatchet = new Hatchet("Bronze hatchet", true,3);
-    static Item LeatherTunic = new Armour("Leather tunic", false, Slot.CHEST, 2);
-    static Item SteelFlint = new Item("Steel & flint", true);
-    static Item Shovel = new Item("Shovel", true);
-    static Item Hammer = new Item("Hammer", false);
-    static Item Pickaxe = new Item("Pickaxe", false);
-    static Item PileOfDirt = new Item("Pile of dirt", false);
-    static Item RockShards = new Item("Rock shards", false);
+    private static Item BronzeDagger = new Weapon("Bronze dagger", false,"Dagger", 2);
+    private static Item BronzeSword = new Weapon("Bronze sword", false,"Sword", 4);
+    private static Item BronzeHatchet = new Hatchet("Bronze hatchet", true,3);
+    private static Item LeatherTunic = new Armour("Leather tunic", false, Slot.CHEST, 2);
+    private static Item SteelFlint = new Item("Steel & flint", true);
+    private static Item Shovel = new Item("Shovel", true);
+    private static Item Hammer = new Item("Hammer", false);
+    private static Item Pickaxe = new Item("Pickaxe", false);
+    private static Item PileOfDirt = new Item("Pile of dirt", false);
+    private static Item RockShards = new Item("Rock shards", false);
 
-    static Map<String, TileType> tileTypes = new HashMap<>();
-    {
-        tileTypes.put("Grass", GameData.Grass);
-        tileTypes.put("Wall", GameData.Wall);
-        tileTypes.put("Floor", GameData.Floor);
-        tileTypes.put("Door", GameData.Door);
-        tileTypes.put("Dirt", GameData.Dirt);
-        tileTypes.put("Rock", GameData.Rock);
-    }
-
-    static Map<String, NPCType> npcTypes = new HashMap<>();
-    {
-        npcTypes.put("Goblin", GameData.Goblin);
-        npcTypes.put("Shopkeeper", GameData.ShopKeeper);
-    }
-    static Map<String, ItemAction> itemUses = new HashMap<>();
-    {
-        itemUses.put("Steel & flint,Oak logs", GameData.Firemaking);
-    }
-    static Map<String, ItemAction> tileItemUses = new HashMap<>();
-    {
-        tileItemUses.put("Grass,Shovel", GameData.Dig);
-        tileItemUses.put("Dirt,Shovel", GameData.Dig);
-        tileItemUses.put("Rock,Shovel", GameData.Mine);
-    }
-
-    static TileType Grass = new TileType(
+    private static TileType Grass = new TileType(
             "Grass",
             new Color(0,100,0),
             new Color(0,40,0),
             true,
             true);
-    static TileType Dirt = new TileType(
+    private static TileType Dirt = new TileType(
             "Dirt",
             new Color(100,68,8),
             new Color(50,34,4),
             true,
             false);
-    static TileType Rock = new TileType(
+    private static TileType Rock = new TileType(
             "Rock",
             new Color(50,50,50),
-            new Color(5,5,5),
+            new Color(25,25,25),
             true,
             false);
-    static TileType Door = new TileType(
+    private static TileType Door = new TileType(
             "Door",
             new Color(55,27,0),
             new Color(20,15,0),
             true,
             false);
-    static TileType Floor = new TileType(
+    private static TileType Floor = new TileType(
             "Floor",
             new Color(100,11,0),
             new Color(52,6,0),
             true,
             false);
-    static TileType Wall = new TileType(
+    private static TileType Wall = new TileType(
             "Wall",
-            Color.GRAY,
-            Color.DARK_GRAY,
+            new Color(100,100,100),
+            new Color(75,75,75),
             false,
             false);
-    static NPCType Goblin = new NPCType(
+    private static NPCType Goblin = new NPCType(
             "Goblin",
             Color.RED,
             true,
@@ -102,7 +75,7 @@ public class GameData {
             false,
             null,
             null);
-    static NPCType ShopKeeper = new NPCType(
+    private static NPCType ShopKeeper = new NPCType(
             "Shopkeeper",
             Color.WHITE,
             false,
@@ -128,7 +101,7 @@ public class GameData {
                             1, 1, 5)
                     ))
     );
-    static ItemAction Firemaking = new ItemAction() {
+    private static ItemAction Firemaking = new ItemAction() {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int firemakingTool, int logs) {
             if (tile.isOutdoors()) {
@@ -138,7 +111,7 @@ public class GameData {
             }
         }
     };
-    static ItemAction Dig = new ItemAction() {
+    private static ItemAction Dig = new ItemAction() {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
             if (tile.type == Grass) {
@@ -152,7 +125,7 @@ public class GameData {
             }
         }
     };
-    static ItemAction Mine = new ItemAction() {
+    private static ItemAction Mine = new ItemAction() {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
             if (tile.type == Rock) {
@@ -161,4 +134,31 @@ public class GameData {
             }
         }
     };
+
+    static Map<String, TileType> tileTypes = new HashMap<>();
+    static {
+        tileTypes.put("Grass", GameData.Grass);
+        tileTypes.put("Wall", GameData.Wall);
+        tileTypes.put("Floor", GameData.Floor);
+        tileTypes.put("Door", GameData.Door);
+        tileTypes.put("Dirt", GameData.Dirt);
+        tileTypes.put("Rock", GameData.Rock);
+    }
+
+    static Map<String, NPCType> npcTypes = new HashMap<>();
+    static {
+        npcTypes.put("Goblin", GameData.Goblin);
+        npcTypes.put("Shopkeeper", GameData.ShopKeeper);
+    }
+    static Map<String, ItemAction> itemUses = new HashMap<>();
+    static {
+        itemUses.put("Steel & flint,Oak logs", GameData.Firemaking);
+    }
+    static Map<String, ItemAction> tileItemUses = new HashMap<>();
+    static {
+        tileItemUses.put("Grass,Shovel", GameData.Dig);
+        tileItemUses.put("Dirt,Shovel", GameData.Dig);
+        tileItemUses.put("Rock,Pickaxe", GameData.Mine);
+    }
+
 }

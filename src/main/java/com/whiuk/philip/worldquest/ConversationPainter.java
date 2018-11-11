@@ -5,11 +5,11 @@ import java.awt.*;
 import static com.whiuk.philip.worldquest.MapConstants.*;
 
 public class ConversationPainter {
-    public static void paintConversation(Graphics2D g, WorldQuest.GameState gameState, NPC talkingTo) {
+    public static void paintConversation(Graphics2D g, WorldQuest.MessageState messageState, NPC talkingTo) {
         String text = "...";
-        if (gameState == WorldQuest.GameState.PLAYER_TALKING) {
+        if (messageState == WorldQuest.MessageState.PLAYER_TALKING) {
             text = "Player: "+talkingTo.currentConversation.playerText;
-        } else if (gameState == WorldQuest.GameState.NPC_TALKING) {
+        } else if (messageState == WorldQuest.MessageState.NPC_TALKING) {
             text = talkingTo.type.name+": "+talkingTo.currentConversation.npcResponse;
         }
         g.setColor(Color.WHITE);

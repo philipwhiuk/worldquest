@@ -28,7 +28,7 @@ class ConversationChoiceSelection implements NPCAction {
 class ShopDisplay implements NPCAction {
 
     public void doAction(WorldQuest game, NPC npc) {
-        npc.currentConversation = null;
+        game.endConversation(npc);
         game.showShop(npc.shop);
     }
 }
