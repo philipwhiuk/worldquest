@@ -393,7 +393,6 @@ public class WorldQuest extends JFrame {
     }
 
     private void processTileClick(Tile tile) {
-        System.out.println("tileClick");
         processPlayerInputWhileRunning(() -> {
             if (player.itemBeingUsed != -1) {
                 int item = player.itemBeingUsed;
