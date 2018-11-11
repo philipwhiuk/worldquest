@@ -16,6 +16,4 @@ public class MapConstants {
     public static final int BORDER_HEIGHT = MAP_HEIGHT + 1;
     public static final int CONVERSATION_HEIGHT = 100;
     public static final int CONVERSATION_Y = 9+BORDER_HEIGHT-CONVERSATION_HEIGHT;
-    public static final int SHOP_HEIGHT = 200;
-    public static final int SHOP_Y = 9+20;
 }
