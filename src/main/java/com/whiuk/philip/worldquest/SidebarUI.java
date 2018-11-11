@@ -3,7 +3,6 @@ package com.whiuk.philip.worldquest;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.awt.*;
-import java.util.List;
 
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.DEAD;
 
@@ -87,7 +86,6 @@ class SidebarUI extends Rectangle implements UI {
                 return;
             }
         }
-        System.out.println(e.getPoint());
         if (activeTab.contains(e.getPoint())) {
             activeTab.onClick(e);
         }

@@ -13,7 +13,6 @@ public class ExperienceTable {
             experience = (experience*(15f/14f))+50;
             experienceTable[i] = (int) experience-50;
         }
-        System.out.println(Arrays.toString(experienceTable));
     }
 
     static int getLevel(int experience) {

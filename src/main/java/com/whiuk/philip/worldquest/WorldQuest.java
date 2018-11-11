@@ -210,7 +210,6 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadTileTypes() {
-        System.out.println(GameData.tileTypes.size());
         tileTypes.putAll(GameData.tileTypes);
     }
 
