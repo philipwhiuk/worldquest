@@ -353,11 +353,10 @@ public class WorldQuest extends JFrame {
             g.setColor(Color.WHITE);
             g.drawRect(40, 40, 560, 400);
             g.drawString("Events", 60, 60);
-            for (int i = 0; i < eventHistory.size(); i++) {
-                String event = eventHistory.get(i);
-                g.drawString(event, 80, 80+(i*20));
+            for (int i = 0; i < eventHistory.size() && i < 15; i++) {
+                g.drawString(eventHistory.get(i), 80, 80+(i*20));
             }
-            g.drawString("New Game? Y/N", 60, 360);
+            g.drawString("New Game? Y/N", 60, 400);
         }
 
         @Override
