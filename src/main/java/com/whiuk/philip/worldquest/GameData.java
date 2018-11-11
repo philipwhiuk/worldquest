@@ -76,7 +76,7 @@ public class GameData {
             null,
             null);
     private static NPCType GoblinKing = new NPCType(
-            "GoblinKing",
+            "Goblin King",
             Color.PINK,
             true,
             true,
