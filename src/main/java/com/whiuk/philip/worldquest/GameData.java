@@ -15,7 +15,7 @@ public class GameData {
     private static Item SteelFlint = new Item("Steel & flint", true);
     private static Item Shovel = new Item("Shovel", true);
     private static Item Hammer = new Item("Hammer", false);
-    private static Item Pickaxe = new Item("Pickaxe", false);
+    private static Item Pickaxe = new Item("Pickaxe", true);
     private static Item PileOfDirt = new Item("Pile of dirt", false);
     private static Item RockShards = new Item("Rock shards", false);
 
