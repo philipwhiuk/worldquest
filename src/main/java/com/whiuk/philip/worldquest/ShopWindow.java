@@ -6,9 +6,11 @@ import java.util.List;
 
 class ShopWindow extends Window {
     private Shop shop;
+    private WorldQuest game;
 
-    ShopWindow(Shop shop) {
+    ShopWindow(WorldQuest game, Shop shop) {
         super(10, 10, 400, 200, shop.name);
+        this.game = game;
         this.shop = shop;
     }
 
@@ -18,9 +20,16 @@ class ShopWindow extends Window {
     }
 
     @Override
-    public void onClick(MouseEvent e) {
-        System.out.println("Click in shop");
-        super.onClick(e);
+    public void onContentClick(MouseEvent e) {
+        for (int i = 0; i < shop.items.size(); i++) {
+            if (shopButton(i).contains(e.getPoint())) {
+                game.buyItem(shop, i);
+            }
+        }
+    }
+
+    private Rectangle shopButton(int i) {
+        return new Rectangle(250, (i*20)+88, 15, 15);
     }
 
     private void paintShopItems(Graphics2D g, List<ShopListing> items) {

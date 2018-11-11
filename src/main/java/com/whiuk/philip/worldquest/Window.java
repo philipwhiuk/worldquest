@@ -6,11 +6,13 @@ import java.awt.event.MouseEvent;
 abstract class Window extends Rectangle implements UI {
     private final Button closeButton;
     private final String title;
+    private final Rectangle frame;
     private Runnable onCloseListener = null;
 
     Window(int x, int y, int width, int height, String title) {
         super(x, y, width, height);
         this.title = title;
+        this.frame = new Rectangle(x,y+40, width, height-40);
         closeButton = new Button(Color.ORANGE, Color.BLACK, "x", x+width-30, y+10) {
             @Override
             public void onClick(MouseEvent e) {
@@ -19,11 +21,16 @@ abstract class Window extends Rectangle implements UI {
         };
     }
 
-    public void onClick(MouseEvent e) {
+    @Override
+    public final void onClick(MouseEvent e) {
         if (closeButton.contains(e.getPoint())) {
             closeButton.onClick(e);
+        } else if (frame.contains(e.getPoint())) {
+            onContentClick(e);
         }
     }
+
+    protected abstract void onContentClick(MouseEvent e);
 
     public void render(Graphics2D g) {
         g.setColor(Color.ORANGE);

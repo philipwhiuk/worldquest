@@ -722,7 +722,7 @@ public class WorldQuest extends JFrame {
     }
 
     void showShop(Shop shop) {
-        gameScreen.showWindow(new ShopWindow(shop));
+        gameScreen.showWindow(new ShopWindow(this, shop));
     }
 
     private void closeShop() {
@@ -755,5 +755,14 @@ public class WorldQuest extends JFrame {
     enum MessageState {
         CHATBOX,
         PLAYER_TALKING, NPC_TALKING
+    }
+
+    public void buyItem(Shop shop, int i) {
+        ShopListing s = shop.items.get(i);
+        if (s.quantity >= 1 && s.getPrice() <= player.money) {
+            s.quantity -= 1;
+            player.money -= s.getPrice();
+            player.inventory.add(s.item.copy());
+        }
     }
 }
