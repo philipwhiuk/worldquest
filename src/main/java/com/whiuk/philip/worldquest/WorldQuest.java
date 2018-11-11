@@ -1,7 +1,5 @@
 package com.whiuk.philip.worldquest;
 
-import org.w3c.dom.css.Rect;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -27,29 +25,6 @@ public class WorldQuest extends JFrame {
     private static final HashMap<Character, Action> keymap = new HashMap<>();
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
 
-    public void changeTileType(Tile tile, TileType type) {
-        Tile newTile = new Tile(type, tile.x, tile.y);
-        newTile.objects.addAll(tile.objects);
-        map[tile.x][tile.y] = newTile;
-    }
-
-    public void endConversation(NPC npc) {
-        npc.currentConversation = null;
-        messageState = CHATBOX;
-    }
-
-    enum GameState {
-        LAUNCHING, LOADING,
-        RUNNING,
-        @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
-        DEAD
-    }
-
-    enum MessageState {
-        CHATBOX,
-        PLAYER_TALKING, NPC_TALKING
-    };
-
     static {
         keymap.put('w', Action.NORTH);
         keymap.put('W', Action.NORTH);
@@ -62,8 +37,8 @@ public class WorldQuest extends JFrame {
         keymap.put('<', Action.STAIRS);
         keymap.put('n', Action.EXIT);
         keymap.put('N', Action.EXIT);
-        keymap.put('y', Action.NEW_GAME);
-        keymap.put('Y', Action.NEW_GAME);
+        keymap.put('y', Action.START_NEW_GAME);
+        keymap.put('Y', Action.START_NEW_GAME);
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
@@ -87,6 +62,7 @@ public class WorldQuest extends JFrame {
     private List<String> eventHistory;
     GameState gameState = LAUNCHING;
     private NPC talkingTo;
+    private DeathScreen deathScreen;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -282,10 +258,12 @@ public class WorldQuest extends JFrame {
         public void render(Graphics2D g) {
             if (gameState == LAUNCHING || gameState == LOADING) {
                 loadingScreen.render(g);
-            } else {
+            } else if (gameState != DEAD) {
                 gameScreen.render(g);
                 sidebar.render(g);
                 messages.render(g);
+            } else {
+                deathScreen.render(g);
             }
         }
 
@@ -515,8 +493,9 @@ public class WorldQuest extends JFrame {
 
     private void processActionWhileGameOver(Action action) {
         switch (action) {
-            case NEW_GAME:
+            case START_NEW_GAME:
                 newGame();
+                continueGame();
                 break;
             case EXIT:
                 System.exit(0);
@@ -721,7 +700,7 @@ public class WorldQuest extends JFrame {
 
     private void gameOver() {
         gameState = DEAD;
-        gameScreen.showScreen(new DeathScreen());
+        deathScreen = new DeathScreen();
     }
 
     void switchMap(String map, int startX, int startY) {
@@ -757,4 +736,27 @@ public class WorldQuest extends JFrame {
         boolean isVisible = x >= player.x - 5 && x <= player.x + 5 && y >= player.y - 5 && y <= player.y + 5;
         return isVisible;
     }
+
+    public void changeTileType(Tile tile, TileType type) {
+        Tile newTile = new Tile(type, tile.x, tile.y);
+        newTile.objects.addAll(tile.objects);
+        map[tile.x][tile.y] = newTile;
     }
+
+    public void endConversation(NPC npc) {
+        npc.currentConversation = null;
+        messageState = CHATBOX;
+    }
+
+    enum GameState {
+        LAUNCHING, LOADING,
+        RUNNING,
+        @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
+        DEAD
+    }
+
+    enum MessageState {
+        CHATBOX,
+        PLAYER_TALKING, NPC_TALKING
+    }
+}
