@@ -354,9 +354,7 @@ public class WorldQuest extends JFrame {
 
         }
     }
-
-
-
+    
     class MessageDisplay extends Rectangle implements UI {
 
         @Override
@@ -370,14 +368,6 @@ public class WorldQuest extends JFrame {
         public void onClick(MouseEvent e) {
 
         }
-    }
-
-    private Rectangle sidebarLocation() {
-        return new Rectangle(420, 0, 260, 480);
-    }
-
-    private Rectangle shopCloseLocation() {
-        return new Rectangle(19+BORDER_WIDTH-35,SHOP_Y+10, 15, 15);
     }
 
     Action getKeyMappedAction(Character c) {
