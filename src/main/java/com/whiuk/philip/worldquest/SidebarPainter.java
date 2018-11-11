@@ -147,9 +147,7 @@ public class SidebarPainter {
                 );
             }
 
-            //TODO: canFight vs canDie
             String npcHealth = npc.canFight() ? ": " + npc.health + "/" + npc.type.health : "";
-            //TODO: typeName vs NPC unique name
             String npcInfo = npc.type.name + npcHealth;
             g.drawString(npcInfo, 500, y);
             y+=20;

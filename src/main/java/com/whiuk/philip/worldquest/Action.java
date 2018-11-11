@@ -2,7 +2,6 @@ package com.whiuk.philip.worldquest;
 
 enum Action {
     NORTH(false), EAST(false), SOUTH(false), WEST(false), STAIRS(false),
-    //TODO: This indexing is very silly and broken
     USE_0(false), EQUIP_0(false), DROP_0(false),
     USE_1(false), EQUIP_1(false), DROP_1(false),
     USE_2(false), EQUIP_2(false), DROP_2(false),

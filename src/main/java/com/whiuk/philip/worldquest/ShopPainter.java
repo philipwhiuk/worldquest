@@ -39,10 +39,6 @@ public class ShopPainter {
             g.drawString(text, 40, 100+(i*20));
 
             ButtonPainter.paintButton(g, Color.GREEN, Color.BLACK, 250, (i*20)+88, "+");
-
-            //TODO: Buying
-            //TODO: Haggling
-            //TODO: Selling
         }
     }
 }

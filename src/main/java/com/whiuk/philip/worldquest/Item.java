@@ -48,7 +48,6 @@ class Armour extends Item {
     Armour(String name, boolean useable, Slot slot, int protection) {
         super(name, useable);
         this.slot = slot;
-        //TODO: Attack type bonuses
         this.protection = protection;
     }
 

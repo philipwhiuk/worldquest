@@ -5,9 +5,7 @@ import java.awt.*;
 public class NPCType {
     final String name;
     final Color color;
-    //TODO: Move Types: Pursuit, Guarding, Zonal
     public final boolean canMove;
-    //TODO: Fight Postures: Aggressive, Defensive, Neutral
     public final boolean canFight;
     public final boolean isAggressive;
     public int health;

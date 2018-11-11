@@ -18,7 +18,6 @@ import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.SidebarViewState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 
-//TODO: Move TODOs to an issue tracker
 public class WorldQuest extends JFrame {
 
     private static final HashMap<Character, Action> keymap = new HashMap<>();
@@ -34,13 +33,11 @@ public class WorldQuest extends JFrame {
         LAUNCHING, LOADING,
         RUNNING,
         PLAYER_TALKING, NPC_TALKING,
-        //TODO: Implement use of conversation options
         @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
         DEAD
     }
 
     static {
-        //TODO: Key config loaded from file + pre-sets
         keymap.put('w', Action.NORTH);
         keymap.put('W', Action.NORTH);
         keymap.put('a', Action.WEST);
@@ -57,14 +54,12 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
-    //TODO: Move this to 'Scenario'
     private Map<String, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, ItemAction> itemUses = new HashMap<>();
     private Map<String, ItemAction> tileItemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
 
-    //TODO: This is the actual gamestate
     private Tile[][] map;
     private String mapName;
     private List<NPC> npcs;
@@ -123,14 +118,12 @@ public class WorldQuest extends JFrame {
     }
 
     private void newGame() {
-        //TODO: Use map-relative-grid-reference-0,0,0
         loadMap("map");
         this.player = PlayerProvider.createPlayer();
         eventHistory = new ArrayList<>();
     }
 
     private void loadGame() {
-        //TODO: Multiple save files
         String savePathname = "saves"+File.separator+"save.dat";
         File saveFile = new File(savePathname);
         if (!saveFile.exists()) {
@@ -162,7 +155,6 @@ public class WorldQuest extends JFrame {
     }
 
     void saveGame() {
-        //TODO: Treat map data as stuff to save.
         String savePathname = "saves"+File.separator+"save.dat";
         File saveFile = new File(savePathname);
         try {
@@ -194,28 +186,19 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadTileTypes() {
-        //TODO: At some point this will come from a file too, but right now there's not much to load.
-        tileTypes.put("Grass", GameData.Grass);
-        tileTypes.put("Wall", GameData.Wall);
-        tileTypes.put("Floor", GameData.Floor);
-        tileTypes.put("Door", GameData.Door);
-        tileTypes.put("Dirt", GameData.Dirt);
+        tileTypes.putAll(GameData.tileTypes);
     }
 
     private void loadNpcTypes() {
-        npcTypes.put("Goblin", GameData.Goblin);
-        npcTypes.put("Shopkeeper", GameData.ShopKeeper);
+        npcTypes.putAll(GameData.npcTypes);
     }
 
     private void loadItemUses() {
-        //TODO: At some point this will come from a file too, but right now there's not much to load.
-        itemUses.put("Steel & flint,Oak logs", GameData.Firemaking);
-        tileItemUses.put("Grass,Shovel", GameData.Dig);
+        itemUses.putAll(GameData.itemUses);
+        tileItemUses.putAll(GameData.tileItemUses);
     }
 
     private void loadMap(String mapResourceName) {
-        //TODO: Generate new map if map doesn't exist (first load)
-        //TODO: Map format not very efficient but easy to read
         String mapPathname = "maps"+File.separator+mapResourceName+".dat";
         File mapFile = new File(mapPathname);
         if (!mapFile.exists()) {
@@ -738,7 +721,6 @@ public class WorldQuest extends JFrame {
     }
 
     void switchMap(String map, int startX, int startY) {
-        //TODO: Save current map
         loadMap(map);
         player.x = startX;
         player.y = startY;
@@ -757,7 +739,6 @@ public class WorldQuest extends JFrame {
     }
 
     void showOptions(Map<String, ConversationChoice> conversationOptions) {
-        //TODO: Show conversation options
     }
 
     void showShop(Shop shop) {
@@ -771,7 +752,6 @@ public class WorldQuest extends JFrame {
     }
 
     boolean isVisible(int x, int y) {
-        // TODO: Walls should block field of view
         boolean isVisible = x >= player.x - 5 && x <= player.x + 5 && y >= player.y - 5 && y <= player.y + 5;
         return isVisible;
     }

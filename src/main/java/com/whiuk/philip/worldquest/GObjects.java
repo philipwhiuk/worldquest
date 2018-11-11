@@ -141,7 +141,6 @@ public class GObjects {
         }
     }
 
-    //TODO: Despawn after X ticks
     static class ItemDrop extends GObjects.GameObject {
         private Item item;
         private int money;

@@ -74,8 +74,6 @@ public class Player extends GameCharacter {
 
     @Override
     void takeHit(int damage) {
-        //TODO: Total/Where Does It Hit
-        //TODO: Damage types
         if (armour.get(Slot.CHEST) != null) {
             damage -= armour.get(Slot.CHEST).protection;
         }

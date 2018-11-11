@@ -29,7 +29,6 @@ public class NPC extends GameCharacter {
 
     @Override
     void actionOnNpc(WorldQuest game, NPC npc) {
-        //TODO: NPC->NPC interaction
     }
 
     @Override
@@ -46,11 +45,9 @@ public class NPC extends GameCharacter {
     }
 
     public boolean hasBeenAttacked() {
-        return false; //TODO: Store whether player has attacked recently
+        return false;
     }
 }
-
-//TODO: Random item listings?
 
 class Shop {
     final String name;
@@ -86,7 +83,6 @@ class ShopListing {
     }
 
     public int getPrice() {
-        //TODO: More expensive when less
         return basePrice;
     }
 }
