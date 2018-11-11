@@ -21,6 +21,10 @@ class GameScreen extends Rectangle implements UI {
         visibleUI.peek().onClick(e);
     }
 
+    public void showScreen(Screen screen) {
+        visibleUI.push(screen);
+    }
+
     public void showWindow(Window window) {
         window.setOnClose(() -> visibleUI.remove(window));
         visibleUI.push(window);

@@ -345,7 +345,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    class DeathScreen implements UI {
+    class DeathScreen implements Screen {
 
         private void paintEventHistory(Graphics2D g) {
             g.setColor(Color.BLACK);
@@ -722,6 +722,7 @@ public class WorldQuest extends JFrame {
 
     private void gameOver() {
         gameState = DEAD;
+        gameScreen.showScreen(new DeathScreen());
     }
 
     void switchMap(String map, int startX, int startY) {
