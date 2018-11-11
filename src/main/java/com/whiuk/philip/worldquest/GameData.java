@@ -7,39 +7,63 @@ import java.util.Arrays;
 public class GameData {
     private static final int DIFFICULTY = 1;
 
+    static Item BronzeDagger = new Weapon("Bronze dagger", false,"Dagger", 2);
+    static Item BronzeSword = new Weapon("Bronze sword", false,"Sword", 4);
+    static Item BronzeHatchet = new Hatchet("Bronze hatchet", true,3);
+    static Item LeatherTunic = new Armour("Leather tunic", false, Slot.CHEST, 2);
+    static Item SteelFlint = new Item("Steel & flint", true);
+    static Item Shovel = new Item("Shovel", true);
+
     static TileType Grass = new TileType(
+            "Grass",
             new Color(0,100,0),
             new Color(0,40,0),
             true,
             true);
-    static TileType Door = new TileType(
-            new Color(55,27,0),
-            new Color(20,15,0),
-            true,
-            false);
-    static TileType Floor = new TileType(
+    static TileType Dirt = new TileType(
+            "Dirt",
             new Color(100,68,8),
             new Color(50,34,4),
             true,
             false);
+    //TODO: This isn't really a tile type
+    static TileType Door = new TileType(
+            "Door",
+            new Color(55,27,0),
+            new Color(20,15,0),
+            true,
+            false);
+    //TODO: This is, but it's not very specific
+    static TileType Floor = new TileType(
+            "Floor",
+            new Color(100,11,0),
+            new Color(52,6,0),
+            true,
+            false);
+    //TODO: This isn't really a tile type
     static TileType Wall = new TileType(
+            "Wall",
             Color.GRAY,
             Color.DARK_GRAY,
             false,
             false);
+    //TODO: Goblin is a race
+    //TODO: Random NPC stuff
     static NPCType Goblin = new NPCType(
             "Goblin",
             Color.RED,
             true,
             true,
+            true,
             5,
             5*DIFFICULTY,
             new GObjects.ItemDrop[]{
-                    new GObjects.ItemDrop(new Weapon("Bronze dagger", false,"Dagger", 2)),
-                    new GObjects.ItemDrop(new Weapon("Bronze sword", false,"Sword", 4)),
-                    new GObjects.ItemDrop(new Hatchet("Bronze hatchet", true,3)),
-                    new GObjects.ItemDrop(new Armour("Leather tunic", false, Slot.CHEST, 2)),
-                    new GObjects.ItemDrop(new Item("Steel & flint", true)),
+                    new GObjects.ItemDrop(BronzeDagger.copy()),
+                    new GObjects.ItemDrop(BronzeSword.copy()),
+                    new GObjects.ItemDrop(BronzeHatchet.copy()),
+                    new GObjects.ItemDrop(LeatherTunic.copy()),
+                    new GObjects.ItemDrop(SteelFlint.copy()),
+                    new GObjects.ItemDrop(Shovel.copy()),
                     new GObjects.ItemDrop(5),
                     new GObjects.ItemDrop(10),
             },
@@ -49,6 +73,7 @@ public class GameData {
     static NPCType ShopKeeper = new NPCType(
             "Shopkeeper",
             Color.WHITE,
+            false,
             false,
             false,
             10,
@@ -68,9 +93,23 @@ public class GameData {
             if (tile.isOutdoors()) {
                 player.inventory.remove(logs);
                 game.spawn(new GObjects.Fire(), player.x, player.y);
+                player.gainExperience("Fire-making", 10);
             } else {
                 //TODO: Error message
             }
         }
     };
+    static ItemAction Dig = new ItemAction() {
+        @Override
+        void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
+            if (tile.type == Grass) {
+                game.changeTileType(tile, Dirt);
+                player.gainExperience("Digging", 10);
+                player.inventory.add(PileOfDirt.copy());
+            } else {
+                //TODO: Error message
+            }
+        }
+    };
+    static Item PileOfDirt = new Item("Pile of dirt", false);
 }

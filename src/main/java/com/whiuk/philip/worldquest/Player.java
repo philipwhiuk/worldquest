@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Player extends GameCharacter {
+    Map<String,Experience> skills;
     Weapon mainHandWeapon;
     HashMap<Slot, Armour> armour;
     List<Item> inventory;
@@ -19,11 +20,12 @@ public class Player extends GameCharacter {
         this.baseDamage = 3;
         this.armour = new HashMap<>();
         this.inventory = new ArrayList<>();
+        this.skills = new HashMap<>();
     }
 
     Player(
             int maxHealth, int health, int money, int baseDamage,
-            Weapon mainHandWeapon, Map<Slot, Armour> armour,
+            Map<String,Experience> skills, Weapon mainHandWeapon, Map<Slot, Armour> armour,
             List<Item> inventory,
             int x, int y) {
         this(x, y);
@@ -35,6 +37,8 @@ public class Player extends GameCharacter {
         this.armour = new HashMap<>();
         this.armour.putAll(armour);
         this.inventory = inventory;
+        this.skills = new HashMap<>();
+        this.skills.putAll(skills);
     }
 
     void actionOnNpc(WorldQuest game, NPC npc) {
@@ -43,7 +47,7 @@ public class Player extends GameCharacter {
         }
     }
 
-    void attackNpc(WorldQuest game, NPC npc) {
+    private void attackNpc(WorldQuest game, NPC npc) {
         super.attackNpc(npc);
         game.npcAttacked(npc);
     }
@@ -53,7 +57,7 @@ public class Player extends GameCharacter {
         gainExperience(mainHandWeapon == null ? "Unarmed" : mainHandWeapon.type, damageCaused*4);
     }
 
-    private void gainExperience(String skill, int newExp) {
+    void gainExperience(String skill, int newExp) {
         Experience experience;
         if (!skills.containsKey(skill)) {
             experience = new Experience(0);
@@ -61,7 +65,7 @@ public class Player extends GameCharacter {
         } else {
             experience = skills.get(skill);
         }
-        while (ExperienceTable.toNextLevel(experience.level, experience.experience) <= experience.experience+newExp) {
+        while (ExperienceTable.toLevel(experience.level, experience.experience) <= newExp) {
             experience.level++;
         }
         experience.experience += newExp;
@@ -98,7 +102,7 @@ public class Player extends GameCharacter {
     }
 
     void addMoney(int money) {
-        this.money = money;
+        this.money += money;
     }
 
     public void setLocation(int x, int y) {

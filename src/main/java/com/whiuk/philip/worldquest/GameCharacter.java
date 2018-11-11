@@ -10,7 +10,6 @@ abstract class GameCharacter {
     int y;
     int maxHealth;
     int health;
-    Map<String,Experience> skills;
 
     GameCharacter(Color color, int x, int y, int maxHealth, int health) {
         this.color = color;
@@ -18,7 +17,6 @@ abstract class GameCharacter {
         this.y = y;
         this.maxHealth = maxHealth;
         this.health = health;
-        this.skills = new HashMap<>();
     }
 
     abstract void actionOnNpc(WorldQuest game, NPC npc);

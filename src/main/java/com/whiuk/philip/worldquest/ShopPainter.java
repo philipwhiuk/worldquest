@@ -1,7 +1,6 @@
 package com.whiuk.philip.worldquest;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.List;
 
 import static com.whiuk.philip.worldquest.MapConstants.BORDER_WIDTH;
@@ -39,8 +38,11 @@ public class ShopPainter {
                     + "         " + listing.getPrice()+" coins";
             g.drawString(text, 40, 100+(i*20));
 
+            ButtonPainter.paintButton(g, Color.GREEN, Color.BLACK, 250, (i*20)+88, "+");
+
             //TODO: Buying
             //TODO: Haggling
+            //TODO: Selling
         }
     }
 }

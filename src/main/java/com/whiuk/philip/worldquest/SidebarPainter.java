@@ -50,7 +50,6 @@ public class SidebarPainter {
         g.setColor(Color.RED);
         g.fillRect(500, 27, (player.health*10), 14);
 
-        //TODO: Skills
         g.setColor(Color.WHITE);
         g.drawString("Money: " + player.money, 450, 60);
 

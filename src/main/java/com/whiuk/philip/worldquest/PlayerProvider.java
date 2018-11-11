@@ -60,7 +60,7 @@ public class PlayerProvider {
                     Integer.parseInt(playerStats[1]),
                     Integer.parseInt(playerStats[2]),
                     Integer.parseInt(playerStats[3]),
-                    weapon, armour, inventory,
+                    skills, weapon, armour, inventory,
                     Integer.parseInt(playerStats[4]),
                     Integer.parseInt(playerStats[5])
             );

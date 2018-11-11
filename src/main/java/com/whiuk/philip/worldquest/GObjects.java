@@ -118,6 +118,7 @@ public class GObjects {
                 cutDown = true;
                 ticksToRegrow = 10;
                 player.inventory.add(new Item("Oak logs", true));
+                player.gainExperience("Woodcutting", 10);
             }
         }
     }
@@ -140,6 +141,7 @@ public class GObjects {
         }
     }
 
+    //TODO: Despawn after X ticks
     static class ItemDrop extends GObjects.GameObject {
         private Item item;
         private int money;

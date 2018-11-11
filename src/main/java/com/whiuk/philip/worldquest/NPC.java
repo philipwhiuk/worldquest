@@ -42,7 +42,7 @@ public class NPC extends GameCharacter {
     }
 
     public boolean isAggressive() {
-        return true; //TODO: Is monster aggressive
+        return type.isAggressive;
     }
 
     public boolean hasBeenAttacked() {

@@ -28,12 +28,13 @@ public class MapTileLoader {
         String[] tileData = mapLine.split(",");
         for (int x = 0; x < tileData.length; x++) {
             //Currently the per tile data is just the tileType.
+            //TODO: Store the objects on a tile
             String tileTypeName = tileData[x];
             TileType tileType = tileTypes.get(tileTypeName);
             if (tileType == null) {
                 throw new RuntimeException("Invalid tile type: " + tileTypeName);
             }
-            map[x][y] = new Tile(tileType);
+            map[x][y] = new Tile(tileType, x, y);
         }
     }
 }

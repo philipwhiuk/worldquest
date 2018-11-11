@@ -11,43 +11,36 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.SidebarViewState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 
-public class WorldQuest extends JFrame implements KeyListener, MouseListener {
+//TODO: Move TODOs to an issue tracker
+public class WorldQuest extends JFrame {
 
-    //TODO: Key config
     private static final HashMap<Character, Action> keymap = new HashMap<>();
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
 
-    enum Action {
-        NORTH(false), EAST(false), SOUTH(false), WEST(false), STAIRS(false),
-        USE_0(false), EQUIP_0(false), DROP_0(false),
-        USE_1(false), EQUIP_1(false), DROP_1(false),
-        USE_2(false), EQUIP_2(false), DROP_2(false),
-        TALK_0(false), TALK_1(false), TALK_2(false),
-        TALK_CONTINUE(false), CLOSE_SHOP(false),
-        SWITCH_TO_SKILLS(true), SWITCH_TO_ITEMS(true), SWITCH_TO_EQUIPMENT(true), SWITCH_TO_NPCS(true),
-        EXIT(false), NEW_GAME(false);
-
-        private boolean isSidebarViewAction;
-
-        Action(boolean isSidebarViewAction) {
-            this.isSidebarViewAction = isSidebarViewAction;
-        }
+    public void changeTileType(Tile tile, TileType type) {
+        Tile newTile = new Tile(type, tile.x, tile.y);
+        newTile.objects.addAll(tile.objects);
+        map[tile.x][tile.y] = newTile;
     }
 
     enum GameState {
         LAUNCHING, LOADING,
         RUNNING,
         PLAYER_TALKING, NPC_TALKING,
-        OPTION_SELECTION, SHOP,
-        DEAD }
+        //TODO: Implement use of conversation options
+        @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
+        DEAD
+    }
 
     static {
+        //TODO: Key config loaded from file + pre-sets
         keymap.put('w', Action.NORTH);
         keymap.put('W', Action.NORTH);
         keymap.put('a', Action.WEST);
@@ -64,12 +57,14 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
-    private Random random = new Random();
-
+    //TODO: Move this to 'Scenario'
     private Map<String, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, ItemAction> itemUses = new HashMap<>();
+    private Map<String, ItemAction> tileItemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
+
+    //TODO: This is the actual gamestate
     private Tile[][] map;
     private String mapName;
     private List<NPC> npcs;
@@ -89,39 +84,16 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private WorldQuest() {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
-        WorldQuestCanvas canvas = new WorldQuestCanvas();
+        WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
+        WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this);
+        WorldQuestCanvas canvas = new WorldQuestCanvas(keyListener, mouseListener);
         ScheduledExecutorService renderQueue = Executors.newSingleThreadScheduledExecutor();
-        add(canvas);
+        getContentPane().add(canvas);
         pack();
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e);
-                String[] options = {"Save", "Quit", "Cancel"};
-                int option = JOptionPane.showOptionDialog(
-                        WorldQuest.this,
-                        "Save before quitting?",
-                        "Save?",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.WARNING_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
-                switch (option) {
-                    case 0:
-                        saveGame();
-                        System.exit(0);
-                    case 1:
-                        System.exit(0);
-                    case 2:
-                }
-            }
-        });
+        addWindowListener(new WorldQuestWindowAdapter(this));
         renderQueue.scheduleAtFixedRate(canvas, 0, 16, TimeUnit.MILLISECONDS);
         setVisible(true);
-        addKeyListener(this);
-        addMouseListener(this);
         new Thread(() -> {
             try {
                 gameState = LOADING;
@@ -151,6 +123,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     }
 
     private void newGame() {
+        //TODO: Use map-relative-grid-reference-0,0,0
         loadMap("map");
         this.player = PlayerProvider.createPlayer();
         eventHistory = new ArrayList<>();
@@ -188,7 +161,8 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         gameState = RUNNING;
     }
 
-    private void saveGame() {
+    void saveGame() {
+        //TODO: Treat map data as stuff to save.
         String savePathname = "saves"+File.separator+"save.dat";
         File saveFile = new File(savePathname);
         try {
@@ -225,6 +199,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         tileTypes.put("Wall", GameData.Wall);
         tileTypes.put("Floor", GameData.Floor);
         tileTypes.put("Door", GameData.Door);
+        tileTypes.put("Dirt", GameData.Dirt);
     }
 
     private void loadNpcTypes() {
@@ -235,9 +210,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     private void loadItemUses() {
         //TODO: At some point this will come from a file too, but right now there's not much to load.
         itemUses.put("Steel & flint,Oak logs", GameData.Firemaking);
+        tileItemUses.put("Grass,Shovel", GameData.Dig);
     }
 
     private void loadMap(String mapResourceName) {
+        //TODO: Generate new map if map doesn't exist (first load)
         //TODO: Map format not very efficient but easy to read
         String mapPathname = "maps"+File.separator+mapResourceName+".dat";
         File mapFile = new File(mapPathname);
@@ -264,10 +241,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
 
-        WorldQuestCanvas() {
+        WorldQuestCanvas(WorldQuestKeyListener keyListener, WorldQuestMouseListener mouseListener) {
             Dimension size = new Dimension (PANEL_WIDTH, PANEL_HEIGHT);
             setPreferredSize(size);
-            addKeyListener(WorldQuest.this);
+            addKeyListener(keyListener);
+            addMouseListener(mouseListener);
             setFocusable(true);
             requestFocus();
         }
@@ -324,66 +302,56 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        Action a = keymap.get(e.getKeyChar());
-        if (a != null) {
-            processAction(a);
-        }
-    }
-
     private Rectangle sidebarLocation() {
         return new Rectangle(420, 0, 260, 480);
     }
 
-    private Rectangle inventoryButtonUseLocation(int index) {
-        int offset = 20*(player.skills.size()+index);
-        return new Rectangle(433,227+offset, 15, 15);
-    }
-
-    private Rectangle inventoryButtonEquipLocation(int index) {
-        int offset = 20*(player.skills.size()+index);
-        return new Rectangle(450,227+offset, 15, 15);
-    }
-
-    private Rectangle inventoryButtonDropLocation(int index) {
-        int offset = 20*(player.skills.size()+index);
-        return new Rectangle(467,227+offset, 15, 15);
+    private Rectangle inventoryButtonLocation(int index, int button) {
+        int xOffset = button*17;
+        int offset = 20*index;
+        return new Rectangle(433+xOffset,155+offset, 15, 15);
     }
 
     private Rectangle npcButtonTalkLocation(int index) {
-        int offset = 20*(player.inventory.size()+index+2+player.skills.size());
-        return new Rectangle(433,227+offset, 15, 15);
+        int offset = 20*index;
+        return new Rectangle(433,155+offset, 15, 15);
     }
 
     private Rectangle shopCloseLocation() {
-        return new Rectangle(19+BORDER_WIDTH-35,SHOP_Y+40, 15, 15);
+        return new Rectangle(19+BORDER_WIDTH-35,SHOP_Y+10, 15, 15);
     }
 
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        Action action = checkInterceptions(e.getPoint());
-        if (action != null) {
-            processAction(action);
-        }
+    Action getKeyMappedAction(Character c) {
+        return keymap.get(c);
     }
 
-    private Action checkInterceptions(Point p) {
-        if (sidebarLocation().contains(p)) {
-            System.out.println("Sidebar clicked");
-            return checkSidebarInterceptions(p);
+    Action getKeypressMappedAction(Integer code) {
+        return keyPressMap.get(code);
+    }
+
+    Action checkForActionInterception(Point point) {
+        if (sidebarLocation().contains(point)) {
+            return checkSidebarInterceptions(point);
         } else if (gameState == SHOP) {
-            if (shopCloseLocation().contains(p)) {
+            if (shopCloseLocation().contains(point)) {
                 return Action.CLOSE_SHOP;
             }
         }
         return null;
     }
 
-    private Action checkSidebarInterceptions(Point p) {
-        System.out.println(p);
+    Tile checkForTileInterception(Point p) {
+        double x = p.getX();
+        double y = p.getY();
+        if (x > MAP_SPACING && x < MAP_SPACING+MAP_WIDTH & y > MAP_SPACING & y < MAP_SPACING+MAP_HEIGHT) {
+            int tileX = (int) Math.floor((x - MAP_SPACING)/TILE_WIDTH);
+            int tileY = (int) Math.floor((y - MAP_SPACING)/TILE_HEIGHT);
+            return map[tileX][tileY];
+        }
+        return null;
+    }
 
+    private Action checkSidebarInterceptions(Point p) {
         if (sidebarTabButton(0, 0).contains(p)) {
             return Action.SWITCH_TO_SKILLS;
         } else if (sidebarTabButton(1, 0).contains(p)) {
@@ -398,23 +366,23 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
             case SKILLS:
                 return null;
             case ITEMS:
-                if (inventoryButtonUseLocation(0).contains(p) && player.inventory.size() >= 1) {
+                if (inventoryButtonLocation(0,0).contains(p) && player.inventory.size() >= 1) {
                     return Action.USE_0;
-                } else if (inventoryButtonUseLocation(1).contains(p) && player.inventory.size() >= 2) {
+                } else if (inventoryButtonLocation(1,0).contains(p) && player.inventory.size() >= 2) {
                     return Action.USE_1;
-                } else if (inventoryButtonUseLocation(2).contains(p) && player.inventory.size() >= 3) {
+                } else if (inventoryButtonLocation(2,0).contains(p) && player.inventory.size() >= 3) {
                     return Action.USE_2;
-                } else if (inventoryButtonEquipLocation(0).contains(p) && player.inventory.size() >= 1) {
+                } else if (inventoryButtonLocation(0,1).contains(p) && player.inventory.size() >= 1) {
                     return Action.EQUIP_0;
-                } else if (inventoryButtonEquipLocation(1).contains(p) && player.inventory.size() >= 2) {
+                } else if (inventoryButtonLocation(1,1).contains(p) && player.inventory.size() >= 2) {
                     return Action.EQUIP_1;
-                } else if (inventoryButtonEquipLocation(2).contains(p) && player.inventory.size() >= 3) {
+                } else if (inventoryButtonLocation(2,1).contains(p) && player.inventory.size() >= 3) {
                     return Action.EQUIP_2;
-                } else if (inventoryButtonDropLocation(0).contains(p) && player.inventory.size() >= 1) {
+                } else if (inventoryButtonLocation(0,2).contains(p) && player.inventory.size() >= 1) {
                     return Action.DROP_0;
-                } else if (inventoryButtonDropLocation(1).contains(p) && player.inventory.size() >= 2) {
+                } else if (inventoryButtonLocation(1,2).contains(p) && player.inventory.size() >= 2) {
                     return Action.DROP_1;
-                } else if (inventoryButtonDropLocation(2).contains(p) && player.inventory.size() >= 3) {
+                } else if (inventoryButtonLocation(2,2).contains(p) && player.inventory.size() >= 3) {
                     return Action.DROP_2;
                 }
                 return null;
@@ -430,11 +398,11 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     }
 
     private Rectangle sidebarTabButton(int x, int y) {
-        return new Rectangle(425+(x*50), 105+(y*25), 45, 20);
+        return new Rectangle(425+(x*50), 75+(y*30), 45, 30);
     }
 
-    private void processAction(Action a) {
-        if (a.isSidebarViewAction) {
+    void processAction(Action a) {
+        if (a.isSidebarViewAction()) {
             processSidebarViewAction(a);
         }
         if (gameState == RUNNING) {
@@ -446,6 +414,17 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         } else if (gameState == DEAD) {
             processActionWhileGameOver(a);
         }
+    }
+
+    void processTileClick(Tile tile) {
+        processPlayerInputWhileRunning(() -> {
+            if (player.itemBeingUsed != -1) {
+                int item = player.itemBeingUsed;
+                player.itemBeingUsed = -1;
+                return useItemOnTile(item, tile);
+            }
+            return false;
+        });
     }
 
     private void processSidebarViewAction(Action a) {
@@ -465,83 +444,71 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     }
 
     private void processActionWhileRunning(Action action) {
-        int initialPlayerHealth = player.health;
-        boolean shouldTick = false;
-
-        switch(action) {
-            case NORTH:
-                north(player);
-                shouldTick = true;
-                break;
-            case EAST:
-                east(player);
-                shouldTick = true;
-                break;
-            case SOUTH:
-                south(player);
-                shouldTick = true;
-                break;
-            case WEST:
-                west(player);
-                shouldTick = true;
-                break;
-            case STAIRS:
-                for (GObjects.GameObject object : map[player.x][player.y].objects) {
-                    if (object instanceof GObjects.Stairs) {
-                        ((GObjects.Stairs) object).go(this);
+        processPlayerInputWhileRunning(() -> {
+            switch (action) {
+                case NORTH:
+                    north(player);
+                    return true;
+                case EAST:
+                    east(player);
+                    return true;
+                case SOUTH:
+                    south(player);
+                    return true;
+                case WEST:
+                    west(player);
+                    return true;
+                case STAIRS:
+                    for (GObjects.GameObject object : map[player.x][player.y].objects) {
+                        if (object instanceof GObjects.Stairs) {
+                            ((GObjects.Stairs) object).go(this);
+                        }
                     }
-                }
-                break;
-            case USE_0:
-                shouldTick = useItem(0);
-                break;
-            case USE_1:
-                shouldTick = useItem(1);
-                break;
-            case USE_2:
-                shouldTick = useItem(2);
-                break;
-            case EQUIP_0:
-                equipItem(0);
-                shouldTick = true;
-                break;
-            case EQUIP_1:
-                equipItem(1);
-                shouldTick = true;
-                break;
-            case EQUIP_2:
-                equipItem(2);
-                shouldTick = true;
-                break;
-            case DROP_0:
-                dropItem(0);
-                shouldTick = true;
-                break;
-            case DROP_1:
-                dropItem(1);
-                shouldTick = true;
-                break;
-            case DROP_2:
-                dropItem(2);
-                shouldTick = true;
-                break;
-            case TALK_0:
-                talkTo(0);
-                shouldTick = true;
-                break;
-            case TALK_1:
-                talkTo(1);
-                shouldTick = true;
-                break;
-            case TALK_2:
-                talkTo(2);
-                shouldTick = true;
-                break;
-        }
+                    break;
+                case USE_0:
+                    return useItem(0);
+                case USE_1:
+                    return useItem(1);
+                case USE_2:
+                    return useItem(2);
+                case EQUIP_0:
+                    equipItem(0);
+                    return true;
+                case EQUIP_1:
+                    equipItem(1);
+                    return true;
+                case EQUIP_2:
+                    equipItem(2);
+                    return true;
+                case DROP_0:
+                    dropItem(0);
+                    return true;
+                case DROP_1:
+                    dropItem(1);
+                    return true;
+                case DROP_2:
+                    dropItem(2);
+                    return true;
+                case TALK_0:
+                    talkTo(0);
+                    return true;
+                case TALK_1:
+                    talkTo(1);
+                    return true;
+                case TALK_2:
+                    talkTo(2);
+                    return true;
+            }
+            return false;
+        });
+    }
+
+    private void processPlayerInputWhileRunning(BooleanSupplier processor) {
+        int initialPlayerHealth = player.health;
+        boolean shouldTick = processor.getAsBoolean();
         if (shouldTick) {
             tick(initialPlayerHealth);
         }
-        visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
     }
 
     private void processActionWhileTalking(Action action) {
@@ -670,6 +637,16 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         return false;
     }
 
+    private boolean useItemOnTile(int firstItemIndex, Tile tile) {
+        String key = tile.type.name+","+player.inventory.get(firstItemIndex).name;
+        ItemAction action = tileItemUses.get(key);
+        if (action != null) {
+            action.perform(this, tile, player, firstItemIndex, -1);
+            return true;
+        }
+        return false;
+    }
+
     private void dropItem(int index) {
         map[player.x][player.y].objects.add(new GObjects.ItemDrop(player.inventory.remove(index)));
     }
@@ -715,12 +692,13 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         } else if (player.health == initialPlayerHealth && player.health < player.maxHealth) {
             player.health += 1;
         }
+        visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
     }
 
     private void tickNPC(NPC npc) {
         if (nextToPlayer(npc) && npc.canFight() && (npc.isAggressive() || npc.hasBeenAttacked())) {
             attackPlayer(npc);
-        } else if(npc.canMove() && random.nextBoolean()) {
+        } else if(npc.canMove() && RandomSource.getRandom().nextBoolean()) {
             move(npc);
         }
     }
@@ -739,7 +717,7 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
     }
 
     private void move(NPC npc) {
-        switch(random.nextInt(4)) {
+        switch(RandomSource.getRandom().nextInt(4)) {
             case 0:
                 north(npc);
                 break;
@@ -759,13 +737,14 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         gameState = DEAD;
     }
 
-    public void switchMap(String map, int startX, int startY) {
+    void switchMap(String map, int startX, int startY) {
+        //TODO: Save current map
         loadMap(map);
         player.x = startX;
         player.y = startY;
     }
 
-    public void npcAttacked(NPC npc) {
+    void npcAttacked(NPC npc) {
         if (npc.isDead()) {
             map[npc.x][npc.y].objects.add(npc.dropItem());
             eventHistory.add("Killed a "+npc.type.name);
@@ -773,20 +752,20 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
 
     }
 
-    public void spawn(GObjects.GameObject object, int x, int y) {
+    void spawn(GObjects.GameObject object, int x, int y) {
         map[x][y].objects.add(object);
     }
 
-    public void showOptions(Map<String, ConversationChoice> conversationOptions) {
+    void showOptions(Map<String, ConversationChoice> conversationOptions) {
         //TODO: Show conversation options
     }
 
-    public void showShop(Shop shop) {
+    void showShop(Shop shop) {
         currentShop = shop;
         gameState = SHOP;
     }
 
-    public void closeShop() {
+    private void closeShop() {
         currentShop = null;
         gameState = RUNNING;
     }
@@ -797,31 +776,4 @@ public class WorldQuest extends JFrame implements KeyListener, MouseListener {
         return isVisible;
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        Action a = keyPressMap.get(e.getKeyCode());
-        if (a != null) {
-            processAction(a);
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
 }

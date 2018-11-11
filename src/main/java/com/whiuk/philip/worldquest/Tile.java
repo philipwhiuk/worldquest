@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Tile {
-    private final TileType type;
+    final TileType type;
     final List<GObjects.GameObject> objects;
     private boolean hasSeen = false;
+    final int x;
+    final int y;
 
-    Tile(TileType type) {
+    Tile(TileType type, int x, int y) {
         this.type = type;
+        this.x = x;
+        this.y = y;
         objects = new ArrayList<>();
     }
 
@@ -27,7 +31,7 @@ class Tile {
         return false;
     }
 
-    public Color getColor(boolean isVisible) {
+    Color getColor(boolean isVisible) {
         if (isVisible) {
             hasSeen = true;
             return type.color;
@@ -38,12 +42,12 @@ class Tile {
         }
     }
 
-    public void onMoveTo(Player player) {
+    void onMoveTo(Player player) {
         objects.forEach(obj -> obj.onMoveTo(player));
         objects.removeIf(GObjects.GameObject::isDeleted);
     }
 
-    public boolean isOutdoors() {
+    boolean isOutdoors() {
         return type.isOutdoors;
     }
 }

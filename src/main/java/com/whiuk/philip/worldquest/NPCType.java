@@ -9,6 +9,7 @@ public class NPCType {
     public final boolean canMove;
     //TODO: Fight Postures: Aggressive, Defensive, Neutral
     public final boolean canFight;
+    public final boolean isAggressive;
     public int health;
     public int damage;
     public GObjects.ItemDrop[] dropTable;
@@ -18,12 +19,15 @@ public class NPCType {
 
     NPCType(String name, Color color,
             boolean canMove,
-            boolean canFight, int health, int damage, GObjects.ItemDrop[] dropTable,
+            boolean canFight, boolean isAggressive,
+            int health, int damage,
+            GObjects.ItemDrop[] dropTable,
             boolean canTalk, ConversationChoice conversationEntryPoint, Shop shop) {
         this.name = name;
         this.color = color;
         this.canMove = canMove;
         this.canFight = canFight;
+        this.isAggressive = isAggressive;
         this.health = health;
         this.damage = damage;
         this.dropTable = dropTable;
