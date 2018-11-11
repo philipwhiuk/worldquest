@@ -67,10 +67,10 @@ class SidebarUI extends Rectangle implements UI {
             g.drawString("GAME OVER!", 450, 40);
         } else {
             g.drawString("Health: ", 450, 40);
+            g.drawRect(499, 26, 101, 15);
+            g.setColor(Color.RED);
+            g.fillRect(500, 27, (game.player.health * 10), 14);
         }
-        g.drawRect(499, 26, 101, 15);
-        g.setColor(Color.RED);
-        g.fillRect(500, 27, (game.player.health * 10), 14);
 
         g.setColor(Color.WHITE);
         g.drawString("Money: " + game.player.money, 450, 60);
