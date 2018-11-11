@@ -127,10 +127,10 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadGame() {
-        String savePathname = "saves"+File.separator+"+save"+File.separator+"player.dat";
+        String savePathname = "saves"+File.separator+"save"+File.separator+"player.dat";
         File saveFile = new File(savePathname);
         if (!saveFile.exists()) {
-            throw new RuntimeException("Unable to load save data: Save data file not found");
+            throw new RuntimeException("Unable to load save data: Save data file not found: "+ saveFile);
         }
         if (!saveFile.canRead()) {
             throw new RuntimeException("Unable to read save file");
