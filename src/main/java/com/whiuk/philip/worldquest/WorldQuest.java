@@ -162,7 +162,7 @@ public class WorldQuest extends JFrame {
     }
 
     void saveGame() {
-        String savePathname = "save"+File.separator+"save"+File.separator+"/player.dat";
+        String savePathname = "saves"+File.separator+"save"+File.separator+"/player.dat";
         File saveFile = new File(savePathname);
         try {
             Files.createDirectories(Paths.get(saveFile.getParent()));
