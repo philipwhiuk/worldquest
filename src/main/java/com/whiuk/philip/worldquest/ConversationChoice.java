@@ -1,5 +1,6 @@
 package com.whiuk.philip.worldquest;
 
+import java.util.List;
 import java.util.Map;
 
 class ConversationChoice {
@@ -18,10 +19,14 @@ interface NPCAction {
 }
 
 class ConversationChoiceSelection implements NPCAction {
-    private Map<String, ConversationChoice> conversationOptions;
+    private List<ConversationChoice> conversationOptions;
+
+    ConversationChoiceSelection(List<ConversationChoice> conversationOptions) {
+        this.conversationOptions = conversationOptions;
+    }
 
     public void doAction(WorldQuest game, NPC npc) {
-       game.showOptions(conversationOptions);
+        game.showOptions(conversationOptions);
     }
 }
 
@@ -30,5 +35,17 @@ class ShopDisplay implements NPCAction {
     public void doAction(WorldQuest game, NPC npc) {
         game.endConversation(npc);
         game.showShop(npc.shop);
+    }
+}
+
+class QuestStartAction implements NPCAction {
+    private final String questName;
+
+    QuestStartAction(String questName) {
+        this.questName = questName;
+    }
+
+    public void doAction(WorldQuest game, NPC npc) {
+        game.startQuest(questName);
     }
 }

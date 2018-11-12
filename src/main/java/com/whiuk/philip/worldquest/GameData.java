@@ -115,6 +115,44 @@ public class GameData {
                             1, 1, 5)
                     ))
     );
+    private static NPCType King = new NPCType(
+            "King Ronald",
+            Color.CYAN,
+            false,
+            false,
+            false,
+            100,
+            0,
+            new GObjects.ItemDrop[]{},
+            true,
+            new ConversationChoice(
+                    "Greetings Your Majesty",
+                    "Hello player!",
+                    new ConversationChoiceSelection(Arrays.asList(
+                            new ConversationChoice("What can I do for you my King?",
+                                    "The goblins are causing havoc!",
+                                    new ConversationChoiceSelection(Arrays.asList(
+                                            new ConversationChoice("Okay I'll take the job!",
+                                            "Thank you - return to me when removed them from the kingdom!",
+                                            new QuestStartAction("GoblinSlayer")
+                                            ),
+                                        new ConversationChoice(
+                                            "Sorry I like Goblins",
+                                            "Bah! Off with you.",
+                                            null
+                                            )
+                                    ))
+                            ),
+                            new ConversationChoice(
+                                    "Is there a shop nearby?",
+                                    "Gerald runs a store just across the road from the castle",
+                                    null
+                            )
+                    ))
+            ),
+            null
+    );
+
     private static ItemAction Firemaking = new ItemAction() {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int firemakingTool, int logs) {
@@ -164,6 +202,7 @@ public class GameData {
         npcTypes.put("Goblin", GameData.Goblin);
         npcTypes.put("GoblinKing", GameData.GoblinKing);
         npcTypes.put("Shopkeeper", GameData.ShopKeeper);
+        npcTypes.put("King", GameData.King);
     }
     static Map<String, ItemAction> itemUses = new HashMap<>();
     static {

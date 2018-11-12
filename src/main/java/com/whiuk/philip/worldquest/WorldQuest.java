@@ -728,7 +728,9 @@ public class WorldQuest extends JFrame {
         map[x][y].objects.add(object);
     }
 
-    void showOptions(Map<String, ConversationChoice> conversationOptions) {
+    void showOptions(List<ConversationChoice> conversationOptions) {
+    }
+    public void startQuest(String questName) {
     }
 
     void showShop(Shop shop) {
