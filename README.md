@@ -1,6 +1,8 @@
 # WorldQuest
 WorldQuest RPG
 
+![Screenshot](screenshot1.jpg "Screenshot")
+
 ## Features
 
 * 2 Maps
