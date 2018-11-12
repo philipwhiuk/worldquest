@@ -181,7 +181,6 @@ public class GObjects {
 
     static class MineralVeinBuilder extends GameObjectBuilder {
         public GameObject build(String[] arguments) {
-            System.out.println(Arrays.toString(arguments));
             return new MineralVein(arguments);
         }
     }
