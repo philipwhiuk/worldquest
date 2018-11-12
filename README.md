@@ -15,16 +15,14 @@ WorldQuest RPG
 * Experience
 * 2 Enemy Types
 * Shop that sells items
+* Mining Ores
 
 ## Roadmap
 
-Goals for version 0.1
+Goals for version 1.0
 
 * Selling items
 * Messages
-
-Goals for version 1.0
-
 * Auto-generated, persistant dungeons
 * Auto-generated, persistant surface landscape
 * Good conversational AI
@@ -35,5 +33,4 @@ Goals for version 1.0
 * Ranged weapons
 * Magecraft
 * Prospecting
-* Mining Ores
 * Smelting
