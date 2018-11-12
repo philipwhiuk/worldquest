@@ -183,6 +183,12 @@ public class GameData {
             if (tile.type == Rock) {
                 player.gainExperience("Mining", 15);
                 player.inventory.add(RockShards.copy());
+                for (GObjects.GameObject object: tile.objects) {
+                    if (object instanceof GObjects.MineralVein) {
+                        GObjects.MineralVein vein = (GObjects.MineralVein) object;
+                        player.inventory.add(vein.mine());
+                    }
+                }
             }
         }
     };

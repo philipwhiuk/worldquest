@@ -1,6 +1,7 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.whiuk.philip.worldquest.MapConstants.MAP_SPACING;
@@ -13,6 +14,7 @@ public class GObjects {
         HashMap<String, GameObjectBuilder> gameObjectBuilders = new HashMap<>();
         gameObjectBuilders.put("Stairs", new GObjects.StairsBuilder());
         gameObjectBuilders.put("Tree", new GObjects.TreeBuilder());
+        gameObjectBuilders.put("MineralVein", new GObjects.MineralVeinBuilder());
         return gameObjectBuilders;
     }
 
@@ -174,6 +176,45 @@ public class GObjects {
             if (item != null)
                 copy.item = item.copy();
             return copy;
+        }
+    }
+
+    static class MineralVeinBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            System.out.println(Arrays.toString(arguments));
+            return new MineralVein(arguments);
+        }
+    }
+
+    static class MineralVein extends GameObject {
+        final Item resource;
+        final Color veinColour;
+
+        MineralVein(String[] arguments) {
+            String resourceData = arguments[0].replaceAll("\\|",",");
+            this.resource = ItemProvider.parseItem(resourceData);
+            this.veinColour = fromCSSDef(arguments[1]);
+        }
+
+        MineralVein(Item resource, Color color) {
+            this.resource = resource;
+            this.veinColour = color;
+        }
+
+        private Color fromCSSDef(String value) {
+            Integer i = Integer.decode(value);
+            return new Color((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(veinColour);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 3,
+                    TILE_WIDTH - 6, TILE_HEIGHT - 6);
+        }
+
+        public Item mine() {
+            return resource.copy();
         }
     }
 }

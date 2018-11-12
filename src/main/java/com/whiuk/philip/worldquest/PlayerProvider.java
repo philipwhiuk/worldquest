@@ -30,7 +30,7 @@ public class PlayerProvider {
         Weapon weapon = null;
         try {
             if (!mainHandWeaponString.isEmpty()) {
-                weapon = (Weapon) parseItem(mainHandWeaponString);
+                weapon = (Weapon) ItemProvider.parseItem(mainHandWeaponString);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse weapon", e);
@@ -40,7 +40,7 @@ public class PlayerProvider {
             for (int i = 0; i < armourCount; i++) {
                 String[] armourData = buffer.readLine().split(":");
                 try {
-                    armour.put(Slot.valueOf(armourData[0]), (Armour) parseItem(armourData[1]));
+                    armour.put(Slot.valueOf(armourData[0]), (Armour) ItemProvider.parseItem(armourData[1]));
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Unable to parse armour in slot: " + armourData[0], e);
                 }
@@ -49,7 +49,7 @@ public class PlayerProvider {
         List<Item> inventory = new ArrayList<>();
         for (int i = 0; i < inventoryCount; i++) {
             try {
-                inventory.add(parseItem(buffer.readLine()));
+                inventory.add(ItemProvider.parseItem(buffer.readLine()));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Unable to parse inventory item: " + i, e);
             }
@@ -94,21 +94,6 @@ public class PlayerProvider {
             buffer.write(printItem(item));
             buffer.newLine();
         }
-    }
-
-    private static Item parseItem(String itemData) {
-        String[] itemClassData = itemData.split(",", 2);
-        switch (itemClassData[0]) {
-            case "Item":
-                return Item.parseItem(itemClassData[1]);
-            case "Weapon":
-                return Weapon.parseItem(itemClassData[1]);
-            case "Armour":
-                return Armour.parseItem(itemClassData[1]);
-            case "Hatchet":
-                return Hatchet.parseItem(itemClassData[1]);
-        }
-        throw new IllegalArgumentException(itemClassData[0]);
     }
 
     private static String printItem(Item item) {
