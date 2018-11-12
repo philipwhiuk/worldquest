@@ -155,8 +155,7 @@ public class WorldQuest extends JFrame {
     }
 
     void saveGame() {
-        String savePathname = "saves"+File.separator+"save"+File.separator+"/player.dat";
-        File saveFile = new File(savePathname);
+        File saveFile = resourceInSaveFolder("player");
         try {
             Files.createDirectories(Paths.get(saveFile.getParent()));
             if (!saveFile.exists()) {
@@ -204,7 +203,7 @@ public class WorldQuest extends JFrame {
         } catch (IOException e) {
             throw new RuntimeException("Resource not found: " + mapResourceName);
         }
-        File mapFile = resourceInSaveFolder(mapResourceName + ".dat");
+        File mapFile = resourceInSaveFolder(mapResourceName);
         if (!mapFile.exists()) {
             throw new RuntimeException(
                     "Unable to load map data: Map data file not found: " + mapFile.getAbsolutePath());
