@@ -89,16 +89,10 @@ public class WorldQuest extends JFrame {
             try {
                 gameState = LOADING;
                 loadScenario();
-                if (new File("saves/save").exists()) {
+                if (resourceInSaveFolder("player").exists()) {
                     loadGame();
                 } else {
                     Files.createDirectories(new File("saves/save").toPath());
-                    Files.copy(
-                            new File("scenario/default/map.dat").toPath(),
-                            new File("saves/save/map.dat").toPath());
-                    Files.copy(
-                            new File("scenario/default/map2.dat").toPath(),
-                            new File("saves/save/map2.dat").toPath());
                     newGame();
                 }
                 continueGame();
@@ -127,8 +121,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadGame() {
-        String savePathname = "saves"+File.separator+"save"+File.separator+"player.dat";
-        File saveFile = new File(savePathname);
+        File saveFile = resourceInSaveFolder("player");
         if (!saveFile.exists()) {
             throw new RuntimeException("Unable to load save data: Save data file not found: "+ saveFile);
         }
@@ -206,8 +199,12 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadMap(String mapResourceName) {
-        String mapPathname = "saves"+File.separator+"save"+File.separator+mapResourceName+".dat";
-        File mapFile = new File(mapPathname);
+        try {
+            copyScenarioMapIfNotFound(mapResourceName);
+        } catch (IOException e) {
+            throw new RuntimeException("Resource not found: " + mapResourceName);
+        }
+        File mapFile = resourceInSaveFolder(mapResourceName + ".dat");
         if (!mapFile.exists()) {
             throw new RuntimeException(
                     "Unable to load map data: Map data file not found: " + mapFile.getAbsolutePath());
@@ -226,6 +223,20 @@ public class WorldQuest extends JFrame {
             this.mapName = mapResourceName;
         } catch (Exception e) {
             throw new RuntimeException("Unable to load map data: " + e.getMessage(), e);
+        }
+    }
+
+    private File resourceInSaveFolder(String resource) {
+        return new File("saves"+File.separator+"save"+File.separator+resource+".dat");
+    }
+
+    private File resourceInScenarioFolder(String resource) {
+        return new File("scenario"+File.separator+"default"+File.separator+resource+".dat");
+    }
+
+    private void copyScenarioMapIfNotFound(String resource) throws IOException {
+        if(!resourceInSaveFolder(resource).exists()) {
+            Files.copy(resourceInScenarioFolder(resource).toPath(), resourceInSaveFolder(resource).toPath());
         }
     }
 
