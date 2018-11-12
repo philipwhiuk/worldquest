@@ -16,6 +16,7 @@ WorldQuest RPG
 * 2 Enemy Types
 * Shop that sells items
 * Mining Ores
+* Smelting
 
 ## Roadmap
 
@@ -33,4 +34,3 @@ Goals for version 1.0
 * Ranged weapons
 * Magecraft
 * Prospecting
-* Smelting
