@@ -14,7 +14,12 @@ public class GameObjectLoader {
             int x = Integer.parseInt(gameObjectData[0]);
             int y = Integer.parseInt(gameObjectData[1]);
             String[] args = (gameObjectData.length > 3) ? gameObjectData[3].split(":") : new String[]{};
-            newMap[x][y].objects.add(gameObjectBuilders.get(gameObjectData[2]).build(args));
+            String objectType = gameObjectData[2];
+            GObjects.GameObjectBuilder builder = gameObjectBuilders.get(objectType);
+            if (builder == null) {
+                throw new IllegalArgumentException("Unknown object type: " + objectType);
+            }
+            newMap[x][y].objects.add(builder.build(args));
         }
     }
 }
