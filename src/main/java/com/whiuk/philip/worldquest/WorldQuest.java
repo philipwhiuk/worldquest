@@ -47,6 +47,7 @@ public class WorldQuest extends JFrame {
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, ItemAction> itemUses = new HashMap<>();
     private Map<String, ItemAction> tileItemUses = new HashMap<>();
+    private Map<String, ItemAction> objectItemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
 
     private GameUI gameUI;
@@ -196,6 +197,7 @@ public class WorldQuest extends JFrame {
     private void loadItemUses() {
         itemUses.putAll(GameData.itemUses);
         tileItemUses.putAll(GameData.tileItemUses);
+        objectItemUses.putAll(GameData.objectItemUses);
     }
 
     private void loadMap(String mapResourceName) {
@@ -222,6 +224,9 @@ public class WorldQuest extends JFrame {
             this.npcs = npcs;
             this.map = newMap;
             this.mapName = mapResourceName;
+            if (buffer.readLine() != null) {
+                throw new RuntimeException("Map has unread data");
+            }
         } catch (Exception e) {
             try {
                 if (copied) {
@@ -590,12 +595,23 @@ public class WorldQuest extends JFrame {
         return false;
     }
 
-    private boolean useItemOnTile(int firstItemIndex, Tile tile) {
-        String key = tile.type.name+","+player.inventory.get(firstItemIndex).name;
+    private boolean useItemOnTile(int itemIndex, Tile tile) {
+        String itemName = player.inventory.get(itemIndex).name;
+        String key = tile.type.name+","+player.inventory.get(itemIndex).name;
         ItemAction action = tileItemUses.get(key);
         if (action != null) {
-            action.perform(this, tile, player, firstItemIndex, -1);
+            action.perform(this, tile, player, itemIndex, -1);
             return true;
+        }
+        for (GObjects.GameObject object : tile.objects) {
+            key = object.getClass().getSimpleName()+","+itemName;
+            System.out.println("Key: "+key);
+            action = objectItemUses.get(key);
+            if (action != null) {
+                System.out.println("Performing action");
+                action.perform(this, tile, player, itemIndex, -1);
+                return true;
+            }
         }
         return false;
     }

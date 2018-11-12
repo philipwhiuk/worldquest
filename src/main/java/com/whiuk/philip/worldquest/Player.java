@@ -60,7 +60,7 @@ public class Player extends GameCharacter {
     void gainExperience(String skill, int newExp) {
         Experience experience;
         if (!skills.containsKey(skill)) {
-            experience = new Experience(0);
+            experience = Experience.NoExperience();
             skills.put(skill, experience);
         } else {
             experience = skills.get(skill);
@@ -90,7 +90,7 @@ public class Player extends GameCharacter {
 
     @Override
     int calculateDamage() {
-        int strBonus = skills.getOrDefault("Strength", new Experience(0)).level;
+        int strBonus = skills.getOrDefault("Strength", Experience.NoExperience()).level;
         int baseDamage = strBonus + 2 + (mainHandWeapon != null ? mainHandWeapon.damage : 0);
         boolean criticalHit = RandomSource.getRandom().nextInt(11) == 10;
         if (criticalHit) {

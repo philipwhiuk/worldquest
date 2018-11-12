@@ -1,5 +1,7 @@
 package com.whiuk.philip.worldquest;
 
+import java.util.Objects;
+
 public class Item {
     static Item parseItem(String itemData) {
         String[] data = itemData.split(",");
@@ -28,6 +30,16 @@ public class Item {
 
     public String print() {
         return this.name+","+useable;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Item && name.equals(((Item) o).name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }
 

@@ -15,6 +15,7 @@ public class GObjects {
         gameObjectBuilders.put("Stairs", new GObjects.StairsBuilder());
         gameObjectBuilders.put("Tree", new GObjects.TreeBuilder());
         gameObjectBuilders.put("MineralVein", new GObjects.MineralVeinBuilder());
+        gameObjectBuilders.put("Furnace", new GObjects.FurnaceBuilder());
         return gameObjectBuilders;
     }
 
@@ -214,6 +215,27 @@ public class GObjects {
 
         public Item mine() {
             return resource.copy();
+        }
+    }
+
+    static class FurnaceBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            return new Furnace();
+        }
+    }
+
+    static class Furnace extends GameObject {
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(Color.BLACK);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 1, MAP_SPACING + (y * TILE_HEIGHT) + 1,
+                    TILE_WIDTH - 2, TILE_HEIGHT - 2);
+            g.setColor(Color.ORANGE);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 4,
+                    TILE_WIDTH - 6, TILE_HEIGHT - 8);
+            g.setColor(Color.RED);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 6,
+                    TILE_WIDTH - 6, TILE_HEIGHT - 8);
         }
     }
 }

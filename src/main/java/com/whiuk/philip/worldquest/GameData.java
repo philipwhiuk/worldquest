@@ -1,9 +1,8 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 public class GameData {
     private static final int DIFFICULTY = 1;
@@ -18,6 +17,9 @@ public class GameData {
     private static Item Pickaxe = new Item("Pickaxe", true);
     private static Item PileOfDirt = new Item("Pile of dirt", false);
     private static Item RockShards = new Item("Rock shards", false);
+    private static Item CopperOre = new Item("Copper ore", true);
+    private static Item TinOre = new Item("Tin ore", true);
+    private static Item BronzeBar = new Item("Bronze bar", true);
 
     private static TileType Grass = new TileType(
             "Grass",
@@ -192,6 +194,44 @@ public class GameData {
             }
         }
     };
+    private static ItemAction Smelt = new ItemAction() {
+        @Override
+        void perform(WorldQuest game, Tile tile, Player player, int ore1, int na) {
+            for (Recipe recipe : recipeList.get("Smelt")) {
+                if (recipe.input.contains(player.inventory.get(ore1)) && recipe.canBeDone(player)) {
+                    for (Item item : recipe.input) {
+                        player.inventory.remove(item);
+                    }
+                    boolean success = recipe.isSuccess();
+                    System.out.println(success);
+                    if (success) {
+                        for (Map.Entry<String, Integer> experience : recipe.experienceGained.entrySet()) {
+                            String skill = experience.getKey();
+                            int expGain = experience.getValue();
+                            Experience skillXp = player.skills.getOrDefault(skill, Experience.NoExperience());
+                            skillXp.experience += expGain;
+                            player.skills.put(skill, skillXp);
+                        }
+                        for (Item item: recipe.output) {
+                            player.inventory.add(item.copy());
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    private static Recipe Bronze = new Recipe(
+            Arrays.asList(CopperOre, TinOre),
+            Arrays.asList(BronzeBar),
+            100,
+            Collections.emptyMap(),
+            Collections.singletonMap("Smelting", 10));
+
+    static Map<String, List<Recipe>> recipeList = new HashMap<>();
+    static {
+        recipeList.put("Smelt", Arrays.asList(Bronze));
+    }
 
     static Map<String, TileType> tileTypes = new HashMap<>();
     static {
@@ -220,5 +260,11 @@ public class GameData {
         tileItemUses.put("Dirt,Shovel", GameData.Dig);
         tileItemUses.put("Rock,Pickaxe", GameData.Mine);
     }
+    static Map<String, ItemAction> objectItemUses = new HashMap<>();
+    static {
+        objectItemUses.put("Furnace,Copper ore", GameData.Smelt);
+        objectItemUses.put("Furnace,Tin ore", GameData.Smelt);
+    }
+
 
 }
