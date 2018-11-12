@@ -20,14 +20,15 @@ WorldQuest RPG
 
 Goals for version 0.1
 
-* Messages
-* Conversations
 * Selling items
+* Messages
 
 Goals for version 1.0
 
 * Auto-generated, persistant dungeons
 * Auto-generated, persistant surface landscape
+* Good conversational AI
+* AI with different combat strategies
 * Quests
 * Smithing
 * Crafting
