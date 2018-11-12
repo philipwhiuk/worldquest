@@ -256,19 +256,11 @@ class SidebarUI extends Rectangle implements UI {
 
         @Override
         public void onClick(MouseEvent e) {
-            Action a = calculateAction(e.getPoint());
-            if (a != null) {
-                game.processAction(a, null);
+            for (int i = 0; i < game.player.inventory.size(); i++) {
+                if (npcButtonTalkLocation(i).contains(e.getPoint())) {
+                    game.talkTo(i);
+                }
             }
-        }
-
-        private Action calculateAction(Point p) {
-            if (npcButtonTalkLocation(0).contains(p) && game.visibleNpcs.size() >= 1) {
-                return Action.TALK_0;
-            } else if (npcButtonTalkLocation(1).contains(p) && game.visibleNpcs.size() >= 2) {
-                return Action.TALK_1;
-            }
-            return null;
         }
     }
 }

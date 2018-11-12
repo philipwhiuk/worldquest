@@ -438,39 +438,6 @@ public class WorldQuest extends JFrame {
                         }
                     }
                     break;
-                case USE_0:
-                    return useItem(0);
-                case USE_1:
-                    return useItem(1);
-                case USE_2:
-                    return useItem(2);
-                case EQUIP_0:
-                    equipItem(0);
-                    return true;
-                case EQUIP_1:
-                    equipItem(1);
-                    return true;
-                case EQUIP_2:
-                    equipItem(2);
-                    return true;
-                case DROP_0:
-                    dropItem(0);
-                    return true;
-                case DROP_1:
-                    dropItem(1);
-                    return true;
-                case DROP_2:
-                    dropItem(2);
-                    return true;
-                case TALK_0:
-                    talkTo(0);
-                    return true;
-                case TALK_1:
-                    talkTo(1);
-                    return true;
-                case TALK_2:
-                    talkTo(2);
-                    return true;
             }
             return false;
         });
@@ -627,7 +594,7 @@ public class WorldQuest extends JFrame {
         map[player.x][player.y].objects.add(new GObjects.ItemDrop(player.inventory.remove(index)));
     }
 
-    private void talkTo(int index) {
+    void talkTo(int index) {
         startConversation(visibleNpcs.get(index));
     }
 
