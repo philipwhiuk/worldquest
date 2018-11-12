@@ -15,7 +15,7 @@ class WorldQuestKeyListener implements KeyListener {
     public void keyTyped(KeyEvent e) {
         Action a = game.getKeyMappedAction(e.getKeyChar());
         if (a != null) {
-            game.processAction(a);
+            game.processAction(a, e);
         }
     }
 
@@ -23,7 +23,7 @@ class WorldQuestKeyListener implements KeyListener {
     public void keyPressed(KeyEvent e) {
         Action a = game.getKeypressMappedAction(e.getKeyCode());
         if (a != null) {
-            game.processAction(a);
+            game.processAction(a, null);
         }
     }
 

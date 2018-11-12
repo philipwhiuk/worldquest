@@ -258,7 +258,7 @@ class SidebarUI extends Rectangle implements UI {
         public void onClick(MouseEvent e) {
             Action a = calculateAction(e.getPoint());
             if (a != null) {
-                game.processAction(a);
+                game.processAction(a, null);
             }
         }
 

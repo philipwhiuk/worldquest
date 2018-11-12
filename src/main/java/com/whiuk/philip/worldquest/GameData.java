@@ -130,10 +130,10 @@ public class GameData {
                     "Hello player!",
                     new ConversationChoiceSelection(Arrays.asList(
                             new ConversationChoice("What can I do for you my King?",
-                                    "The goblins are causing havoc!",
+                                    "The goblins are causing havoc - kill them!",
                                     new ConversationChoiceSelection(Arrays.asList(
-                                            new ConversationChoice("Okay I'll take the job!",
-                                            "Thank you - return to me when removed them from the kingdom!",
+                                            new ConversationChoice("Okay I'll take the job.",
+                                            "Thank you - return to me when you've removed them!",
                                             new QuestStartAction("GoblinSlayer")
                                             ),
                                         new ConversationChoice(

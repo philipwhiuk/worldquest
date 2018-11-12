@@ -7,7 +7,8 @@ enum Action {
     USE_2(false), EQUIP_2(false), DROP_2(false),
     TALK_0(false), TALK_1(false), TALK_2(false),
     TALK_CONTINUE(false), CLOSE_SHOP(false),
-    EXIT(false), START_NEW_GAME(false);
+    EXIT(false), START_NEW_GAME(false),
+    CONVERSATION_OPTION(false);
 
     private boolean isSidebarViewAction;
 

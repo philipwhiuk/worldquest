@@ -16,9 +16,7 @@ import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
-import static com.whiuk.philip.worldquest.WorldQuest.MessageState.CHATBOX;
-import static com.whiuk.philip.worldquest.WorldQuest.MessageState.NPC_TALKING;
-import static com.whiuk.philip.worldquest.WorldQuest.MessageState.PLAYER_TALKING;
+import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
 
 public class WorldQuest extends JFrame {
 
@@ -39,6 +37,9 @@ public class WorldQuest extends JFrame {
         keymap.put('N', Action.EXIT);
         keymap.put('y', Action.START_NEW_GAME);
         keymap.put('Y', Action.START_NEW_GAME);
+        keymap.put('1', Action.CONVERSATION_OPTION);
+        keymap.put('2', Action.CONVERSATION_OPTION);
+        keymap.put('3', Action.CONVERSATION_OPTION);
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
@@ -371,6 +372,8 @@ public class WorldQuest extends JFrame {
         public void render(Graphics2D g) {
             if (messageState == PLAYER_TALKING || messageState == NPC_TALKING) {
                 ConversationPainter.paintConversation(g, messageState, talkingTo);
+            } else if (messageState == CONVERSATION_OPTION) {
+                ConversationPainter.paintConversationOptions(g, (ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
             }
         }
 
@@ -388,10 +391,10 @@ public class WorldQuest extends JFrame {
         return keyPressMap.get(code);
     }
 
-    void processAction(Action a) {
+    void processAction(Action a, KeyEvent e) {
         if (gameState == RUNNING) {
-            if (messageState == PLAYER_TALKING || messageState == NPC_TALKING) {
-                processActionWhileTalking(a);
+            if (messageState == PLAYER_TALKING || messageState == NPC_TALKING || messageState == CONVERSATION_OPTION) {
+                processActionWhileTalking(a, e);
             } else {
                 processActionWhileRunning(a);
             }
@@ -481,11 +484,13 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private void processActionWhileTalking(Action action) {
+    private void processActionWhileTalking(Action action, KeyEvent e) {
         switch(action) {
             case TALK_CONTINUE:
                 progressConversation();
                 break;
+            case CONVERSATION_OPTION:
+                pickConversationOption(Integer.parseInt(""+e.getKeyChar()));
         }
     }
 
@@ -644,8 +649,23 @@ public class WorldQuest extends JFrame {
         if (messageState == PLAYER_TALKING) {
             messageState = NPC_TALKING;
         } else {
-            talkingTo.currentConversation.npcAction.doAction(this, talkingTo);
+            if (talkingTo.currentConversation.npcAction != null) {
+                talkingTo.currentConversation.npcAction.doAction(this, talkingTo);
+            } else {
+                endConversation(talkingTo);
+            }
         }
+    }
+
+    void setMessageState(MessageState newState) {
+        messageState = newState;
+    }
+
+    private void pickConversationOption(int i) {
+        talkingTo.currentConversation = ((ConversationChoiceSelection) talkingTo.currentConversation.npcAction)
+                .conversationOptions
+                .get(i-1);
+        displayConversation();
     }
 
     private void tick(int initialPlayerHealth) {
@@ -727,8 +747,6 @@ public class WorldQuest extends JFrame {
         map[x][y].objects.add(object);
     }
 
-    void showOptions(List<ConversationChoice> conversationOptions) {
-    }
     public void startQuest(String questName) {
     }
 
@@ -759,12 +777,13 @@ public class WorldQuest extends JFrame {
     enum GameState {
         LAUNCHING, LOADING,
         RUNNING,
-        @SuppressWarnings("unused") OPTION_SELECTION, SHOP,
+        SHOP,
         DEAD
     }
 
     enum MessageState {
         CHATBOX,
+        CONVERSATION_OPTION,
         PLAYER_TALKING, NPC_TALKING
     }
 
