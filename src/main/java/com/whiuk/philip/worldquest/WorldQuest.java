@@ -49,6 +49,7 @@ public class WorldQuest extends JFrame {
     private Map<String, ItemAction> tileItemUses = new HashMap<>();
     private Map<String, ItemAction> objectItemUses = new HashMap<>();
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
+    private Map<String, Quest> questList = new HashMap<>();
 
     private GameUI gameUI;
     private LoadingScreen loadingScreen;
@@ -113,6 +114,7 @@ public class WorldQuest extends JFrame {
         loadTileTypes();
         loadNpcTypes();
         loadItemUses();
+        loadQuestList();
         gameObjectBuilders = GObjects.provideBuilders();
     }
 
@@ -198,6 +200,10 @@ public class WorldQuest extends JFrame {
         itemUses.putAll(GameData.itemUses);
         tileItemUses.putAll(GameData.tileItemUses);
         objectItemUses.putAll(GameData.objectItemUses);
+    }
+
+    private void loadQuestList() {
+        questList.putAll(GameData.questList);
     }
 
     private void loadMap(String mapResourceName) {
@@ -388,7 +394,10 @@ public class WorldQuest extends JFrame {
             if (messageState == PLAYER_TALKING || messageState == NPC_TALKING) {
                 ConversationPainter.paintConversation(g, messageState, talkingTo);
             } else if (messageState == CONVERSATION_OPTION) {
-                ConversationPainter.paintConversationOptions(g, (ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
+                ConversationPainter.paintConversationOptions(
+                        g,
+                        WorldQuest.this,
+                        (ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
             }
         }
 
@@ -655,9 +664,12 @@ public class WorldQuest extends JFrame {
     }
 
     private void pickConversationOption(int i) {
-        talkingTo.currentConversation = ((ConversationChoiceSelection) talkingTo.currentConversation.npcAction)
-                .conversationOptions
-                .get(i-1);
+        ConversationChoiceSelection selection = ((ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
+        List<ConversationChoice> options = selection
+                .conversationOptions.stream()
+                .filter(choice -> choice.canSee.test(new QuestState(this)))
+                .collect(Collectors.toList());
+        talkingTo.currentConversation = options.get(i-1);
         displayConversation();
     }
 
@@ -731,9 +743,9 @@ public class WorldQuest extends JFrame {
     void npcAttacked(NPC npc) {
         if (npc.isDead()) {
             map[npc.x][npc.y].objects.add(npc.dropItem());
+            player.quests.forEach((name,quest) -> quest.npcDeath(npc.type.name));
             eventHistory.add("Killed a "+npc.type.name);
         }
-
     }
 
     void spawn(GObjects.GameObject object, int x, int y) {
@@ -741,6 +753,14 @@ public class WorldQuest extends JFrame {
     }
 
     public void startQuest(String questName) {
+        Quest quest = questList.get(questName);
+        if (quest == null) {
+            throw new RuntimeException("Unable to start quest "+questName+" - quest not found");
+        } else if (player.quests.containsKey(questName)) {
+            throw new RuntimeException("Unable to start quest "+questName+" - already started quest");
+        } else {
+            player.quests.put(questName, quest.start());
+        }
     }
 
     void showShop(Shop shop) {

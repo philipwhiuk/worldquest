@@ -54,13 +54,26 @@ public class PlayerProvider {
                 throw new IllegalArgumentException("Unable to parse inventory item: " + i, e);
             }
         }
+
+
+        int questCount = Integer.parseInt(buffer.readLine());
+        Map<String, Quest> quests = new HashMap<>();
+        for (int i = 0; i < questCount; i++) {
+            try {
+                Quest quest = QuestProvider.parseQuest(buffer);
+                quests.put(quest.name, quest);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Unable to parse quest: " + i, e);
+            }
+        }
+
         try {
             return new Player(
                     Integer.parseInt(playerStats[0]),
                     Integer.parseInt(playerStats[1]),
                     Integer.parseInt(playerStats[2]),
                     Integer.parseInt(playerStats[3]),
-                    skills, weapon, armour, inventory,
+                    skills, weapon, armour, inventory, quests,
                     Integer.parseInt(playerStats[4]),
                     Integer.parseInt(playerStats[5])
             );
@@ -94,6 +107,12 @@ public class PlayerProvider {
             buffer.write(printItem(item));
             buffer.newLine();
         }
+        buffer.write(""+player.quests.size());
+        buffer.newLine();
+        for (Quest quest : player.quests.values()) {
+            QuestProvider.writeQuest(buffer, quest);
+        }
+
     }
 
     private static String printItem(Item item) {

@@ -11,6 +11,7 @@ public class Player extends GameCharacter {
     Weapon mainHandWeapon;
     HashMap<Slot, Armour> armour;
     List<Item> inventory;
+    Map<String, Quest> quests;
     int money;
     int baseDamage;
     int itemBeingUsed = -1;
@@ -21,12 +22,13 @@ public class Player extends GameCharacter {
         this.armour = new HashMap<>();
         this.inventory = new ArrayList<>();
         this.skills = new HashMap<>();
+        this.quests = new HashMap<>();
     }
 
     Player(
             int maxHealth, int health, int money, int baseDamage,
             Map<String,Experience> skills, Weapon mainHandWeapon, Map<Slot, Armour> armour,
-            List<Item> inventory,
+            List<Item> inventory, Map<String, Quest> quests,
             int x, int y) {
         this(x, y);
         this.mainHandWeapon = mainHandWeapon;
@@ -36,9 +38,12 @@ public class Player extends GameCharacter {
         this.baseDamage = baseDamage;
         this.armour = new HashMap<>();
         this.armour.putAll(armour);
-        this.inventory = inventory;
+        this.inventory = new ArrayList<>();
+        this.inventory.addAll(inventory);
         this.skills = new HashMap<>();
         this.skills.putAll(skills);
+        this.quests = new HashMap<>();
+        this.quests.putAll(quests);
     }
 
     void actionOnNpc(WorldQuest game, NPC npc) {

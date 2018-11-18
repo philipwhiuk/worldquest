@@ -1,15 +1,19 @@
 package com.whiuk.philip.worldquest;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 class ConversationChoice {
     final String playerText;
     final String npcResponse;
     NPCAction npcAction;
-    ConversationChoice(String player, String npcResponse, NPCAction npcAction) {
+    final Predicate<QuestState> canSee;
+
+    ConversationChoice(String player, String npcResponse, NPCAction npcAction, Predicate<QuestState> canSee) {
         this.playerText = player;
         this.npcResponse = npcResponse;
         this.npcAction = npcAction;
+        this.canSee = canSee;
     }
 }
 

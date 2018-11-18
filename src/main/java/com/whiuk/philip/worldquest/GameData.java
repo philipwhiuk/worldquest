@@ -3,6 +3,7 @@ package com.whiuk.philip.worldquest;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class GameData {
     private static final int DIFFICULTY = 1;
@@ -20,6 +21,12 @@ public class GameData {
     private static Item CopperOre = new Item("Copper ore", true);
     private static Item TinOre = new Item("Tin ore", true);
     private static Item BronzeBar = new Item("Bronze bar", true);
+    private static HashMap<String, Integer> GoblinSlayerKills = new HashMap<>();
+    static {
+        GoblinSlayerKills.put("Goblin", 5);
+    }
+    private static Quest GoblinSlayer = new Quest("Goblin Slayer", GoblinSlayerKills, false);
+    private static Predicate<QuestState> GoblinSlayerStarted = (state) -> !state.player.quests.containsKey(GoblinSlayer.name);
 
     private static TileType Grass = new TileType(
             "Grass",
@@ -102,7 +109,8 @@ public class GameData {
             new GObjects.ItemDrop[]{},
             true,
             new ConversationChoice(null, "Hello and welcome to my shop!",
-                    new ShopDisplay()),
+                    new ShopDisplay(),
+                    (state) -> true),
             new Shop("General Store", Arrays.asList(
                     new ShopListing(
                             Hammer.copy(),
@@ -134,23 +142,29 @@ public class GameData {
                             new ConversationChoice("What can I do for you my King?",
                                     "The goblins are causing havoc - kill them!",
                                     new ConversationChoiceSelection(Arrays.asList(
-                                            new ConversationChoice("Okay I'll take the job.",
-                                            "Thank you - return to me when you've removed them!",
-                                            new QuestStartAction("GoblinSlayer")
+                                            new ConversationChoice(
+                                                    "Okay I'll take the job.",
+                                                    "Thank you!",
+                                                    new QuestStartAction(GoblinSlayer.name),
+                                                    (state) -> true
                                             ),
                                         new ConversationChoice(
-                                            "Sorry I like Goblins",
-                                            "Bah! Off with you.",
-                                            null
+                                                "Sorry I like Goblins",
+                                                "Bah! Off with you.",
+                                                null,
+                                                (state) -> true
                                             )
-                                    ))
+                                    )),
+                                    GoblinSlayerStarted
                             ),
                             new ConversationChoice(
                                     "Is there a shop nearby?",
                                     "Gerald runs a store just across the road from the castle",
-                                    null
+                                    null,
+                                    (state) -> true
                             )
-                    ))
+                    )),
+                    (state) -> true
             ),
             null
     );
@@ -228,7 +242,7 @@ public class GameData {
             Collections.emptyMap(),
             Collections.singletonMap("Smelting", 10));
 
-    static Map<String, List<Recipe>> recipeList = new HashMap<>();
+    private static Map<String, List<Recipe>> recipeList = new HashMap<>();
     static {
         recipeList.put("Smelt", Arrays.asList(Bronze));
     }
@@ -265,6 +279,8 @@ public class GameData {
         objectItemUses.put("Furnace,Copper ore", GameData.Smelt);
         objectItemUses.put("Furnace,Tin ore", GameData.Smelt);
     }
-
-
+    static Map<String, Quest> questList = new HashMap<>();
+    static {
+        questList.put(GoblinSlayer.name, GoblinSlayer);
+    }
 }

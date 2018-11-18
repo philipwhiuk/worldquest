@@ -2,6 +2,7 @@ package com.whiuk.philip.worldquest;
 
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.MapConstants.*;
 
@@ -20,10 +21,13 @@ public class ConversationPainter {
         g.drawString("Continue",25, CONVERSATION_Y+65);
     }
 
-    public static void paintConversationOptions(Graphics2D g, ConversationChoiceSelection ccs) {
+    public static void paintConversationOptions(Graphics2D g, WorldQuest game, ConversationChoiceSelection ccs) {
         g.setColor(Color.WHITE);
         g.drawRect(9, CONVERSATION_Y, BORDER_WIDTH, CONVERSATION_HEIGHT);
-        List<ConversationChoice> options = ccs.conversationOptions;
+        QuestState state = new QuestState(game);
+        List<ConversationChoice> options = ccs.conversationOptions.stream()
+                .filter(choice -> choice.canSee.test(state))
+                .collect(Collectors.toList());
         for (int i = 0; i < options.size(); i++) {
             g.setColor(Color.CYAN);
             g.drawString((i+1)+".", 25, CONVERSATION_Y+40+(i*25));
