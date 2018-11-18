@@ -24,7 +24,12 @@ public class GameData {
     static {
         GoblinSlayerKills.put("Goblin", 5);
     }
-    private static Quest GoblinSlayer = new Quest("Goblin Slayer", GoblinSlayerKills, false);
+    private static QuestStep GoblinSlaying = new QuestStep(GoblinSlayerKills);
+    private static Quest GoblinSlayer = new Quest(
+            "Goblin Slayer",
+            Arrays.asList(GoblinSlaying),
+            0,
+            false);
 
     private static TileType Grass = new TileType(
             "Grass",
