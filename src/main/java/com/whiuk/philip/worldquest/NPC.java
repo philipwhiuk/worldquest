@@ -23,8 +23,8 @@ public class NPC extends GameCharacter {
 
     boolean canTalk() { return type.canTalk; }
 
-    void startConversation() {
-        currentConversation = type.conversationEntryPoint;
+    void startConversation(WorldQuest game) {
+        currentConversation = type.conversation.selector.apply(new QuestState(game));
     }
 
     @Override

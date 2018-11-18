@@ -13,7 +13,7 @@ public class Quest {
         this.finished = finished;
     }
 
-    private void finish() {
+    void finish(Player player) {
         this.finished = true;
     }
 
@@ -29,14 +29,11 @@ public class Quest {
             } else {
                 killsRequired.put(name, kills -1);
             }
-            checkQuestComplete();
         }
     }
 
-    private void checkQuestComplete() {
-        if (killsRequired.isEmpty()) {
-            finish();
-        }
+    public boolean isQuestComplete() {
+        return killsRequired.isEmpty();
     }
 
     public Quest start() {

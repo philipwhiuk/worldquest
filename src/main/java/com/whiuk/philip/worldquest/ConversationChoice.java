@@ -1,7 +1,16 @@
 package com.whiuk.philip.worldquest;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
+
+class Conversation {
+    Function<QuestState, ConversationChoice> selector;
+
+    Conversation(Function<QuestState, ConversationChoice> selector) {
+        this.selector = selector;
+    }
+}
 
 class ConversationChoice {
     final String playerText;
@@ -50,6 +59,19 @@ class QuestStartAction implements NPCAction {
 
     public void doAction(WorldQuest game, NPC npc) {
         game.startQuest(questName);
+        game.endConversation(npc);
+    }
+}
+
+class QuestFinishAction implements NPCAction {
+    private final String questName;
+
+    QuestFinishAction(String questName) {
+        this.questName = questName;
+    }
+
+    public void doAction(WorldQuest game, NPC npc) {
+        game.player.getQuest(questName).finish(game.player);
         game.endConversation(npc);
     }
 }

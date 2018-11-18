@@ -634,7 +634,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void startConversation(NPC npc) {
-        npc.startConversation();
+        npc.startConversation(this);
         talkingTo = npc;
         displayConversation();
     }

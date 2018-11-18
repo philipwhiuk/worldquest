@@ -12,7 +12,7 @@ public class NPCType {
     public int damage;
     public GObjects.ItemDrop[] dropTable;
     public final boolean canTalk;
-    final ConversationChoice conversationEntryPoint;
+    final Conversation conversation;
     public Shop shop;
 
     NPCType(String name, Color color,
@@ -20,7 +20,7 @@ public class NPCType {
             boolean canFight, boolean isAggressive,
             int health, int damage,
             GObjects.ItemDrop[] dropTable,
-            boolean canTalk, ConversationChoice conversationEntryPoint, Shop shop) {
+            boolean canTalk, Conversation conversation, Shop shop) {
         this.name = name;
         this.color = color;
         this.canMove = canMove;
@@ -30,7 +30,7 @@ public class NPCType {
         this.damage = damage;
         this.dropTable = dropTable;
         this.canTalk = canTalk;
-        this.conversationEntryPoint = conversationEntryPoint;
+        this.conversation = conversation;
         this.shop = shop;
     }
 }

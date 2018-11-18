@@ -3,7 +3,6 @@ package com.whiuk.philip.worldquest;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class GameData {
     private static final int DIFFICULTY = 1;
@@ -26,7 +25,6 @@ public class GameData {
         GoblinSlayerKills.put("Goblin", 5);
     }
     private static Quest GoblinSlayer = new Quest("Goblin Slayer", GoblinSlayerKills, false);
-    private static Predicate<QuestState> GoblinSlayerStarted = (state) -> !state.player.quests.containsKey(GoblinSlayer.name);
 
     private static TileType Grass = new TileType(
             "Grass",
@@ -98,6 +96,12 @@ public class GameData {
             false,
             null,
             null);
+    private static ConversationChoice ShopDialog = new ConversationChoice(
+            null,
+            "Hello and welcome to my shop!",
+            new ShopDisplay(),
+            (state) -> true
+    );
     private static NPCType ShopKeeper = new NPCType(
             "Shopkeeper",
             Color.WHITE,
@@ -108,9 +112,7 @@ public class GameData {
             0,
             new GObjects.ItemDrop[]{},
             true,
-            new ConversationChoice(null, "Hello and welcome to my shop!",
-                    new ShopDisplay(),
-                    (state) -> true),
+            new Conversation(state -> ShopDialog),
             new Shop("General Store", Arrays.asList(
                     new ShopListing(
                             Hammer.copy(),
@@ -125,6 +127,79 @@ public class GameData {
                             1, 1, 5)
                     ))
     );
+
+    private static ConversationChoice King_StartGoblinSlayerDialog = new ConversationChoice(
+            "What can I do for you my King?",
+            "The goblins are causing havoc - kill them!",
+            new ConversationChoiceSelection(Arrays.asList(
+                    new ConversationChoice(
+                            "Okay I'll take the job.",
+                            "Thank you!",
+                            new QuestStartAction(GoblinSlayer.name),
+                            (state) -> true
+                    ),
+                    new ConversationChoice(
+                            "Sorry I like Goblins",
+                            "Bah! Off with you.",
+                            null,
+                            (state) -> true
+                    )
+            )),
+            (state -> state.player.getQuestState(GoblinSlayer.name).equals(QuestStatus.NOT_STARTED))
+    );
+
+    private static ConversationChoice King_ShopQuestion = new ConversationChoice(
+            "Is there a shop nearby?",
+            "Gerald runs a store just across the road from the castle",
+            null,
+            (state) -> true
+    );
+
+    private static ConversationChoice King_DefaultOpening = new ConversationChoice(
+            "Greetings Your Majesty",
+            "Hello player!",
+            new ConversationChoiceSelection(Arrays.asList(
+                    King_StartGoblinSlayerDialog,
+                    King_ShopQuestion
+            )),
+            (state) -> true
+    );
+
+    private static ConversationChoice King_NotFinishedYetSorry = new ConversationChoice(
+            "I'm not finished yet...",
+            "Well do hurry please, they're a real menace",
+            null,
+            (state -> !state.player.getQuest(GoblinSlayer.name).isQuestComplete())
+    );
+
+    private static ConversationChoice King_Finished = new ConversationChoice(
+            "I've finished!",
+            "Congratulations. Thanks for helping!",
+            new QuestFinishAction(GoblinSlayer.name),
+            (state -> state.player.getQuest(GoblinSlayer.name).isQuestComplete())
+    );
+
+    private static ConversationChoice King_SomethingElse = new ConversationChoice(
+            "Actually I'm here about something else",
+            "Oh - well what is it?",
+            new ConversationChoiceSelection(Arrays.asList(
+                    King_ShopQuestion
+            )),
+            (state -> true)
+    );
+
+    private static ConversationChoice King_GoblinSlayerProgressRequest = new ConversationChoice(
+            "Greetings Your Majesty",
+            "Hello! How's the goblin hunting going?",
+            new ConversationChoiceSelection(Arrays.asList(
+                    King_NotFinishedYetSorry,
+                    King_Finished,
+                    King_SomethingElse
+            )),
+            state -> true
+    );
+
+
     private static NPCType King = new NPCType(
             "King Ronald",
             Color.CYAN,
@@ -135,36 +210,17 @@ public class GameData {
             0,
             new GObjects.ItemDrop[]{},
             true,
-            new ConversationChoice(
-                    "Greetings Your Majesty",
-                    "Hello player!",
-                    new ConversationChoiceSelection(Arrays.asList(
-                            new ConversationChoice("What can I do for you my King?",
-                                    "The goblins are causing havoc - kill them!",
-                                    new ConversationChoiceSelection(Arrays.asList(
-                                            new ConversationChoice(
-                                                    "Okay I'll take the job.",
-                                                    "Thank you!",
-                                                    new QuestStartAction(GoblinSlayer.name),
-                                                    (state) -> true
-                                            ),
-                                        new ConversationChoice(
-                                                "Sorry I like Goblins",
-                                                "Bah! Off with you.",
-                                                null,
-                                                (state) -> true
-                                            )
-                                    )),
-                                    GoblinSlayerStarted
-                            ),
-                            new ConversationChoice(
-                                    "Is there a shop nearby?",
-                                    "Gerald runs a store just across the road from the castle",
-                                    null,
-                                    (state) -> true
-                            )
-                    )),
-                    (state) -> true
+            new Conversation(
+                    state -> {
+                        switch (state.player.getQuestState(GoblinSlayer.name)) {
+                            case NOT_STARTED:
+                            case FINISHED:
+                                return King_DefaultOpening;
+                            case STARTED:
+                                return King_GoblinSlayerProgressRequest;
+                        }
+                        return King_DefaultOpening;
+                    }
             ),
             null
     );

@@ -112,4 +112,15 @@ public class Player extends GameCharacter {
         this.x = x;
         this.y = y;
     }
+
+    QuestStatus getQuestState(String questName) {
+        if (quests.containsKey(questName)) {
+            return quests.get(questName).isFinished() ? QuestStatus.FINISHED : QuestStatus.STARTED;
+        }
+        return QuestStatus.NOT_STARTED;
+    }
+
+    public Quest getQuest(String name) {
+        return quests.get(name);
+    }
 }
