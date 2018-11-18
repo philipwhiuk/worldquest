@@ -20,6 +20,7 @@ public class GameData {
     private static Item CopperOre = new Item("Copper ore", true);
     private static Item TinOre = new Item("Tin ore", true);
     private static Item BronzeBar = new Item("Bronze bar", true);
+    private static Item OakLogs = new Item("Oak logs", true);
     private static HashMap<String, Integer> GoblinSlayerKills = new HashMap<>();
     static {
         GoblinSlayerKills.put("Goblin", 5);
@@ -238,13 +239,21 @@ public class GameData {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
             if (tile.type == Grass) {
-                game.changeTileType(tile, Dirt);
-                player.gainExperience("Digging", 10);
-                player.inventory.add(PileOfDirt.copy());
+                if (player.inventory.hasSpaceForItem(PileOfDirt)) {
+                    game.changeTileType(tile, Dirt);
+                    player.gainExperience("Digging", 10);
+                    player.inventory.add(PileOfDirt.copy());
+                } else {
+                    //TODO: No space
+                }
             } else if (tile.type == Dirt) {
-                game.changeTileType(tile, Rock);
-                player.gainExperience("Digging", 10);
-                player.inventory.add(PileOfDirt.copy());
+                if (player.inventory.hasSpaceForItem(PileOfDirt)) {
+                    game.changeTileType(tile, Rock);
+                    player.gainExperience("Digging", 10);
+                    player.inventory.add(PileOfDirt.copy());
+                } else {
+                    //TODO: No space
+                }
             }
         }
     };
@@ -252,12 +261,16 @@ public class GameData {
         @Override
         void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
             if (tile.type == Rock) {
-                player.gainExperience("Mining", 15);
-                player.inventory.add(RockShards.copy());
-                for (GObjects.GameObject object: tile.objects) {
-                    if (object instanceof GObjects.MineralVein) {
-                        GObjects.MineralVein vein = (GObjects.MineralVein) object;
-                        player.inventory.add(vein.mine());
+                if (player.inventory.hasSpaceForItem(RockShards)) {
+                    player.gainExperience("Mining", 15);
+                    player.inventory.add(RockShards.copy());
+                    for (GObjects.GameObject object : tile.objects) {
+                        if (object instanceof GObjects.MineralVein) {
+                            GObjects.MineralVein vein = (GObjects.MineralVein) object;
+                            if (player.inventory.hasSpaceForItem(vein.resource)) {
+                                player.inventory.add(vein.mine());
+                            }
+                        }
                     }
                 }
             }
@@ -272,7 +285,6 @@ public class GameData {
                         player.inventory.remove(item);
                     }
                     boolean success = recipe.isSuccess();
-                    System.out.println(success);
                     if (success) {
                         for (Map.Entry<String, Integer> experience : recipe.experienceGained.entrySet()) {
                             String skill = experience.getKey();

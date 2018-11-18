@@ -1,26 +1,32 @@
 package com.whiuk.philip.worldquest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 public class Inventory implements Iterable<Item> {
+    private static final int MAX_INVENTORY_SIZE = 15;
     private ArrayList<Item> items;
 
     Inventory() {
         items = new ArrayList<>();
     }
 
-    public void addAll(List<Item> items) {
-        for (Item item : items) {
-            if (hasSpaceForItem(item)) {
+    void addAll(List<Item> items) {
+        if (hasSpaceForItems(items)) {
+            for (Item item : items) {
                 this.items.add(item);
             }
         }
     }
 
+    boolean hasSpaceForItems(List<Item> items) {
+        return this.items.size() + items.size() <= MAX_INVENTORY_SIZE;
+    }
+
     boolean hasSpaceForItem(Item item) {
-        return items.size() < 15;
+        return hasSpaceForItems(Collections.singletonList(item));
     }
 
     public Item get(int index) {

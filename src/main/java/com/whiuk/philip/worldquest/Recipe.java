@@ -35,6 +35,9 @@ class Recipe {
         for (Map.Entry<String, Integer> skillReq : skillRequirements.entrySet()) {
             canBeDone &= player.skills.getOrDefault(skillReq.getKey(), Experience.NoExperience()).level >= skillReq.getValue();
         }
+        if (!player.inventory.hasSpaceForItems(output)) {
+            return false;
+        }
         return canBeDone;
     }
 }

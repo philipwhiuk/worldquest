@@ -78,15 +78,18 @@ public class GObjects {
 
     static class TreeBuilder extends GameObjectBuilder {
         public GameObject build(String[] arguments) {
-            return new Tree();
+            return new Tree(arguments);
         }
     }
 
     static class Tree extends GameObject {
+        Item resource;
         boolean cutDown;
         int ticksToRegrow;
 
-        public Tree() {
+        public Tree(String[] arguments) {
+            String resourceData = arguments[0].replaceAll("\\|",",");
+            this.resource = ItemProvider.parseItem(resourceData);
         }
 
         @Override
@@ -118,10 +121,10 @@ public class GObjects {
 
         @Override
         public void doAction(Player player) {
-            if (player.mainHandWeapon instanceof Hatchet) {
+            if (player.mainHandWeapon instanceof Hatchet && player.inventory.hasSpaceForItem(resource)) {
                 cutDown = true;
                 ticksToRegrow = 10;
-                player.inventory.add(new Item("Oak logs", true));
+                player.inventory.add(resource.copy());
                 player.gainExperience("Woodcutting", 10);
             }
         }
@@ -259,11 +262,13 @@ public class GObjects {
 
         @Override
         public void onMoveTo(Player player) {
-            if (item != null) {
-                player.inventory.add(item);
+            if (item == null || player.inventory.hasSpaceForItem(item)) {
+                if (item != null) {
+                    player.inventory.add(item);
+                }
+                player.addMoney(money);
+                deleted = true;
             }
-            player.addMoney(money);
-            deleted = true;
         }
 
         public ItemDrop copy() {
