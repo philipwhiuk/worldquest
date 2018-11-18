@@ -11,7 +11,7 @@ Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Gr
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Wall,Wall,Wall,Grass,Wall,Wall,Wall,Wall,Wall,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Wall,Floor,Wall,Grass,Wall,Floor,Floor,Floor,Wall,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Wall,Floor,Wall,Grass,Wall,Floor,Floor,Floor,Wall,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
-Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Wall,Door,Wall,Grass,Wall,Wall,Wall,Door,Wall,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
+Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Wall,Floor,Wall,Grass,Wall,Wall,Wall,Floor,Wall,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
 Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass,Grass
@@ -47,9 +47,11 @@ Goblin,28,20
 GoblinKing,24,20
 Shopkeeper,16,10
 King,18,18
-5
+7
 15,10,Stairs,map2:15:10
 4,4,Tree,
 1,39,MineralVein,Item|Copper ore|true:0XFFA500
 1,38,MineralVein,Item|Tin ore|true:0XDDDDDD
 11,10,Furnace
+17,12,Door,SOUTH
+11,12,Door,SOUTH

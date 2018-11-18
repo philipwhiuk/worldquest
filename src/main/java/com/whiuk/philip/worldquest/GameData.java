@@ -49,12 +49,6 @@ public class GameData {
             new Color(25,25,25),
             true,
             false);
-    private static TileType Door = new TileType(
-            "Door",
-            new Color(55,27,0),
-            new Color(20,15,0),
-            true,
-            false);
     private static TileType Floor = new TileType(
             "Floor",
             new Color(100,11,0),
@@ -313,7 +307,6 @@ public class GameData {
         tileTypes.put("Grass", GameData.Grass);
         tileTypes.put("Wall", GameData.Wall);
         tileTypes.put("Floor", GameData.Floor);
-        tileTypes.put("Door", GameData.Door);
         tileTypes.put("Dirt", GameData.Dirt);
         tileTypes.put("Rock", GameData.Rock);
     }

@@ -10,6 +10,7 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 
 * 2 Maps
 * Stairs
+* Doors that open and shut
 * 2 Enemy Types
 * Shop that sells items
 * Talking to NPCs
@@ -39,24 +40,30 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 
 ## Roadmap
 
-Goals for version 1.0
+Goals for version 1.0 (Public Release)
 
-* Proper Doors
-* Doors with keys
+* A decent-size game world with rivers, bridges, forests and dungeons
+* Doors that require keys
+* Fetch quests
 * Quest rewards
 * Quest requirements
 * Fetch quests
-* Implement a multi-step quest
+* Persistent NPC death & health
+* At least one multi-step quest
 * FOV that respects walls.
 * Selling items
-* Game messages
-* Auto-generated, persistent dungeons
-* Auto-generated, persistent surface landscape
-* Deeper conversational AI
+* Hit splats
+* Game messages when stuff happens
 * AI with different combat strategies
-* Item quests
 * Smithing
 * Crafting
 * Ranged weapons
 * Magecraft
 * Prospecting
+
+Goals for version 2.0
+
+* Auto-generated, persistent dungeons
+* Auto-generated, persistent surface landscape
+* Deeper conversational AI
+* Enemy respawn mechanics

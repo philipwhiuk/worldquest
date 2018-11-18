@@ -18,11 +18,11 @@ class Tile {
         objects = new ArrayList<>();
     }
 
-    boolean canMoveTo() {
-        if (type.canMoveTo()) {
+    boolean canMoveTo(Direction directionMoving) {
+        if (type.canMoveTo(directionMoving)) {
             boolean canMove = true;
             for (GObjects.GameObject obj : objects) {
-                if (!obj.canMoveTo()) {
+                if (!obj.canMoveTo(directionMoving)) {
                     canMove = false;
                 }
             }

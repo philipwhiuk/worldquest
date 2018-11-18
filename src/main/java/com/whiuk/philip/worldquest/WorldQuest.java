@@ -506,25 +506,25 @@ public class WorldQuest extends JFrame {
 
     private void north(GameCharacter subject) {
         if (inBounds(subject.x, subject.y - 1)) {
-            directionAction(subject, subject.x, subject.y - 1);
+            directionAction(subject, Direction.NORTH, subject.x, subject.y - 1);
         }
     }
 
     private void south(GameCharacter subject) {
         if (inBounds(subject.x, subject.y + 1)) {
-            directionAction(subject, subject.x, subject.y + 1);
+            directionAction(subject, Direction.SOUTH, subject.x, subject.y + 1);
         }
     }
 
     private void east(GameCharacter subject) {
         if (inBounds(subject.x + 1, subject.y)) {
-            directionAction(subject, subject.x + 1, subject.y);
+            directionAction(subject, Direction.EAST, subject.x + 1, subject.y);
         }
     }
 
     private void west(GameCharacter subject) {
         if (inBounds(subject.x - 1, subject.y)) {
-            directionAction(subject,subject.x - 1, subject.y);
+            directionAction(subject,Direction.WEST, subject.x - 1, subject.y);
         }
     }
 
@@ -532,7 +532,7 @@ public class WorldQuest extends JFrame {
         return x >= 0 && x <= MAX_X && y >= 0 && y <= MAX_Y;
     }
 
-    private void directionAction(GameCharacter subject, int x, int y) {
+    private void directionAction(GameCharacter subject, Direction directionMoving, int x, int y) {
         for (NPC npc : npcs) {
             if (npc.x == x && npc.y == y && npc != subject) {
                 subject.actionOnNpc(this, npc);
@@ -542,7 +542,7 @@ public class WorldQuest extends JFrame {
         if (player.x == x && player.y == y && player != subject) {
             return;
         }
-        if (map[x][y].canMoveTo()) {
+        if (map[x][y].canMoveTo(directionMoving)) {
             if (player == subject) {
                 map[x][y].onMoveTo(player);
             }

@@ -17,7 +17,7 @@ public class TileType {
         this.isOutdoors = isOutdoors;
     }
 
-    public boolean canMoveTo() {
+    public boolean canMoveTo(Direction directionMoving) {
         return canMoveTo;
     }
 }
