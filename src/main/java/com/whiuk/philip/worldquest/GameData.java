@@ -37,31 +37,36 @@ public class GameData {
             new Color(0,100,0),
             new Color(0,40,0),
             true,
-            true);
+            true,
+            false);
     private static TileType Dirt = new TileType(
             "Dirt",
             new Color(100,68,8),
             new Color(50,34,4),
             true,
+            false,
             false);
     private static TileType Rock = new TileType(
             "Rock",
             new Color(50,50,50),
             new Color(25,25,25),
             true,
+            false,
             false);
     private static TileType Floor = new TileType(
             "Floor",
             new Color(100,11,0),
             new Color(52,6,0),
             true,
+            false,
             false);
     private static TileType Wall = new TileType(
             "Wall",
             new Color(100,100,100),
             new Color(75,75,75),
             false,
-            false);
+            false,
+            true);
     private static NPCType Goblin = new NPCType(
             "Goblin",
             Color.RED,
@@ -314,13 +319,13 @@ public class GameData {
         recipeList.put("Smelt", Arrays.asList(Bronze));
     }
 
-    static Map<String, TileType> tileTypes = new HashMap<>();
+    static Map<Integer, TileType> tileTypes = new HashMap<>();
     static {
-        tileTypes.put("Grass", GameData.Grass);
-        tileTypes.put("Wall", GameData.Wall);
-        tileTypes.put("Floor", GameData.Floor);
-        tileTypes.put("Dirt", GameData.Dirt);
-        tileTypes.put("Rock", GameData.Rock);
+        tileTypes.put(1, GameData.Grass);
+        tileTypes.put(2, GameData.Wall);
+        tileTypes.put(3, GameData.Floor);
+        tileTypes.put(4, GameData.Dirt);
+        tileTypes.put(5, GameData.Rock);
     }
 
     static Map<String, NPCType> npcTypes = new HashMap<>();

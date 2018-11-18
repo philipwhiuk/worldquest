@@ -9,7 +9,7 @@ import static com.whiuk.philip.worldquest.MapConstants.MAP_TILES_WIDTH;
 
 public class MapTileLoader {
 
-    static Tile[][] loadMapTiles(Map<String, TileType> tileTypes, BufferedReader buffer) throws IOException {
+    static Tile[][] loadMapTiles(Map<Integer, TileType> tileTypes, BufferedReader buffer) throws IOException {
         Tile[][] newMap = new Tile[MAP_TILES_WIDTH][MAP_TILES_HEIGHT];
         int mapLines = Integer.parseInt(buffer.readLine());
         if (mapLines != MAP_TILES_HEIGHT) {
@@ -24,14 +24,13 @@ public class MapTileLoader {
         return newMap;
     }
 
-    private static void processMapLine(Map<String, TileType> tileTypes, Tile[][] map, int y, String mapLine) {
+    private static void processMapLine(Map<Integer, TileType> tileTypes, Tile[][] map, int y, String mapLine) {
         String[] tileData = mapLine.split(",");
         for (int x = 0; x < tileData.length; x++) {
-            //Currently the per tile data is just the tileType.
-            String tileTypeName = tileData[x];
-            TileType tileType = tileTypes.get(tileTypeName);
+            int tileTypeId = Integer.parseInt(tileData[x]);
+            TileType tileType = tileTypes.get(tileTypeId);
             if (tileType == null) {
-                throw new RuntimeException("Invalid tile type: " + tileTypeName);
+                throw new RuntimeException("Invalid tile type: " + tileTypeId);
             }
             map[x][y] = new Tile(tileType, x, y);
         }

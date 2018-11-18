@@ -44,7 +44,7 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
-    private Map<String, TileType> tileTypes = new HashMap<>();
+    private Map<Integer, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, ItemAction> itemUses = new HashMap<>();
     private Map<String, ItemAction> tileItemUses = new HashMap<>();
@@ -67,6 +67,7 @@ public class WorldQuest extends JFrame {
     GameState gameState = LAUNCHING;
     private NPC talkingTo;
     private DeathScreen deathScreen;
+    private List<Room> rooms;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -212,7 +213,7 @@ public class WorldQuest extends JFrame {
         try {
             copied = copyScenarioMapIfNotFoundOrNewer(mapResourceName);
         } catch (IOException e) {
-            throw new RuntimeException("Resource not found: " + mapResourceName);
+            throw new RuntimeException("Resource not found: " + mapResourceName, e);
         }
         File mapFile = resourceInSaveFolder(mapResourceName);
         if (!mapFile.exists()) {
@@ -228,6 +229,7 @@ public class WorldQuest extends JFrame {
             Tile[][] newMap = MapTileLoader.loadMapTiles(tileTypes, buffer);
             List<NPC> npcs = NPCLoader.loadNPCs(npcTypes, buffer);
             GameObjectLoader.loadGameObjects(gameObjectBuilders, buffer, newMap);
+            this.rooms = RoomLoader.loadRooms(buffer, newMap);
             this.npcs = npcs;
             this.map = newMap;
             this.mapName = mapResourceName;
@@ -255,7 +257,10 @@ public class WorldQuest extends JFrame {
     }
 
     private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
-        if(!resourceInSaveFolder(resource).exists() || scenarioFileIsNewer(resource)) {
+        if (resourceInSaveFolder(resource).exists() && scenarioFileIsNewer(resource)) {
+            Files.delete(resourceInSaveFolder(resource).toPath());
+        }
+        if(!resourceInSaveFolder(resource).exists()) {
             Files.copy(resourceInScenarioFolder(resource).toPath(), resourceInSaveFolder(resource).toPath());
             return true;
         }
@@ -777,8 +782,47 @@ public class WorldQuest extends JFrame {
     }
 
     boolean isVisible(int x, int y) {
-        boolean isVisible = x >= player.x - 5 && x <= player.x + 5 && y >= player.y - 5 && y <= player.y + 5;
-        return isVisible;
+        int xDiff = Math.abs(x - player.x);
+        int yDiff = Math.abs(y - player.y);
+
+        if (xDiff + yDiff > 6 || xDiff > 4 || yDiff > 4) {
+            return false;
+        }
+        if (bothNotInRoom(x, y)) {
+            return true;
+        }
+        if (inSameRoom(x, y)) {
+            return true;
+        }
+        if (map[player.x][player.y].room == null && visibleRoomEdge(x,y)) {
+                return true;
+        }
+        return false;
+    }
+
+    private boolean bothNotInRoom(int x, int y) {
+        return map[player.x][player.y].isOutdoors() && map[x][y].isOutdoors();
+    }
+
+    private boolean inSameRoom(int x, int y) {
+        return map[player.x][player.y].room == map[x][y].room;
+    }
+
+    private boolean visibleRoomEdge(int x, int y) {
+        Room mapRoom = map[x][y].room;
+        if (player.x < x && ((int) mapRoom.getMinX()) == x) {
+            return true;
+        }
+        if (player.x > x && ((int) mapRoom.getMaxX()) == x+1) {
+            return true;
+        }
+        if (player.y < y && ((int) mapRoom.getMinY()) == y) {
+            return true;
+        }
+        if (player.y > y && ((int) mapRoom.getMaxY()) == y+1) {
+            return true;
+        }
+        return false;
     }
 
     public void changeTileType(Tile tile, TileType type) {

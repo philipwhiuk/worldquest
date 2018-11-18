@@ -14,6 +14,7 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 * 2 Enemy Types
 * Shop that sells items
 * Talking to NPCs
+* Obstruct-able field of view
 
 ### Skills
 
@@ -50,7 +51,6 @@ Goals for version 1.0 (Public Release)
 * Fetch quests
 * Persistent NPC death & health
 * At least one multi-step quest
-* FOV that respects walls.
 * Selling items
 * Hit splats
 * Game messages when stuff happens

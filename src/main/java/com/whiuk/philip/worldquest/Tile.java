@@ -10,6 +10,7 @@ class Tile {
     private boolean hasSeen = false;
     final int x;
     final int y;
+    Room room;
 
     Tile(TileType type, int x, int y) {
         this.type = type;
@@ -49,5 +50,9 @@ class Tile {
 
     boolean isOutdoors() {
         return type.isOutdoors;
+    }
+
+    boolean blocksView() {
+        return type.blocksView;
     }
 }
