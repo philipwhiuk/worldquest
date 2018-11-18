@@ -54,15 +54,17 @@ public class GObjects {
         private String map;
         private int startX;
         private int startY;
+        private Direction direction;
 
         public Stairs(String[] arguments) {
-            this(arguments[0], Integer.parseInt(arguments[1]), Integer.parseInt(arguments[2]));
+            this(arguments[0], Integer.parseInt(arguments[1]), Integer.parseInt(arguments[2]), Direction.valueOf(arguments[3]));
         }
 
-        public Stairs(String map, int startX, int startY) {
+        public Stairs(String map, int startX, int startY, Direction direction) {
             this.map = map;
             this.startX = startX;
             this.startY = startY;
+            this.direction = direction;
         }
 
         void go(WorldQuest worldQuest) {
@@ -71,8 +73,23 @@ public class GObjects {
 
         @Override
         void draw(Graphics2D g, int x, int y) {
-            g.setColor(Color.blue);
-            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT), TILE_WIDTH, TILE_HEIGHT / 2);
+            if (direction.equals(Direction.DOWN)) {
+                g.setColor(Color.BLACK);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT), TILE_WIDTH, 3);
+                g.setColor(Color.DARK_GRAY);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 3, TILE_WIDTH, 3);
+                g.setColor(Color.LIGHT_GRAY);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 6, TILE_WIDTH, 4);
+            } else if (direction.equals(Direction.UP)) {
+                g.setColor(Color.LIGHT_GRAY);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT), TILE_WIDTH, 3);
+                g.setColor(Color.DARK_GRAY);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 3, TILE_WIDTH, 3);
+                g.setColor(Color.BLACK);
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 6, TILE_WIDTH, 4);
+            } else {
+                throw new RuntimeException("Unsupported stairs direction:" + direction);
+            }
         }
     }
 

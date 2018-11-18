@@ -33,6 +33,7 @@ public class WorldQuest extends JFrame {
         keymap.put('d', Action.EAST);
         keymap.put('D', Action.EAST);
         keymap.put('<', Action.STAIRS);
+        keymap.put('>', Action.STAIRS);
         keymap.put('n', Action.EXIT);
         keymap.put('N', Action.EXIT);
         keymap.put('y', Action.START_NEW_GAME);
