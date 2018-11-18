@@ -147,17 +147,46 @@ public class GObjects {
 
     static class DoorBuilder extends GameObjectBuilder {
         public GameObject build(String[] arguments) {
+            if (arguments.length != 2) {
+                throw new IllegalArgumentException("Expected door position and open side: " + Arrays.toString(arguments));
+            }
             switch (Direction.valueOf(arguments[0])) {
                 case SOUTH:
-                    return new SouthDoor();
+                    return new SouthDoor(Direction.valueOf(arguments[1]));
+                case EAST:
+                    return new EastDoor(Direction.valueOf(arguments[1]));
             }
             return null;
         }
     }
 
-    static class SouthDoor extends GameObject {
-        private boolean isOpen = false;
+    abstract static class Door extends GameObject {
+        boolean isOpen = false;
         private int ticksToShut = 0;
+
+        @Override
+        public void doAction(Player player) {
+            isOpen = true;
+            ticksToShut = 30;
+        }
+
+        @Override
+        void tick() {
+            if (isOpen && ticksToShut <= 1) {
+                isOpen = false;
+            } else {
+                ticksToShut -= 1;
+            }
+        }
+
+    }
+
+    static class SouthDoor extends Door {
+        private final Direction openDoorSide;
+
+        SouthDoor(Direction openDoorSide) {
+            this.openDoorSide = openDoorSide;
+        }
 
         @Override
         public boolean canMoveTo(Direction directionMoving) {
@@ -175,19 +204,36 @@ public class GObjects {
                         TILE_WIDTH, 4);
             }
         }
+    }
 
-        @Override
-        public void doAction(Player player) {
-            isOpen = true;
-            ticksToShut = 30;
+    static class EastDoor extends Door {
+        private final Direction openDoorSide;
+
+        EastDoor(Direction openDoorSide) {
+            this.openDoorSide = openDoorSide;
         }
 
         @Override
-        void tick() {
-            if (isOpen && ticksToShut <= 1) {
-                isOpen = false;
+        public boolean canMoveTo(Direction directionMoving) {
+            return directionMoving != Direction.WEST || isOpen;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            if (isOpen) {
+                if (openDoorSide == Direction.NORTH) {
+                    g.fillRect(MAP_SPACING + (x * TILE_WIDTH),
+                            MAP_SPACING + (y * TILE_HEIGHT),
+                            TILE_WIDTH, 4);
+                } else {
+                    g.fillRect(MAP_SPACING + (x * TILE_WIDTH),
+                            MAP_SPACING + (y * TILE_HEIGHT) + TILE_HEIGHT - 4,
+                            TILE_WIDTH, 4);
+                }
             } else {
-                ticksToShut -= 1;
+                g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + TILE_WIDTH - 4, MAP_SPACING + (y * TILE_HEIGHT),
+                        4, TILE_HEIGHT);
             }
         }
     }

@@ -804,8 +804,10 @@ public class WorldQuest extends JFrame {
         ShopListing s = shop.items.get(i);
         if (s.quantity >= 1 && s.getPrice() <= player.money) {
             s.quantity -= 1;
-            player.money -= s.getPrice();
-            player.inventory.add(s.item.copy());
+            if (player.inventory.hasSpaceForItem(s.item)) {
+                player.money -= s.getPrice();
+                player.inventory.add(s.item.copy());
+            }
         }
     }
 }

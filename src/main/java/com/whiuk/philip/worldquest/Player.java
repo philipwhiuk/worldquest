@@ -1,7 +1,6 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,7 @@ public class Player extends GameCharacter {
     Map<String,Experience> skills;
     Weapon mainHandWeapon;
     HashMap<Slot, Armour> armour;
-    List<Item> inventory;
+    Inventory inventory;
     Map<String, Quest> quests;
     int money;
     int baseDamage;
@@ -20,7 +19,7 @@ public class Player extends GameCharacter {
         super(Color.YELLOW, x, y, 10, 10);
         this.baseDamage = 3;
         this.armour = new HashMap<>();
-        this.inventory = new ArrayList<>();
+        this.inventory = new Inventory();
         this.skills = new HashMap<>();
         this.quests = new HashMap<>();
     }
@@ -28,7 +27,7 @@ public class Player extends GameCharacter {
     Player(
             int maxHealth, int health, int money, int baseDamage,
             Map<String,Experience> skills, Weapon mainHandWeapon, Map<Slot, Armour> armour,
-            List<Item> inventory, Map<String, Quest> quests,
+            List<Item> items, Map<String, Quest> quests,
             int x, int y) {
         this(x, y);
         this.mainHandWeapon = mainHandWeapon;
@@ -38,8 +37,8 @@ public class Player extends GameCharacter {
         this.baseDamage = baseDamage;
         this.armour = new HashMap<>();
         this.armour.putAll(armour);
-        this.inventory = new ArrayList<>();
-        this.inventory.addAll(inventory);
+        this.inventory = new Inventory();
+        this.inventory.addAll(items);
         this.skills = new HashMap<>();
         this.skills.putAll(skills);
         this.quests = new HashMap<>();
