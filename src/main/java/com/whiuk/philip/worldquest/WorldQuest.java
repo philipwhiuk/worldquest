@@ -210,7 +210,7 @@ public class WorldQuest extends JFrame {
     private void loadMap(String mapResourceName) {
         boolean copied;
         try {
-            copied = copyScenarioMapIfNotFound(mapResourceName);
+            copied = copyScenarioMapIfNotFoundOrNewer(mapResourceName);
         } catch (IOException e) {
             throw new RuntimeException("Resource not found: " + mapResourceName);
         }
@@ -254,12 +254,16 @@ public class WorldQuest extends JFrame {
         return new File("scenario"+File.separator+"default"+File.separator+resource+".dat");
     }
 
-    private boolean copyScenarioMapIfNotFound(String resource) throws IOException {
-        if(!resourceInSaveFolder(resource).exists()) {
+    private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
+        if(!resourceInSaveFolder(resource).exists() || scenarioFileIsNewer(resource)) {
             Files.copy(resourceInScenarioFolder(resource).toPath(), resourceInSaveFolder(resource).toPath());
             return true;
         }
         return false;
+    }
+
+    private boolean scenarioFileIsNewer(String resource) {
+        return resourceInScenarioFolder(resource).lastModified() > resourceInSaveFolder(resource).lastModified();
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
