@@ -5,8 +5,6 @@ import java.util.*;
 import java.util.List;
 
 public class GameData {
-    private static final int DIFFICULTY = 1;
-
     private static Item BronzeDagger = new Weapon("Bronze dagger", false,"Dagger", 2);
     private static Item BronzeSword = new Weapon("Bronze sword", false,"Sword", 4);
     private static Item BronzeHatchet = new Hatchet("Bronze hatchet", true,3);
@@ -21,6 +19,9 @@ public class GameData {
     private static Item TinOre = new Item("Tin ore", true);
     private static Item BronzeBar = new Item("Bronze bar", true);
     private static Item OakLogs = new Item("Oak logs", true);
+    private static Item Feathers = new Item("Feathers", true);
+    private static Item Bones = new Item("Bones", true);
+    private static Item RawChicken = new Item("Raw chicken", true);
     private static HashMap<String, Integer> GoblinSlayerKills = new HashMap<>();
     static {
         GoblinSlayerKills.put("Goblin", 5);
@@ -67,6 +68,48 @@ public class GameData {
             false,
             true,
             true);
+    private static NPCType Chicken = new NPCType(
+            "Chicken",
+            Color.WHITE,
+            true,
+            true,
+            false,
+            2,
+            1,
+            new GObjects.ItemDrop[]{
+                    new GObjects.ItemDrop(Feathers.copy()),
+                    new GObjects.ItemDrop(Bones.copy()),
+                    new GObjects.ItemDrop(RawChicken.copy())
+            },
+            false,
+            null,
+            null);
+    private static NPCType Rat = new NPCType(
+            "Rat",
+            Color.LIGHT_GRAY,
+            true,
+            true,
+            false,
+            2,
+            1,
+            new GObjects.ItemDrop[]{
+            },
+            false,
+            null,
+            null);
+    private static NPCType GiantRat = new NPCType(
+            "Giant Rat",
+            Color.GRAY,
+            true,
+            true,
+            false,
+            5,
+            1,
+            new GObjects.ItemDrop[]{
+            },
+            false,
+            null,
+            null);
     private static NPCType Goblin = new NPCType(
             "Goblin",
             Color.RED,
@@ -74,7 +117,7 @@ public class GameData {
             true,
             true,
             5,
-            5*DIFFICULTY,
+            5,
             new GObjects.ItemDrop[]{
                     new GObjects.ItemDrop(BronzeDagger.copy()),
                     new GObjects.ItemDrop(BronzeSword.copy()),
@@ -94,7 +137,7 @@ public class GameData {
             true,
             true,
             50,
-            10*DIFFICULTY,
+            10,
             new GObjects.ItemDrop[]{
                     new GObjects.ItemDrop(100),
             },
@@ -107,6 +150,19 @@ public class GameData {
             new ShopDisplay(),
             (state) -> true
     );
+    private static Shop GeneralStore = new Shop("General Store", Arrays.asList(
+            new ShopListing(
+                    Hammer.copy(),
+                    1, 1, 5),
+            new ShopListing(
+                    Shovel.copy(),
+                    1, 1, 5),
+            new ShopListing(
+                    Pickaxe.copy(),
+                    1, 1, 5),
+            new ShopListing(SteelFlint.copy(),
+                    1, 1, 5)
+    ));
     private static NPCType ShopKeeper = new NPCType(
             "Shopkeeper",
             Color.WHITE,
@@ -118,19 +174,7 @@ public class GameData {
             new GObjects.ItemDrop[]{},
             true,
             new Conversation(state -> ShopDialog),
-            new Shop("General Store", Arrays.asList(
-                    new ShopListing(
-                            Hammer.copy(),
-                            1, 1, 5),
-                    new ShopListing(
-                            Shovel.copy(),
-                            1, 1, 5),
-                    new ShopListing(
-                            Pickaxe.copy(),
-                            1, 1, 5),
-                    new ShopListing(SteelFlint.copy(),
-                            1, 1, 5)
-                    ))
+            GeneralStore
     );
 
     private static ConversationChoice King_StartGoblinSlayerDialog = new ConversationChoice(
@@ -344,6 +388,9 @@ public class GameData {
         npcTypes.put("GoblinKing", GameData.GoblinKing);
         npcTypes.put("Shopkeeper", GameData.ShopKeeper);
         npcTypes.put("King", GameData.King);
+        npcTypes.put("GiantRat", GameData.GiantRat);
+        npcTypes.put("Chicken", GameData.Chicken);
+        npcTypes.put("Rat", GameData.Rat);
     }
     static Map<String, ItemAction> itemUses = new HashMap<>();
     static {

@@ -721,8 +721,24 @@ public class WorldQuest extends JFrame {
     private void tickNPC(NPC npc) {
         if (nextToPlayer(npc) && npc.canFight() && (npc.isAggressive() || npc.hasBeenAttacked())) {
             attackPlayer(npc);
-        } else if(npc.canMove() && RandomSource.getRandom().nextBoolean()) {
-            move(npc);
+        } else if(npc.canMove()) {
+            Direction direction = npc.movementStrategy.nextDirection(npc);
+            if (direction != null) {
+                switch (direction) {
+                    case NORTH:
+                        north(npc);
+                        break;
+                    case SOUTH:
+                        south(npc);
+                        break;
+                    case EAST:
+                        east(npc);
+                        break;
+                    case WEST:
+                        west(npc);
+                        break;
+                }
+            }
         }
     }
 
@@ -802,7 +818,7 @@ public class WorldQuest extends JFrame {
         int xDiff = Math.abs(x - player.x);
         int yDiff = Math.abs(y - player.y);
 
-        if (xDiff + yDiff > 6 || xDiff > 4 || yDiff > 4) {
+        if (xDiff + yDiff > 8 || xDiff > 6 || yDiff > 6) {
             return false;
         }
         if (bothNotInRoom(x, y)) {

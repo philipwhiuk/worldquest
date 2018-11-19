@@ -7,12 +7,14 @@ public class NPC extends GameCharacter {
     final NPCType type;
     final int experience = 10;
     ConversationChoice currentConversation = null;
-    public Shop shop;
+    Shop shop;
+    MovementStrategy movementStrategy;
 
-    NPC(NPCType type, int x, int y) {
+    NPC(NPCType type, int x, int y, MovementStrategy movementStrategy) {
         super(type.color, x, y, type.health, type.health);
         this.type = type;
         this.shop = type.shop != null ? type.shop.copy() : null;
+        this.movementStrategy = movementStrategy;
     }
 
     boolean canMove() { return type.canMove; }

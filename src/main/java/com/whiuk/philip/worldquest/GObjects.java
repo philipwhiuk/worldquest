@@ -18,6 +18,7 @@ public class GObjects {
         gameObjectBuilders.put("Furnace", new GObjects.FurnaceBuilder());
         gameObjectBuilders.put("Door", new GObjects.DoorBuilder());
         gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
+        gameObjectBuilders.put("Fence", new GObjects.FenceBuilder());
         return gameObjectBuilders;
     }
 
@@ -171,13 +172,15 @@ public class GObjects {
             if (arguments.length != 2) {
                 throw new IllegalArgumentException("Expected door position and open side: " + Arrays.toString(arguments));
             }
-            switch (Direction.valueOf(arguments[0])) {
+            Direction doorDirection = Direction.valueOf(arguments[0]);
+            switch (doorDirection) {
                 case SOUTH:
                     return new SouthDoor(Direction.valueOf(arguments[1]));
                 case EAST:
                     return new EastDoor(Direction.valueOf(arguments[1]));
+                default:
+                    throw new IllegalArgumentException("Unexpected direction for door:" + doorDirection);
             }
-            return null;
         }
     }
 
@@ -368,6 +371,121 @@ public class GObjects {
             g.setColor(Color.DARK_GRAY);
             g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 1, MAP_SPACING + (y * TILE_HEIGHT) + 1,
                     TILE_WIDTH - 3, TILE_HEIGHT - 3);
+        }
+    }
+
+    static class FenceBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            if (arguments.length != 1) {
+                throw new IllegalArgumentException("Expected fence position only: " + Arrays.toString(arguments));
+            }
+            Direction fenceDirection = Direction.valueOf(arguments[0]);
+            switch (fenceDirection) {
+                case NORTH:
+                    return new NorthFence();
+                case SOUTH:
+                    return new SouthFence();
+                case EAST:
+                    return new EastFence();
+                case NORTHEAST:
+                    return new NorthEastFence();
+                case SOUTHEAST:
+                    return new SouthEastFence();
+                default:
+                    throw new IllegalArgumentException("Unexpected direction for fence:" + fenceDirection);
+            }
+        }
+    }
+
+    abstract static class Fence extends GameObject {
+    }
+
+    static class NorthFence extends Fence {
+        NorthFence() {
+        }
+
+        @Override
+        public boolean canMoveTo(Direction directionMoving) {
+            return directionMoving != Direction.SOUTH && directionMoving != Direction.NORTH;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 2,
+                    TILE_WIDTH, 2);
+        }
+    }
+
+    static class SouthFence extends Fence {
+        SouthFence() {
+        }
+
+        @Override
+        public boolean canMoveTo(Direction directionMoving) {
+            return directionMoving != Direction.SOUTH && directionMoving != Direction.NORTH;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + TILE_HEIGHT - 4,
+                    TILE_WIDTH, 2);
+        }
+    }
+
+    static class EastFence extends Fence {
+        EastFence() {
+        }
+
+        @Override
+        public boolean canMoveTo(Direction directionMoving) {
+            return directionMoving != Direction.WEST && directionMoving != Direction.EAST;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + TILE_WIDTH - 3, MAP_SPACING + (y * TILE_HEIGHT),
+                    3, TILE_HEIGHT);
+        }
+    }
+
+    static class SouthEastFence extends Fence {
+        SouthEastFence() {
+        }
+
+        @Override
+        public boolean canMoveTo(Direction directionMoving) {
+            return false;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + TILE_HEIGHT - 4,
+                    TILE_WIDTH, 2); //SOUTH
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + TILE_WIDTH - 3, MAP_SPACING + (y * TILE_HEIGHT),
+                    3, TILE_HEIGHT); //EAST
+        }
+    }
+
+    static class NorthEastFence extends Fence {
+        NorthEastFence() {
+        }
+
+        @Override
+        public boolean canMoveTo(Direction directionMoving) {
+            return false;
+        }
+
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(new Color(100,68,8));
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH), MAP_SPACING + (y * TILE_HEIGHT) + 2,
+                    TILE_WIDTH, 2); // NORTH
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + TILE_WIDTH - 3, MAP_SPACING + (y * TILE_HEIGHT),
+                    3, TILE_HEIGHT); //EAST
         }
     }
 }

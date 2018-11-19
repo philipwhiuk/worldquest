@@ -17,7 +17,8 @@ public class NPCLoader {
             if (npcType == null) {
                 throw new IllegalArgumentException("Unknown NPC type: " + npcData[0]);
             }
-            npcs.add(new NPC(npcType, Integer.parseInt(npcData[1]), Integer.parseInt(npcData[2])));
+            npcs.add(new NPC(npcType, Integer.parseInt(npcData[1]), Integer.parseInt(npcData[2]),
+                    MovementStrategy.parseStrategy(npcData[3].replaceAll("\\|",","))));
         }
         return npcs;
     }

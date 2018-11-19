@@ -39,15 +39,16 @@
 5,5,5,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 5,5,5,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 5,5,5,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-7
-Goblin,25,20
-Goblin,26,20
-Goblin,27,20
-Goblin,28,20
-GoblinKing,30,20
-Shopkeeper,20,10
-King,3,15
-9
+8
+Goblin,25,20,Random
+Goblin,26,20,Random
+Goblin,27,20,Random
+Goblin,28,20,Random
+GoblinKing,30,20,Random
+Shopkeeper,20,10,Fixed
+King,3,15,Fixed
+Chicken,21,19,Zonal|19|17|3|3
+22
 33,14,Stairs,map2:15:10:DOWN
 4,4,Tree,Item|Oak logs|true
 1,39,MineralVein,Item|Copper ore|true:0XFFA500
@@ -58,6 +59,18 @@ King,3,15
 10,14,Door,EAST:NORTH
 10,15,Door,EAST:SOUTH
 15,20,Anvil
+19,21,Fence,SOUTH
+20,21,Fence,SOUTH
+21,21,Fence,SOUTH
+22,21,Fence,SOUTH
+23,21,Fence,SOUTHEAST
+23,20,Fence,EAST
+23,19,Fence,EAST
+23,18,Fence,EAST
+23,17,Fence,NORTHEAST
+22,17,Fence,NORTH
+21,17,Fence,NORTH
+20,17,Fence,NORTH
 4
 General Store
 19,9,4,4
