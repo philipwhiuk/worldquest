@@ -293,7 +293,7 @@ public class GameData {
                     player.gainExperience("Digging", 10);
                     player.inventory.add(PileOfDirt.copy());
                 } else {
-                    //TODO: No space
+                    game.eventMessage("You don't have space in your inventory");
                 }
             } else if (tile.type == Dirt) {
                 if (player.inventory.hasSpaceForItem(PileOfDirt)) {
@@ -301,7 +301,7 @@ public class GameData {
                     player.gainExperience("Digging", 10);
                     player.inventory.add(PileOfDirt.copy());
                 } else {
-                    //TODO: No space
+                    game.eventMessage("You don't have space in your inventory");
                 }
             }
         }
@@ -318,9 +318,13 @@ public class GameData {
                             GObjects.MineralVein vein = (GObjects.MineralVein) object;
                             if (player.inventory.hasSpaceForItem(vein.resource)) {
                                 player.inventory.add(vein.mine());
+                            } else {
+                                game.eventMessage("No space to take the " + vein.resource.name);
                             }
                         }
                     }
+                } else {
+                    game.eventMessage("No space in your inventory");
                 }
             }
         }

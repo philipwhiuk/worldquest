@@ -273,12 +273,16 @@ public class WorldQuest extends JFrame {
 
     public void reportHit(GameCharacter attacker, GameCharacter defender, int damage) {
         if (attacker instanceof Player) {
-            eventHistory.add("You attack the " + ((NPC) defender).type.name + ", doing " + damage + " damage");
+            eventMessage("You attack the " + ((NPC) defender).type.name + ", doing " + damage + " damage");
         } else if (defender instanceof Player) {
-            eventHistory.add("The "+((NPC) attacker).type.name+ " attacks you, doing " + damage + " damage");
+            eventMessage("The "+((NPC) attacker).type.name+ " attacks you, doing " + damage + " damage");
         } else {
-            eventHistory.add("The "+((NPC) attacker).type.name+ " attacks the " + ((NPC) defender).type.name +", doing " + damage + " damage");
+            eventMessage("The "+((NPC) attacker).type.name+ " attacks the " + ((NPC) defender).type.name +", doing " + damage + " damage");
         }
+    }
+
+    public void eventMessage(String message) {
+        eventHistory.add(message);
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -576,7 +580,7 @@ public class WorldQuest extends JFrame {
             subject.x = x;
             subject.y = y;
         } else if (map[x][y].objects.size() > 0) {
-            map[x][y].objects.get(0).doAction(player);
+            map[x][y].objects.get(0).doAction(this, player);
         }
     }
 

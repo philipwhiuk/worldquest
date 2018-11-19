@@ -39,7 +39,7 @@ public class GObjects {
             return deleted;
         }
 
-        public void doAction(Player player) {}
+        public void doAction(WorldQuest game, Player player) {}
     }
 
     abstract static class GameObjectBuilder {
@@ -139,12 +139,16 @@ public class GObjects {
         }
 
         @Override
-        public void doAction(Player player) {
+        public void doAction(WorldQuest game, Player player) {
             if (player.mainHandWeapon instanceof Hatchet && player.inventory.hasSpaceForItem(resource)) {
                 cutDown = true;
                 ticksToRegrow = 10;
                 player.inventory.add(resource.copy());
                 player.gainExperience("Woodcutting", 10);
+            } else if (!(player.mainHandWeapon instanceof Hatchet)) {
+                game.eventMessage("You need to wield a Hatchet to chop down trees");
+            } else if (!player.inventory.hasSpaceForItem(resource)) {
+                game.eventMessage("No space in your inventory");
             }
         }
     }
@@ -189,7 +193,7 @@ public class GObjects {
         private int ticksToShut = 0;
 
         @Override
-        public void doAction(Player player) {
+        public void doAction(WorldQuest game, Player player) {
             isOpen = true;
             ticksToShut = 30;
         }
