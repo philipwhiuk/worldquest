@@ -271,6 +271,16 @@ public class WorldQuest extends JFrame {
         return resourceInScenarioFolder(resource).lastModified() > resourceInSaveFolder(resource).lastModified();
     }
 
+    public void reportHit(GameCharacter attacker, GameCharacter defender, int damage) {
+        if (attacker instanceof Player) {
+            eventHistory.add("You attack the " + ((NPC) defender).type.name + ", doing " + damage + " damage");
+        } else if (defender instanceof Player) {
+            eventHistory.add("The "+((NPC) attacker).type.name+ " attacks you, doing " + damage + " damage");
+        } else {
+            eventHistory.add("The "+((NPC) attacker).type.name+ " attacks the " + ((NPC) defender).type.name +", doing " + damage + " damage");
+        }
+    }
+
     private class WorldQuestCanvas extends JPanel implements Runnable {
 
         WorldQuestCanvas(WorldQuestKeyListener keyListener, WorldQuestMouseListener mouseListener) {
@@ -408,6 +418,13 @@ public class WorldQuest extends JFrame {
                         g,
                         WorldQuest.this,
                         (ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
+            } else {
+                int last = eventHistory.size()-1;
+                for (int i = 0; i < 5 && last-i > 0; i++) {
+                    g.setColor(Color.WHITE);
+                    g.setFont(g.getFont().deriveFont(Font.BOLD,11));
+                    g.drawString(eventHistory.get(last-i), 25, CONVERSATION_Y+80-(i*20));
+                }
             }
         }
 
@@ -710,7 +727,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void attackPlayer(NPC npc) {
-        npc.attack(player);
+        npc.attack(this, player);
         if (player.isDead()) {
             eventHistory.add("Killed by a "+npc.type.name);
         }
@@ -801,7 +818,7 @@ public class WorldQuest extends JFrame {
     }
 
     private boolean bothNotInRoom(int x, int y) {
-        return map[player.x][player.y].isOutdoors() && map[x][y].isOutdoors();
+        return map[player.x][player.y].room == null && map[x][y].room == null;
     }
 
     private boolean inSameRoom(int x, int y) {

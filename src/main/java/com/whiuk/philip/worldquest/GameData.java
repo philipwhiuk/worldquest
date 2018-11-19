@@ -51,7 +51,7 @@ public class GameData {
             new Color(50,50,50),
             new Color(25,25,25),
             true,
-            false,
+            true,
             false);
     private static TileType Floor = new TileType(
             "Floor",
@@ -65,7 +65,7 @@ public class GameData {
             new Color(100,100,100),
             new Color(75,75,75),
             false,
-            false,
+            true,
             true);
     private static NPCType Goblin = new NPCType(
             "Goblin",
@@ -306,6 +306,16 @@ public class GameData {
             }
         }
     };
+    private static ItemAction Smith = new ItemAction() {
+        @Override
+        void perform(WorldQuest game, Tile tile, Player player, int bar, int na) {
+            if (player.inventory.containsItem("Hammer")) {
+                //TODO: Show smithing screen for bar.
+                System.out.println("Smithing WIP");
+            }
+        }
+    };
+
 
     private static Recipe Bronze = new Recipe(
             Arrays.asList(CopperOre, TinOre),
@@ -349,6 +359,7 @@ public class GameData {
     static {
         objectItemUses.put("Furnace,Copper ore", GameData.Smelt);
         objectItemUses.put("Furnace,Tin ore", GameData.Smelt);
+        objectItemUses.put("Anvil,Bronze bar", GameData.Smith);
     }
     static Map<String, Quest> questList = new HashMap<>();
     static {

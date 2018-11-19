@@ -17,6 +17,7 @@ public class GObjects {
         gameObjectBuilders.put("MineralVein", new GObjects.MineralVeinBuilder());
         gameObjectBuilders.put("Furnace", new GObjects.FurnaceBuilder());
         gameObjectBuilders.put("Door", new GObjects.DoorBuilder());
+        gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
         return gameObjectBuilders;
     }
 
@@ -352,6 +353,21 @@ public class GObjects {
             g.setColor(Color.RED);
             g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 6,
                     TILE_WIDTH - 6, TILE_HEIGHT - 8);
+        }
+    }
+
+    static class AnvilBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            return new Anvil();
+        }
+    }
+
+    static class Anvil extends GameObject {
+        @Override
+        void draw(Graphics2D g, int x, int y) {
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 1, MAP_SPACING + (y * TILE_HEIGHT) + 1,
+                    TILE_WIDTH - 3, TILE_HEIGHT - 3);
         }
     }
 }

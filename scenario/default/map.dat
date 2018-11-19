@@ -57,6 +57,7 @@ King,3,15
 15,12,Door,SOUTH:WEST
 10,14,Door,EAST:NORTH
 10,15,Door,EAST:SOUTH
+15,20,Anvil
 4
 General Store
 19,9,4,4

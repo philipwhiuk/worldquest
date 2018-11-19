@@ -32,6 +32,6 @@ class QuestsTab extends SidebarTab {
 
     private void listQuest(Graphics2D g, Player player, Quest quest, int offset, int index) {
         g.setColor(quest.isFinished() ? Color.GREEN : Color.YELLOW);
-        g.drawString(quest.name, 500, offset);
+        g.drawString(quest.name, 450, offset);
     }
 }

@@ -39,27 +39,34 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 * Kill-X quest
 * Multi-step quest support
 
+## UX
+
+* Tabbed interface for stats
+* Map-click actions
+* WASD controls
+* Game messages for feedback
+
 ## Roadmap
 
 Goals for version 1.0 (Public Release)
 
+* Smithing
 * A decent-size game world with rivers, bridges, forests and dungeons
 * Doors that require keys
 * Fetch quests
 * Quest rewards
 * Quest requirements
-* Fetch quests
 * Persistent NPC death & health
 * At least one multi-step quest
 * Selling items
 * Hit splats
-* Game messages when stuff happens
 * AI with different combat strategies
-* Smithing
 * Crafting
 * Ranged weapons
 * Magecraft
 * Prospecting
+* Right-click actions
+* Less text, more item graphics in UI
 
 Goals for version 2.0
 

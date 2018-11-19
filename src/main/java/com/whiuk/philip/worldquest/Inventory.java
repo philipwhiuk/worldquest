@@ -60,4 +60,8 @@ public class Inventory implements Iterable<Item> {
     public Iterator<Item> iterator() {
         return items.iterator();
     }
+
+    public boolean containsItem(String itemName) {
+        return items.stream().anyMatch(item -> item.name.equals(itemName));
+    }
 }

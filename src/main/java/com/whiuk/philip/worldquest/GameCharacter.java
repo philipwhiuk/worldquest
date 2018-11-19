@@ -21,13 +21,14 @@ abstract class GameCharacter {
 
     abstract void actionOnNpc(WorldQuest game, NPC npc);
 
-    void attackNpc(NPC npc) {
-        attack(npc);
+    void attackNpc(WorldQuest game, NPC npc) {
+        attack(game, npc);
     }
 
-    void attack(GameCharacter c) {
+    void attack(WorldQuest game, GameCharacter c) {
         if (RandomSource.getRandom().nextBoolean()) {
             int damage = this.calculateDamage();
+            game.reportHit(this, c, damage);
             c.takeHit(damage);
             attackSuccessful(damage);
         }

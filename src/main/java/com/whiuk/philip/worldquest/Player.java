@@ -51,8 +51,8 @@ public class Player extends GameCharacter {
         }
     }
 
-    private void attackNpc(WorldQuest game, NPC npc) {
-        super.attackNpc(npc);
+    void attackNpc(WorldQuest game, NPC npc) {
+        super.attackNpc(game, npc);
         game.npcAttacked(npc);
     }
 

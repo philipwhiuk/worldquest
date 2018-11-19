@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Tile {
+    static Color ROOF_COLOR = new Color(80,38,14);
+    static Color ROOF_FOW_COLOR = new Color(40,19,7);
+
     final TileType type;
     final List<GObjects.GameObject> objects;
     private boolean hasSeen = false;
@@ -32,12 +35,20 @@ class Tile {
         return false;
     }
 
-    Color getColor(boolean isVisible) {
+    Color getColor(boolean isVisible, Room playerRoom) {
         if (isVisible) {
             hasSeen = true;
-            return type.color;
+            if (isOutdoors() || room == playerRoom) {
+                return type.color;
+            } else {
+                return ROOF_COLOR;
+            }
         } else if (hasSeen) {
-            return type.fowColor;
+            if (isOutdoors() || room == playerRoom) {
+                return type.fowColor;
+            } else {
+                return ROOF_FOW_COLOR;
+            }
         } else {
             return Color.BLACK;
         }

@@ -15,13 +15,14 @@ public class MapViewPainter {
     }
 
     private static void paintMap(Graphics2D g, WorldQuest game, Tile[][] map) {
+        Room playerRoom = map[game.player.x][game.player.y].room;
         g.setColor(Color.WHITE);
         g.drawRect(9,9, BORDER_WIDTH, BORDER_HEIGHT);
         if (map != null) {
             for (int x = 0; x < map.length; x++) {
                 for (int y = 0; y < map[x].length; y++) {
                     if (map[x][y] != null) {
-                        g.setColor(map[x][y].getColor(game.isVisible(x, y)));
+                        g.setColor(map[x][y].getColor(game.isVisible(x, y), playerRoom));
                         g.fillRect(
                                 MAP_SPACING + (x * TILE_WIDTH),
                                 MAP_SPACING + (y * TILE_HEIGHT),
