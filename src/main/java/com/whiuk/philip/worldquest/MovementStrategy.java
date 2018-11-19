@@ -45,7 +45,6 @@ class ZonalMovementStrategy implements MovementStrategy {
             case 2: if (npc.x > x) { toUse = Direction.WEST; } else { toUse = Direction.EAST; } break;
             case 3: if (npc.x < x+width) { toUse = Direction.EAST; } else { toUse = Direction.WEST; } break;
         }
-        System.out.println(toUse);
         return toUse;
     }
 }
