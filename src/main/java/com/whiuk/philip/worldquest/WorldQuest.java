@@ -759,23 +759,6 @@ public class WorldQuest extends JFrame {
                         (player.y == npc.y && (player.x-1 == npc.x || player.x+1 == npc.x));
     }
 
-    private void move(NPC npc) {
-        switch(RandomSource.getRandom().nextInt(4)) {
-            case 0:
-                north(npc);
-                break;
-            case 1:
-                east(npc);
-                break;
-            case 2:
-                west(npc);
-                break;
-            case 3:
-                south(npc);
-                break;
-        }
-    }
-
     private void gameOver() {
         gameState = DEAD;
         deathScreen = new DeathScreen();
