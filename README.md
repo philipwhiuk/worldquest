@@ -50,6 +50,7 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 
 Goals for version 1.0 (Public Release)
 
+* Hunger, food, armour and healing
 * Smithing
 * A decent-size game world with rivers, bridges, forests and dungeons
 * Doors that require keys
