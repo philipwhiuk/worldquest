@@ -588,19 +588,27 @@ public class WorldQuest extends JFrame {
         Item i = player.inventory.get(index);
         if (i instanceof Weapon) {
             Weapon w = (Weapon) i;
-            if (player.mainHandWeapon != null) {
-                player.inventory.add(player.mainHandWeapon);
-                player.mainHandWeapon = null;
+            if (player.mainHandWeapon != null && ! player.inventory.hasSpaceForItem(player.mainHandWeapon)) {
+                eventMessage("No space to store the item you're currently wielding");
+            } else {
+                if (player.mainHandWeapon != null) {
+                    player.inventory.add(player.mainHandWeapon);
+                    player.mainHandWeapon = null;
+                }
+                player.inventory.remove(w);
+                player.mainHandWeapon = w;
             }
-            player.inventory.remove(w);
-            player.mainHandWeapon = w;
         } else if (i instanceof Armour) {
             Armour a = (Armour) i;
-            Armour removed = player.armour.put(a.slot, a);
-            if (removed != null) {
-                player.inventory.add(removed);
+            if (player.armour.get(a.slot) != null && ! player.inventory.hasSpaceForItem(player.armour.get(a.slot))) {
+                eventMessage("No space to store the item you're currently wielding");
+            } else {
+                Armour removed = player.armour.put(a.slot, a);
+                if (removed != null) {
+                    player.inventory.add(removed);
+                }
+                player.inventory.remove(a);
             }
-            player.inventory.remove(a);
         }
     }
 
@@ -711,7 +719,10 @@ public class WorldQuest extends JFrame {
         npcs.removeIf(GameCharacter::isDead);
         for (Tile[] tiles: map) {
             for(Tile tile: tiles) {
-                tile.objects.forEach(GObjects.GameObject::tick);
+                Iterator<GObjects.GameObject> objectIterator = tile.objects.iterator();
+                while (objectIterator.hasNext()) {
+                    objectIterator.next().tick(objectIterator);
+                }
             }
         }
         if (player.isDead()) {

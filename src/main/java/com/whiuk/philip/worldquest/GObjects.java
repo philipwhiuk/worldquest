@@ -3,6 +3,7 @@ package com.whiuk.philip.worldquest;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import static com.whiuk.philip.worldquest.MapConstants.MAP_SPACING;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_HEIGHT;
@@ -25,7 +26,7 @@ public class GObjects {
     abstract static class GameObject {
         boolean deleted = false;
 
-        void tick() {}
+        void tick(Iterator<GameObject> objectIterator) {}
 
         abstract void draw(Graphics2D g, int x, int y);
 
@@ -112,7 +113,7 @@ public class GObjects {
         }
 
         @Override
-        void tick() {
+        void tick(Iterator<GameObject> objectIterator) {
             if (cutDown && ticksToRegrow <= 1) {
                 cutDown = false;
             } else {
@@ -199,7 +200,7 @@ public class GObjects {
         }
 
         @Override
-        void tick() {
+        void tick(Iterator<GameObject> objectIterator) {
             if (isOpen && ticksToShut <= 1) {
                 isOpen = false;
             } else {
@@ -269,6 +270,7 @@ public class GObjects {
     static class ItemDrop extends GObjects.GameObject {
         private Item item;
         private int money;
+        private int ticksToRemove = 100;
 
         ItemDrop(Item i) {
             this.item = i;
@@ -301,6 +303,15 @@ public class GObjects {
             if (item != null)
                 copy.item = item.copy();
             return copy;
+        }
+
+        @Override
+        void tick(Iterator<GameObject> objectIterator) {
+            if (ticksToRemove <= 1) {
+                objectIterator.remove();
+            } else {
+                ticksToRemove -= 1;
+            }
         }
     }
 
