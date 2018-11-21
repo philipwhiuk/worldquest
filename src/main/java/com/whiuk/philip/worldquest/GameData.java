@@ -281,6 +281,8 @@ public class GameData {
                 player.inventory.remove(logs);
                 game.spawn(new GObjects.Fire(), player.x, player.y);
                 player.gainExperience("Fire-making", 10);
+            } else {
+                game.eventMessage("You probably shouldn't make a fire here.");
             }
         }
     };
@@ -303,6 +305,8 @@ public class GameData {
                 } else {
                     game.eventMessage("You don't have space in your inventory");
                 }
+            } else {
+                game.eventMessage("You can't Dig here");
             }
         }
     };
