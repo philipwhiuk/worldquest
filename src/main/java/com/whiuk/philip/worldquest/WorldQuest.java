@@ -791,6 +791,7 @@ public class WorldQuest extends JFrame {
     }
 
     void switchMap(String map, int startX, int startY) {
+        saveMap(mapName);
         loadMap(map);
         player.x = startX;
         player.y = startY;
