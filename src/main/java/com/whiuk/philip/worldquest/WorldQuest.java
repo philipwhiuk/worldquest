@@ -178,6 +178,7 @@ public class WorldQuest extends JFrame {
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
             buffer.write(mapName);
             buffer.newLine();
+            saveMap(mapName);
             PlayerProvider.savePlayer(buffer, player);
             buffer.write(""+eventHistory.size());
             buffer.newLine();
@@ -187,6 +188,20 @@ public class WorldQuest extends JFrame {
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to save: " + e.getMessage(), e);
+        }
+    }
+
+    private void saveMap(String mapResourceName) {
+        File mapFile = resourceInSaveFolder(mapResourceName);
+        try(
+                OutputStream mapDataStream = new FileOutputStream(mapFile);
+                BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
+            MapTileLoader.saveMapTiles(map, buffer);
+            NPCLoader.saveNPCs(npcTypes, npcs, buffer);
+            GameObjectLoader.saveGameObjects(buffer, map);
+            RoomLoader.saveRooms(buffer, rooms);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save map: " + e.getMessage(), e);
         }
     }
 

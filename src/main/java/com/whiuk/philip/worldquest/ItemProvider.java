@@ -15,4 +15,16 @@ public class ItemProvider {
         }
         throw new IllegalArgumentException(itemClassData[0]);
     }
+
+    public static String printItem(Item resource) {
+        if (resource instanceof Hatchet) {
+            return "Hatchet,"+resource.print();
+        } else if (resource instanceof Armour) {
+            return "Armour,"+resource.print();
+        } else if (resource instanceof Weapon) {
+            return "Weapon,"+resource.print();
+        } else {
+            return "Item,"+resource.print();
+        }
+    }
 }

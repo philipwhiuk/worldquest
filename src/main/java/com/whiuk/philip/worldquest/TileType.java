@@ -3,6 +3,7 @@ package com.whiuk.philip.worldquest;
 import java.awt.*;
 
 public class TileType {
+    final int id;
     final String name;
     final Color color;
     final Color fowColor;
@@ -10,7 +11,8 @@ public class TileType {
     public boolean isOutdoors;
     public boolean blocksView;
 
-    TileType(String name, Color color, Color fowColor, boolean canMoveTo, boolean isOutdoors, boolean blocksView) {
+    TileType(int id, String name, Color color, Color fowColor, boolean canMoveTo, boolean isOutdoors, boolean blocksView) {
+        this.id = id;
         this.name = name;
         this.color = color;
         this.fowColor = fowColor;

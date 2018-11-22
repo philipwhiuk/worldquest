@@ -2,7 +2,10 @@ package com.whiuk.philip.worldquest;
 
 class Room {
     final String name;
-    private final int x, y, width, height;
+    final int x;
+    final int y;
+    final int width;
+    final int height;
 
     Room(String name, int x, int y, int width, int height) {
         this.name = name;

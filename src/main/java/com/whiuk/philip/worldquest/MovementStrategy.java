@@ -16,12 +16,19 @@ public interface MovementStrategy {
     }
 
     Direction nextDirection(NPC npc);
+
+    String asString();
 }
 
 class FixedMovementStrategy implements MovementStrategy {
     @Override
     public Direction nextDirection(NPC npc) {
         return null;
+    }
+
+    @Override
+    public String asString() {
+        return "Fixed";
     }
 }
 
@@ -47,6 +54,11 @@ class ZonalMovementStrategy implements MovementStrategy {
         }
         return toUse;
     }
+
+    @Override
+    public String asString() {
+        return "Zonal,"+x+","+y+","+width+","+height;
+    }
 }
 
 class RandomMovementStrategy implements MovementStrategy {
@@ -60,5 +72,10 @@ class RandomMovementStrategy implements MovementStrategy {
             case 3: return Direction.WEST;
         }
         return null;
+    }
+
+    @Override
+    public String asString() {
+        return "Random";
     }
 }

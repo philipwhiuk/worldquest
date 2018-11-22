@@ -34,6 +34,7 @@ public class GameData {
             false);
 
     private static TileType Grass = new TileType(
+            1,
             "Grass",
             new Color(0,100,0),
             new Color(0,40,0),
@@ -41,6 +42,7 @@ public class GameData {
             true,
             false);
     private static TileType Dirt = new TileType(
+            4,
             "Dirt",
             new Color(100,68,8),
             new Color(50,34,4),
@@ -48,6 +50,7 @@ public class GameData {
             false,
             false);
     private static TileType Rock = new TileType(
+            5,
             "Rock",
             new Color(50,50,50),
             new Color(25,25,25),
@@ -55,6 +58,7 @@ public class GameData {
             true,
             false);
     private static TileType Floor = new TileType(
+            3,
             "Floor",
             new Color(100,11,0),
             new Color(52,6,0),
@@ -62,6 +66,7 @@ public class GameData {
             false,
             false);
     private static TileType Wall = new TileType(
+            2,
             "Wall",
             new Color(100,100,100),
             new Color(75,75,75),
@@ -69,6 +74,7 @@ public class GameData {
             true,
             true);
     private static NPCType Chicken = new NPCType(
+            "Chicken",
             "Chicken",
             Color.WHITE,
             true,
@@ -86,6 +92,7 @@ public class GameData {
             null);
     private static NPCType Rat = new NPCType(
             "Rat",
+            "Rat",
             Color.LIGHT_GRAY,
             true,
             true,
@@ -98,6 +105,7 @@ public class GameData {
             null,
             null);
     private static NPCType GiantRat = new NPCType(
+            "GiantRat",
             "Giant Rat",
             Color.GRAY,
             true,
@@ -111,6 +119,7 @@ public class GameData {
             null,
             null);
     private static NPCType Goblin = new NPCType(
+            "Goblin",
             "Goblin",
             Color.RED,
             true,
@@ -131,6 +140,7 @@ public class GameData {
             null,
             null);
     private static NPCType GoblinKing = new NPCType(
+            "GoblinKing",
             "Goblin King",
             Color.PINK,
             true,
@@ -164,6 +174,7 @@ public class GameData {
                     1, 1, 5)
     ));
     private static NPCType ShopKeeper = new NPCType(
+            "Shopkeeper",
             "Shopkeeper",
             Color.WHITE,
             false,
@@ -250,6 +261,7 @@ public class GameData {
 
 
     private static NPCType King = new NPCType(
+            "King",
             "King Ronald",
             Color.CYAN,
             false,
@@ -383,22 +395,22 @@ public class GameData {
 
     static Map<Integer, TileType> tileTypes = new HashMap<>();
     static {
-        tileTypes.put(1, GameData.Grass);
-        tileTypes.put(2, GameData.Wall);
-        tileTypes.put(3, GameData.Floor);
-        tileTypes.put(4, GameData.Dirt);
-        tileTypes.put(5, GameData.Rock);
+        tileTypes.put(Grass.id, GameData.Grass);
+        tileTypes.put(Wall.id, GameData.Wall);
+        tileTypes.put(Floor.id, GameData.Floor);
+        tileTypes.put(Dirt.id, GameData.Dirt);
+        tileTypes.put(Rock.id, GameData.Rock);
     }
 
     static Map<String, NPCType> npcTypes = new HashMap<>();
     static {
-        npcTypes.put("Goblin", GameData.Goblin);
-        npcTypes.put("GoblinKing", GameData.GoblinKing);
-        npcTypes.put("Shopkeeper", GameData.ShopKeeper);
-        npcTypes.put("King", GameData.King);
-        npcTypes.put("GiantRat", GameData.GiantRat);
-        npcTypes.put("Chicken", GameData.Chicken);
-        npcTypes.put("Rat", GameData.Rat);
+        npcTypes.put(Goblin.id, GameData.Goblin);
+        npcTypes.put(GoblinKing.id, GameData.GoblinKing);
+        npcTypes.put(ShopKeeper.id, GameData.ShopKeeper);
+        npcTypes.put(King.id, GameData.King);
+        npcTypes.put(GiantRat.id, GameData.GiantRat);
+        npcTypes.put(Chicken.id, GameData.Chicken);
+        npcTypes.put(Rat.id, GameData.Rat);
     }
     static Map<String, ItemAction> itemUses = new HashMap<>();
     static {

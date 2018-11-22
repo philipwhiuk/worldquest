@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import static com.whiuk.philip.worldquest.Direction.EAST;
+import static com.whiuk.philip.worldquest.Direction.SOUTH;
 import static com.whiuk.philip.worldquest.MapConstants.MAP_SPACING;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_HEIGHT;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_WIDTH;
@@ -41,6 +43,10 @@ public class GObjects {
         }
 
         public void doAction(WorldQuest game, Player player) {}
+
+        public abstract String asString();
+
+        public abstract String id();
     }
 
     abstract static class GameObjectBuilder {
@@ -93,6 +99,16 @@ public class GObjects {
             } else {
                 throw new RuntimeException("Unsupported stairs direction:" + direction);
             }
+        }
+
+        @Override
+        public String asString() {
+            return map+","+startX+","+startY+","+direction;
+        }
+
+        @Override
+        public String id() {
+            return "Stairs";
         }
     }
 
@@ -152,6 +168,16 @@ public class GObjects {
                 game.eventMessage("No space in your inventory");
             }
         }
+
+        @Override
+        public String asString() {
+            return ItemProvider.printItem(resource).replaceAll(",","\\|");
+        }
+
+        @Override
+        public String id() {
+            return "Tree";
+        }
     }
 
     static class Fire extends GameObject {
@@ -159,6 +185,16 @@ public class GObjects {
         @Override
         public boolean canMoveTo(Direction directionMoving) {
             return true;
+        }
+
+        @Override
+        public String asString() {
+            return "";
+        }
+
+        @Override
+        public String id() {
+            return "Fire";
         }
 
         @Override
@@ -180,9 +216,9 @@ public class GObjects {
             Direction doorDirection = Direction.valueOf(arguments[0]);
             switch (doorDirection) {
                 case SOUTH:
-                    return new SouthDoor(Direction.valueOf(arguments[1]));
+                    return new SouthDoor(SOUTH, Direction.valueOf(arguments[1]));
                 case EAST:
-                    return new EastDoor(Direction.valueOf(arguments[1]));
+                    return new EastDoor(EAST, Direction.valueOf(arguments[1]));
                 default:
                     throw new IllegalArgumentException("Unexpected direction for door:" + doorDirection);
             }
@@ -190,8 +226,14 @@ public class GObjects {
     }
 
     abstract static class Door extends GameObject {
+        final Direction direction;
+        Direction openDoorSide;
         boolean isOpen = false;
         private int ticksToShut = 0;
+
+        Door(Direction direction) {
+            this.direction = direction;
+        }
 
         @Override
         public void doAction(WorldQuest game, Player player) {
@@ -208,12 +250,25 @@ public class GObjects {
             }
         }
 
+        @Override
+        public String asString() {
+            if (openDoorSide != null) {
+                return direction.name()+","+openDoorSide.name();
+            }
+            return direction.name()+","+Direction.NORTH.name();
+        }
+
+        @Override
+        public String id() {
+            return "Door";
+        }
+
     }
 
     static class SouthDoor extends Door {
-        private final Direction openDoorSide;
 
-        SouthDoor(Direction openDoorSide) {
+        SouthDoor(Direction direction, Direction openDoorSide) {
+            super(direction);
             this.openDoorSide = openDoorSide;
         }
 
@@ -238,7 +293,8 @@ public class GObjects {
     static class EastDoor extends Door {
         private final Direction openDoorSide;
 
-        EastDoor(Direction openDoorSide) {
+        EastDoor(Direction direction, Direction openDoorSide) {
+            super(direction);
             this.openDoorSide = openDoorSide;
         }
 
@@ -298,6 +354,16 @@ public class GObjects {
             }
         }
 
+        @Override
+        public String asString() {
+            return money+","+(item != null ? ItemProvider.printItem(item).replaceAll(",","\\|") : "");
+        }
+
+        @Override
+        public String id() {
+            return "ItemDrop";
+        }
+
         public ItemDrop copy() {
             ItemDrop copy = new ItemDrop(money);
             if (item != null)
@@ -323,17 +389,14 @@ public class GObjects {
 
     static class MineralVein extends GameObject {
         final Item resource;
+        final String cssDef;
         final Color veinColour;
 
         MineralVein(String[] arguments) {
             String resourceData = arguments[0].replaceAll("\\|",",");
             this.resource = ItemProvider.parseItem(resourceData);
-            this.veinColour = fromCSSDef(arguments[1]);
-        }
-
-        MineralVein(Item resource, Color color) {
-            this.resource = resource;
-            this.veinColour = color;
+            this.cssDef = arguments[1];
+            this.veinColour = fromCSSDef(cssDef);
         }
 
         private Color fromCSSDef(String value) {
@@ -350,6 +413,16 @@ public class GObjects {
 
         public Item mine() {
             return resource.copy();
+        }
+
+        @Override
+        public String asString() {
+            return ItemProvider.printItem(resource).replaceAll(",","\\|")+","+cssDef;
+        }
+
+        @Override
+        public String id() {
+            return "MineralVein";
         }
     }
 
@@ -372,6 +445,16 @@ public class GObjects {
             g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 3, MAP_SPACING + (y * TILE_HEIGHT) + 6,
                     TILE_WIDTH - 6, TILE_HEIGHT - 8);
         }
+
+        @Override
+        public String asString() {
+            return "";
+        }
+
+        @Override
+        public String id() {
+            return "Furnace";
+        }
     }
 
     static class AnvilBuilder extends GameObjectBuilder {
@@ -386,6 +469,16 @@ public class GObjects {
             g.setColor(Color.DARK_GRAY);
             g.fillRect(MAP_SPACING + (x * TILE_WIDTH) + 1, MAP_SPACING + (y * TILE_HEIGHT) + 1,
                     TILE_WIDTH - 3, TILE_HEIGHT - 3);
+        }
+
+        @Override
+        public String asString() {
+            return "";
+        }
+
+        @Override
+        public String id() {
+            return "Anvil";
         }
     }
 
@@ -413,15 +506,34 @@ public class GObjects {
     }
 
     abstract static class Fence extends GameObject {
+
+        private final Direction direction;
+
+        Fence(Direction direction) {
+            this.direction = direction;
+        }
+
+        @Override
+        public String asString() {
+            return direction.name();
+        }
+
+        @Override
+        public String id() {
+            return "Fence";
+        }
+
     }
 
     static class NorthFence extends Fence {
+
         NorthFence() {
+            super(Direction.NORTH);
         }
 
         @Override
         public boolean canMoveTo(Direction directionMoving) {
-            return directionMoving != Direction.SOUTH && directionMoving != Direction.NORTH;
+            return directionMoving != SOUTH && directionMoving != Direction.NORTH;
         }
 
         @Override
@@ -434,11 +546,12 @@ public class GObjects {
 
     static class SouthFence extends Fence {
         SouthFence() {
+            super(Direction.SOUTH);
         }
 
         @Override
         public boolean canMoveTo(Direction directionMoving) {
-            return directionMoving != Direction.SOUTH && directionMoving != Direction.NORTH;
+            return directionMoving != SOUTH && directionMoving != Direction.NORTH;
         }
 
         @Override
@@ -450,12 +563,14 @@ public class GObjects {
     }
 
     static class EastFence extends Fence {
+
         EastFence() {
+            super(Direction.EAST);
         }
 
         @Override
         public boolean canMoveTo(Direction directionMoving) {
-            return directionMoving != Direction.WEST && directionMoving != Direction.EAST;
+            return directionMoving != Direction.WEST && directionMoving != EAST;
         }
 
         @Override
@@ -467,7 +582,9 @@ public class GObjects {
     }
 
     static class SouthEastFence extends Fence {
+
         SouthEastFence() {
+            super(Direction.SOUTHEAST);
         }
 
         @Override
@@ -486,7 +603,9 @@ public class GObjects {
     }
 
     static class NorthEastFence extends Fence {
+
         NorthEastFence() {
+            super(Direction.NORTHEAST);
         }
 
         @Override

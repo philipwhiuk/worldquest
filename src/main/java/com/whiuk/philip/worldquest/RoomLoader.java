@@ -1,6 +1,7 @@
 package com.whiuk.philip.worldquest;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,23 @@ public class RoomLoader {
                     Integer.parseInt(args[0]), Integer.parseInt(args[1]),
                     Integer.parseInt(args[2]), Integer.parseInt(args[3]));
             rooms.add(room);
-            for (int x = (int) room.getMinX(); x < room.getMaxX(); x++) {
-                for (int y = (int) room.getMinY(); y < room.getMaxY(); y++) {
+            for (int x = room.getMinX(); x < room.getMaxX(); x++) {
+                for (int y = room.getMinY(); y < room.getMaxY(); y++) {
                     newMap[x][y].room = room;
                 }
             }
         }
         return rooms;
+    }
+
+    public static void saveRooms(BufferedWriter buffer, List<Room> rooms) throws IOException {
+        buffer.write(Integer.toString(rooms.size()));
+        buffer.newLine();
+        for (Room room: rooms) {
+            buffer.write(room.name);
+            buffer.newLine();
+            buffer.write(room.x+","+room.y+","+room.width+","+room.height);
+            buffer.newLine();
+        }
     }
 }

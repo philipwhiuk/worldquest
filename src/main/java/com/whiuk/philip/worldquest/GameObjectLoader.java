@@ -1,6 +1,7 @@
 package com.whiuk.philip.worldquest;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,5 +22,26 @@ public class GameObjectLoader {
             }
             newMap[x][y].objects.add(builder.build(args));
         }
+    }
+
+    public static void saveGameObjects(BufferedWriter buffer, Tile[][] map) throws IOException {
+        int count = 0;
+        for (Tile[] tileColumn : map) {
+            for(Tile tile: tileColumn) {
+                count += tile.objects.size();
+            }
+        }
+        buffer.write(Integer.toString(count));
+        buffer.newLine();
+        for (int x = 0; x < map.length;  x++) {
+            for(int y = 0; y < map[x].length;  y++) {
+                for (GObjects.GameObject gameObject: map[x][y].objects) {
+                    String objectData = x+","+y+","+gameObject.id()+","+gameObject.asString().replaceAll(",",":");
+                    buffer.write(objectData);
+                    buffer.newLine();
+                }
+            }
+        }
+
     }
 }

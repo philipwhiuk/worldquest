@@ -1,6 +1,7 @@
 package com.whiuk.philip.worldquest;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,5 +22,15 @@ public class NPCLoader {
                     MovementStrategy.parseStrategy(npcData[3].replaceAll("\\|",","))));
         }
         return npcs;
+    }
+
+    public static void saveNPCs(Map<String, NPCType> npcTypes, List<NPC> npcs, BufferedWriter buffer) throws IOException {
+        buffer.write(Integer.toString(npcs.size()));
+        buffer.newLine();
+        for (NPC npc: npcs) {
+            String npcData = npc.type.id+","+npc.x+","+npc.y+","+npc.movementStrategy.asString().replaceAll(",","\\|");
+            buffer.write(npcData);
+            buffer.newLine();
+        }
     }
 }

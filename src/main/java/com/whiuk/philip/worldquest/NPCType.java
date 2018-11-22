@@ -3,6 +3,7 @@ package com.whiuk.philip.worldquest;
 import java.awt.*;
 
 public class NPCType {
+    final String id;
     final String name;
     final Color color;
     public final boolean canMove;
@@ -15,12 +16,13 @@ public class NPCType {
     final Conversation conversation;
     public Shop shop;
 
-    NPCType(String name, Color color,
+    NPCType(String id, String name, Color color,
             boolean canMove,
             boolean canFight, boolean isAggressive,
             int health, int damage,
             GObjects.ItemDrop[] dropTable,
             boolean canTalk, Conversation conversation, Shop shop) {
+        this.id = id;
         this.name = name;
         this.color = color;
         this.canMove = canMove;
