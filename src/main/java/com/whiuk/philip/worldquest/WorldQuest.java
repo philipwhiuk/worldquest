@@ -77,6 +77,7 @@ public class WorldQuest extends JFrame {
     private WorldQuest() {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
+        setJMenuBar(buildMenuBar());
         WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
         gameUI = new GameUI();
         WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this, gameUI);
@@ -110,6 +111,18 @@ public class WorldQuest extends JFrame {
                 System.exit(1);
             }
         }).start();
+    }
+
+    private JMenuBar buildMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("WorldQuest");
+        JMenuItem licenseItem = new JMenuItem("License");
+        licenseItem.addActionListener(e -> JOptionPane.showMessageDialog(
+                WorldQuest.this,
+                "All rights reserved, Philip Whitehouce (2018)"));
+        menu.add(licenseItem);
+        menuBar.add(menu);
+        return menuBar;
     }
 
     private void loadScenario() {
@@ -581,15 +594,26 @@ public class WorldQuest extends JFrame {
     private void directionAction(GameCharacter subject, Direction directionMoving, int x, int y) {
         for (NPC npc : npcs) {
             if (npc.x == x && npc.y == y && npc != subject) {
+                //Player asks to move to another subject - handle interaction (e.g. fight)
                 subject.actionOnNpc(this, npc);
                 return;
             }
         }
         if (player.x == x && player.y == y && player != subject) {
+            //Subject can't move to player's location (attacks already dealt with)
             return;
         }
         if (map[x][y].canMoveTo(directionMoving)) {
             if (player == subject) {
+                if (map[player.x][player.y].room != map[x][y].room) {
+                    if (map[x][y].room == null) {
+                        eventMessage("Leaving the "+map[player.x][player.y].room.name);
+                    } else if (map[player.x][player.y].room == null) {
+                        eventMessage("Entering the "+map[x][y].room.name);
+                    } else {
+                        eventMessage("Moving to the "+map[x][y].room.name);
+                    }
+                }
                 map[x][y].onMoveTo(player);
             }
             subject.x = x;
