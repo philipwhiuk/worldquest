@@ -692,10 +692,8 @@ public class WorldQuest extends JFrame {
         }
         for (GObjects.GameObject object : tile.objects) {
             key = object.getClass().getSimpleName()+","+itemName;
-            System.out.println("Key: "+key);
             action = objectItemUses.get(key);
             if (action != null) {
-                System.out.println("Performing action");
                 action.perform(this, tile, player, itemIndex, -1);
                 return true;
             }
