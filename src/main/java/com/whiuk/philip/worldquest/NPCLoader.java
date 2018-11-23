@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,9 @@ public class NPCLoader {
         List<NPC> npcs = new ArrayList<>(npcCount);
         for (int i = 0; i < npcCount; i++) {
             String[] npcData = buffer.readLine().split(",");
+            if (npcData.length != 4) {
+                throw new RuntimeException("Bad NPC data format: " + Arrays.toString(npcData));
+            }
             NPCType npcType = npcTypes.get(npcData[0]);
             if (npcType == null) {
                 throw new IllegalArgumentException("Unknown NPC type: " + npcData[0]);
