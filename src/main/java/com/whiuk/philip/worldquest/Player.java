@@ -48,6 +48,8 @@ public class Player extends GameCharacter {
     void actionOnNpc(WorldQuest game, NPC npc) {
         if (npc.canFight()) {
             attackNpc(game, npc);
+        } else {
+            game.eventMessage("You can't fight this NPC!");
         }
     }
 
