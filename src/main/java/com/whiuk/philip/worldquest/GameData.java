@@ -73,6 +73,15 @@ public class GameData {
             false,
             true,
             true);
+    private static TileType Water = new TileType(
+            6,
+            "Water",
+            new Color(31,83,222),
+            new Color(15,40,110),
+            false,
+            true,
+            false
+    );
     private static NPCType Chicken = new NPCType(
             "Chicken",
             "Chicken",
@@ -400,6 +409,7 @@ public class GameData {
         tileTypes.put(Floor.id, GameData.Floor);
         tileTypes.put(Dirt.id, GameData.Dirt);
         tileTypes.put(Rock.id, GameData.Rock);
+        tileTypes.put(Water.id, GameData.Water);
     }
 
     static Map<String, NPCType> npcTypes = new HashMap<>();
