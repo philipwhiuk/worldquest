@@ -68,6 +68,10 @@ public class WorldQuest extends JFrame {
     private NPC talkingTo;
     private DeathScreen deathScreen;
     private List<Room> rooms;
+    private String northMap;
+    private String eastMap;
+    private String southMap;
+    private String westMap;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -134,7 +138,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void newGame() {
-        loadMap("map");
+        loadMap("map000");
         this.player = PlayerProvider.createPlayer();
         eventHistory = new ArrayList<>();
     }
@@ -213,6 +217,10 @@ public class WorldQuest extends JFrame {
             NPCLoader.saveNPCs(npcTypes, npcs, buffer);
             GameObjectLoader.saveGameObjects(buffer, map);
             RoomLoader.saveRooms(buffer, rooms);
+            buffer.write(northMap); buffer.newLine();
+            buffer.write(eastMap); buffer.newLine();
+            buffer.write(southMap); buffer.newLine();
+            buffer.write(westMap); buffer.newLine();
         } catch (IOException e) {
             throw new RuntimeException("Unable to save map: " + e.getMessage(), e);
         }
@@ -258,6 +266,10 @@ public class WorldQuest extends JFrame {
             List<NPC> npcs = NPCLoader.loadNPCs(npcTypes, buffer);
             GameObjectLoader.loadGameObjects(gameObjectBuilders, buffer, newMap);
             this.rooms = RoomLoader.loadRooms(buffer, newMap);
+            this.northMap = buffer.readLine();
+            this.eastMap = buffer.readLine();
+            this.southMap = buffer.readLine();
+            this.westMap = buffer.readLine();
             this.npcs = npcs;
             this.map = newMap;
             this.mapName = mapResourceName;
@@ -566,24 +578,32 @@ public class WorldQuest extends JFrame {
     private void north(GameCharacter subject) {
         if (inBounds(subject.x, subject.y - 1)) {
             directionAction(subject, Direction.NORTH, subject.x, subject.y - 1);
+        } else if (subject == player) {
+            switchMap(northMap, subject.x, MAX_Y);
         }
     }
 
     private void south(GameCharacter subject) {
         if (inBounds(subject.x, subject.y + 1)) {
             directionAction(subject, Direction.SOUTH, subject.x, subject.y + 1);
+        } else if (subject == player) {
+            switchMap(southMap, subject.x, 0);
         }
     }
 
     private void east(GameCharacter subject) {
         if (inBounds(subject.x + 1, subject.y)) {
             directionAction(subject, Direction.EAST, subject.x + 1, subject.y);
+        } else if (subject == player) {
+            switchMap(eastMap, 0, subject.y);
         }
     }
 
     private void west(GameCharacter subject) {
         if (inBounds(subject.x - 1, subject.y)) {
             directionAction(subject,Direction.WEST, subject.x - 1, subject.y);
+        } else if (subject == player) {
+            switchMap(westMap, MAX_X, 0);
         }
     }
 
