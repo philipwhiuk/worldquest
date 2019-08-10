@@ -22,11 +22,47 @@ public class WorldQuest extends JFrame {
     private static final String DEFAULT_SCENARIO = "default";
     private static final String LICENSE_TEXT = "All rights reserved, Philip Whitehouse (2018)";
     private static final String INITIAL_MAP_FILE = "map000";
+    private static final String KEYMAP_FILE = "keymap";
+    private static final String FILE_EXTENSION = ".dat";
 
     private static final HashMap<Character, Action> keymap = new HashMap<>();
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
 
     static {
+        if (Files.exists(new File(KEYMAP_FILE+FILE_EXTENSION).toPath())) {
+            try {
+                readKeymap();
+            } catch (Exception e) {
+                e.printStackTrace();
+                setupDefaultKeymap();
+            }
+        } else {
+            setupDefaultKeymap();
+        }
+    }
+
+    private static void readKeymap() {
+        try(
+                InputStream mapDataStream = new FileInputStream(KEYMAP_FILE+FILE_EXTENSION);
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
+            int keyTypeCount = Integer.parseInt(buffer.readLine());
+            for (int i = 0; i < keyTypeCount; i++ ) {
+                String keyTypeLine = buffer.readLine();
+                String[] keyData = keyTypeLine.split(",");
+                keymap.put(keyData[0].charAt(0), Action.valueOf(keyData[1]));
+            }
+            int keyPressCount = Integer.parseInt(buffer.readLine());
+            for (int i = 0; i < keyPressCount; i++ ) {
+                String keyPressLine = buffer.readLine();
+                String[] keyPressData = keyPressLine.split(",");
+                keyPressMap.put(Integer.parseInt(keyPressData[0]), Action.valueOf(keyPressData[1]));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load key map data: " + e.getMessage(), e);
+        }
+    }
+
+    private static void setupDefaultKeymap() {
         keymap.put('w', Action.NORTH);
         keymap.put('W', Action.NORTH);
         keymap.put('a', Action.WEST);
@@ -330,11 +366,11 @@ public class WorldQuest extends JFrame {
     }
 
     private File resourceInSaveFolder(String resource) {
-        return new File("saves"+File.separator+this.saveFolder+File.separator+resource+".dat");
+        return new File("saves"+File.separator+this.saveFolder+File.separator+resource+FILE_EXTENSION);
     }
 
     private File resourceInScenarioFolder(String scenarioName, String resource) {
-        return new File("scenario"+File.separator+scenarioName+File.separator+resource+".dat");
+        return new File("scenario"+File.separator+scenarioName+File.separator+resource+FILE_EXTENSION);
     }
 
     private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
