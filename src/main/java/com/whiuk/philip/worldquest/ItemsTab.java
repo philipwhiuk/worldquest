@@ -57,7 +57,10 @@ class ItemsTab extends SidebarTab {
     public void onClick(MouseEvent e) {
         for (int i = 0; i < game.player.inventory.size(); i++) {
             if (inventoryButtonLocation(i, 0).contains(e.getPoint())) {
-                game.useItem(i);
+                boolean actionPerformed = game.useItem(i);
+                if (!actionPerformed) {
+                    game.eventMessage("Nothing happens");
+                }
                 return;
             } else if (inventoryButtonLocation(i, 1).contains(e.getPoint())) {
                 game.equipItem(i);
