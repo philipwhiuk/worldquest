@@ -15,7 +15,19 @@ public class PlayerProvider {
     }
 
     public static Player loadPlayer(BufferedReader buffer) throws IOException {
-        String playerStats[] = buffer.readLine().split(",");
+        String playerStatus[] = buffer.readLine().split(",");
+
+        int statsCount = Integer.parseInt(buffer.readLine());
+        Map<String, Experience> stats = new HashMap<>();
+        for (int i = 0; i < statsCount; i++) {
+            String[] statData = buffer.readLine().split(":");
+            try {
+                stats.put(statData[0], new Experience(Integer.parseInt(statData[1])));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Unable to parse stat: " + statData[0], e);
+            }
+        }
+
         int skillsCount = Integer.parseInt(buffer.readLine());
         Map<String, Experience> skills = new HashMap<>();
         for (int i = 0; i < skillsCount; i++) {
@@ -69,13 +81,12 @@ public class PlayerProvider {
 
         try {
             return new Player(
-                    Integer.parseInt(playerStats[0]),
-                    Integer.parseInt(playerStats[1]),
-                    Integer.parseInt(playerStats[2]),
-                    Integer.parseInt(playerStats[3]),
-                    skills, weapon, armour, inventory, quests,
-                    Integer.parseInt(playerStats[4]),
-                    Integer.parseInt(playerStats[5])
+                    Integer.parseInt(playerStatus[0]),
+                    Integer.parseInt(playerStatus[1]),
+                    Integer.parseInt(playerStatus[2]),
+                    stats, skills, weapon, armour, inventory, quests,
+                    Integer.parseInt(playerStatus[4]),
+                    Integer.parseInt(playerStatus[5])
             );
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse player", e);
@@ -85,8 +96,14 @@ public class PlayerProvider {
     public static void savePlayer(BufferedWriter buffer, Player player) throws IOException {
         buffer.write(String.join(",",
                 ""+player.maxHealth, ""+player.health, ""+player.money,
-                ""+player.baseDamage, ""+player.x, ""+player.y));
+                ""+player.x, ""+player.y));
         buffer.newLine();
+        buffer.write(""+player.stats.size());
+        buffer.newLine();
+        for (Map.Entry<String, Experience> entry : player.stats.entrySet()) {
+            buffer.write(entry.getKey()+":"+entry.getValue().experience);
+            buffer.newLine();
+        }
         buffer.write(""+player.skills.size());
         buffer.newLine();
         for (Map.Entry<String, Experience> entry : player.skills.entrySet()) {

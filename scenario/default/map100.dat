@@ -43,9 +43,13 @@
 Goblin,20,20,Random
 Goblin,21,20,Random
 Goblin,22,20,Random
-Goblin,23,20,Randomw
+Goblin,23,20,Random
 1
-15,10,Stairs,map:33:14:UP
+15,10,Stairs,map000:33:14:UP
 1
 Cellar
 14,9,5,4
+map1-10
+map101
+map110
+map10-1

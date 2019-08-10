@@ -38,6 +38,11 @@ public class NPC extends GameCharacter {
         return RandomSource.getRandom().nextInt(type.damage);
     }
 
+    @Override
+    boolean isHit() {
+        return RandomSource.getRandom().nextBoolean();
+    }
+
     public GObjects.ItemDrop dropItem() {
         return type.dropTable[RandomSource.getRandom().nextInt(type.dropTable.length)].copy();
     }

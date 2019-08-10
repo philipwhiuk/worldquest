@@ -15,6 +15,7 @@ class SidebarUI extends Rectangle implements UI {
         super(400, 0, 240, 480);
         this.game = game;
         tabs = new SidebarTab[]{
+                new StatsTab(game),
                 new SkillsTab(game),
                 new EquipmentTab(game),
                 new ItemsTab(game),
@@ -22,34 +23,40 @@ class SidebarUI extends Rectangle implements UI {
                 new QuestsTab(game)
         };
         tabButtons = new TextButton[]{
-                new TextButton(Color.GREEN, Color.BLACK, 425, 80, "Skills", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 425, 80, "Stats", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(0);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 80, "Equip.", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 475, 80, "Skills", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(1);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 525, 80, "Items", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 525, 80, "Equip.", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(2);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 425, 105, "NPCs", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 425, 105, "Items", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(3);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 105, "Quests", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 475, 105, "NPCs", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(4);
+                    }
+                },
+                new TextButton(Color.GREEN, Color.BLACK, 525, 105, "Quests", false) {
+                    @Override
+                    public void onClick(MouseEvent e) {
+                        setActiveTab(5);
                     }
                 }
         };

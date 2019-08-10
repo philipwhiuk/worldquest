@@ -57,10 +57,15 @@ public class WorldQuest extends JFrame {
 
     private GameUI gameUI;
     private LoadingScreen loadingScreen;
+    private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SidebarUI sidebar;
     private MessageDisplay messages;
     private MessageState messageState;
+
+    private String scenario = DEFAULT_SCENARIO;
+    private String saveFolder;
+
     private Tile[][] map;
     private String mapName;
     private List<NPC> npcs;
@@ -75,7 +80,6 @@ public class WorldQuest extends JFrame {
     private String eastMap;
     private String southMap;
     private String westMap;
-    private String scenario = DEFAULT_SCENARIO;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -86,6 +90,7 @@ public class WorldQuest extends JFrame {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
         setJMenuBar(buildMenuBar());
+
         WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
         gameUI = new GameUI();
         WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this, gameUI);
@@ -101,15 +106,8 @@ public class WorldQuest extends JFrame {
         setVisible(true);
         new Thread(() -> {
             try {
-                gameState = LOADING;
-                loadScenario();
-                if (resourceInSaveFolder("player").exists()) {
-                    loadGame();
-                } else {
-                    Files.createDirectories(new File("saves/save").toPath());
-                    newGame();
-                }
-                continueGame();
+                menuScreen = new MenuScreen(this);
+                gameState = MENU_SCREEN;
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(WorldQuest.this,
                         e.getMessage(),
@@ -119,6 +117,45 @@ public class WorldQuest extends JFrame {
                 System.exit(1);
             }
         }).start();
+    }
+
+    void loadSave(String scenarioName, String saveFolder) {
+        try {
+            gameState = LOADING;
+            scenario = scenarioName;
+            this.saveFolder = saveFolder;
+            loadScenario(scenarioName);
+            loadGame();
+            continueGame();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(WorldQuest.this,
+                    e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    void newSaveGame(String scenarioName, String saveFolder) {
+        try {
+            gameState = LOADING;
+            scenario = scenarioName;
+            this.saveFolder = saveFolder;
+            loadScenario(scenarioName);
+            FileDeleteUtil.deleteDirectory(new File("saves/"+saveFolder).toPath());
+            Files.createDirectories(new File("saves/"+saveFolder).toPath());
+            newGame();
+            continueGame();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(WorldQuest.this,
+                    e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 
     private JMenuBar buildMenuBar() {
@@ -133,7 +170,7 @@ public class WorldQuest extends JFrame {
         return menuBar;
     }
 
-    private void loadScenario() {
+    private void loadScenario(String scenarioName) {
         loadTileTypes();
         loadNpcTypes();
         loadItemUses();
@@ -293,7 +330,7 @@ public class WorldQuest extends JFrame {
     }
 
     private File resourceInSaveFolder(String resource) {
-        return new File("saves"+File.separator+"save"+File.separator+resource+".dat");
+        return new File("saves"+File.separator+this.saveFolder+File.separator+resource+".dat");
     }
 
     private File resourceInScenarioFolder(String scenarioName, String resource) {
@@ -301,7 +338,7 @@ public class WorldQuest extends JFrame {
     }
 
     private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
-        if (resourceInSaveFolder(resource).exists() && scenarioFileIsNewer(resource)) {
+        if (resourceInSaveFolder(resource).exists() && scenarioFileIsNewer(this.scenario, resource)) {
             Files.delete(resourceInSaveFolder(resource).toPath());
         }
         if(!resourceInSaveFolder(resource).exists()) {
@@ -311,8 +348,8 @@ public class WorldQuest extends JFrame {
         return false;
     }
 
-    private boolean scenarioFileIsNewer(String resource) {
-        return resourceInScenarioFolder(resource).lastModified() > resourceInSaveFolder(resource).lastModified();
+    private boolean scenarioFileIsNewer(String scenario, String resource) {
+        return resourceInScenarioFolder(scenario, resource).lastModified() > resourceInSaveFolder(resource).lastModified();
     }
 
     public void reportHit(GameCharacter attacker, GameCharacter defender, int damage) {
@@ -365,6 +402,8 @@ public class WorldQuest extends JFrame {
         public void render(Graphics2D g) {
             if (gameState == LAUNCHING || gameState == LOADING) {
                 loadingScreen.render(g);
+            } else if (gameState == MENU_SCREEN) {
+                menuScreen.render(g);
             } else if (gameState != DEAD) {
                 gameScreen.render(g);
                 sidebar.render(g);
@@ -378,6 +417,8 @@ public class WorldQuest extends JFrame {
         public void onClick(MouseEvent e) {
             if (gameState == LAUNCHING || gameState == LOADING) {
                 loadingScreen.onClick(e);
+            } else if (gameState == GameState.MENU_SCREEN) {
+                menuScreen.onClick(e);
             } else {
                 if (gameScreen.contains(e.getPoint())) {
                     gameScreen.onClick(e);
@@ -933,7 +974,7 @@ public class WorldQuest extends JFrame {
         LAUNCHING, LOADING,
         RUNNING,
         SHOP,
-        DEAD
+        MENU_SCREEN, DEAD
     }
 
     enum MessageState {

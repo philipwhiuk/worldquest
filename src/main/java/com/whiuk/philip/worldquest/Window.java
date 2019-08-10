@@ -15,7 +15,7 @@ abstract class Window extends Rectangle implements UI {
         this.frame = new Rectangle(x,y+40, width, height-40);
         closeButton = new Button(Color.ORANGE, Color.BLACK, "x", x+width-30, y+10) {
             @Override
-            public void onClick(MouseEvent e) {
+            public void handleClick(MouseEvent e) {
                 Window.this.close();
             }
         };

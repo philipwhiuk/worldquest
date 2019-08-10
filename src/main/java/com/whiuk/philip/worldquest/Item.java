@@ -43,7 +43,7 @@ public class Item {
     }
 }
 
-enum Slot { CHEST }
+enum Slot {OFF_HAND, CHEST }
 
 class Armour extends Item {
     final Slot slot;

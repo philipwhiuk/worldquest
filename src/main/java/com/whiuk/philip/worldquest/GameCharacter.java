@@ -26,7 +26,7 @@ abstract class GameCharacter {
     }
 
     void attack(WorldQuest game, GameCharacter target) {
-        if (RandomSource.getRandom().nextBoolean()) {
+        if (target.isHit()) {
             int damage = this.calculateDamage();
             game.reportHit(this, target, damage);
             target.takeHit(damage);
@@ -38,6 +38,8 @@ abstract class GameCharacter {
     }
 
     abstract int calculateDamage();
+
+    abstract boolean isHit();
 
     void takeHit(int damage) {
         if (health < damage) {
