@@ -19,6 +19,9 @@ import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
 
 public class WorldQuest extends JFrame {
+    private static final String DEFAULT_SCENARIO = "default";
+    private static final String LICENSE_TEXT = "All rights reserved, Philip Whitehouse (2018)";
+    private static final String INITIAL_MAP_FILE = "map000";
 
     private static final HashMap<Character, Action> keymap = new HashMap<>();
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
@@ -72,6 +75,7 @@ public class WorldQuest extends JFrame {
     private String eastMap;
     private String southMap;
     private String westMap;
+    private String scenario = DEFAULT_SCENARIO;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -123,7 +127,7 @@ public class WorldQuest extends JFrame {
         JMenuItem licenseItem = new JMenuItem("License");
         licenseItem.addActionListener(e -> JOptionPane.showMessageDialog(
                 WorldQuest.this,
-                "All rights reserved, Philip Whitehouce (2018)"));
+                LICENSE_TEXT));
         menu.add(licenseItem);
         menuBar.add(menu);
         return menuBar;
@@ -138,7 +142,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void newGame() {
-        loadMap("map000");
+        loadMap(INITIAL_MAP_FILE);
         this.player = PlayerProvider.createPlayer();
         eventHistory = new ArrayList<>();
     }
@@ -292,8 +296,8 @@ public class WorldQuest extends JFrame {
         return new File("saves"+File.separator+"save"+File.separator+resource+".dat");
     }
 
-    private File resourceInScenarioFolder(String resource) {
-        return new File("scenario"+File.separator+"default"+File.separator+resource+".dat");
+    private File resourceInScenarioFolder(String scenarioName, String resource) {
+        return new File("scenario"+File.separator+scenarioName+File.separator+resource+".dat");
     }
 
     private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
@@ -301,7 +305,7 @@ public class WorldQuest extends JFrame {
             Files.delete(resourceInSaveFolder(resource).toPath());
         }
         if(!resourceInSaveFolder(resource).exists()) {
-            Files.copy(resourceInScenarioFolder(resource).toPath(), resourceInSaveFolder(resource).toPath());
+            Files.copy(resourceInScenarioFolder(this.scenario, resource).toPath(), resourceInSaveFolder(resource).toPath());
             return true;
         }
         return false;
