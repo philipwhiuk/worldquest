@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
+import static com.whiuk.philip.worldquest.GameFileUtils.*;
 import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
@@ -23,7 +24,6 @@ public class WorldQuest extends JFrame {
     private static final String LICENSE_TEXT = "All rights reserved, Philip Whitehouse (2018)";
     private static final String INITIAL_MAP_FILE = "map000";
     private static final String KEYMAP_FILE = "keymap";
-    private static final String FILE_EXTENSION = ".dat";
 
     private static final HashMap<Character, Action> keymap = new HashMap<>();
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
@@ -137,25 +137,39 @@ public class WorldQuest extends JFrame {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WorldQuestWindowAdapter(this));
         loadingScreen = new LoadingScreen();
-
+        launch();
         renderQueue.scheduleAtFixedRate(canvas, 0, 16, TimeUnit.MILLISECONDS);
         setVisible(true);
-        new Thread(() -> {
-            try {
-                menuScreen = new MenuScreen(this);
-                gameState = MENU_SCREEN;
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(WorldQuest.this,
-                        e.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }).start();
+    }
+
+    private void launch() {
+        showMenu();
+    }
+
+    private void showMenu() {
+        menuScreen = new MenuScreen(this);
+        gameState = MENU_SCREEN;
+    }
+
+    private JMenuBar buildMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("WorldQuest");
+        JMenuItem licenseItem = new JMenuItem("License");
+        licenseItem.addActionListener(e -> JOptionPane.showMessageDialog(
+                WorldQuest.this,
+                LICENSE_TEXT));
+        menu.add(licenseItem);
+        menuBar.add(menu);
+        return menuBar;
     }
 
     void loadSave(String scenarioName, String saveFolder) {
+        if (!GameFileUtils.savedGameExists(saveFolder)) {
+            JOptionPane.showMessageDialog(WorldQuest.this,
+                    "Saved Game Doesn't Exist",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
         try {
             gameState = LOADING;
             scenario = scenarioName;
@@ -179,7 +193,7 @@ public class WorldQuest extends JFrame {
             scenario = scenarioName;
             this.saveFolder = saveFolder;
             loadScenario(scenarioName);
-            FileDeleteUtil.deleteDirectory(new File("saves/"+saveFolder).toPath());
+            GameFileUtils.deleteDirectory(new File("saves/"+saveFolder).toPath());
             Files.createDirectories(new File("saves/"+saveFolder).toPath());
             newGame();
             continueGame();
@@ -192,18 +206,6 @@ public class WorldQuest extends JFrame {
             System.exit(1);
         }
 
-    }
-
-    private JMenuBar buildMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("WorldQuest");
-        JMenuItem licenseItem = new JMenuItem("License");
-        licenseItem.addActionListener(e -> JOptionPane.showMessageDialog(
-                WorldQuest.this,
-                LICENSE_TEXT));
-        menu.add(licenseItem);
-        menuBar.add(menu);
-        return menuBar;
     }
 
     private void loadScenario(String scenarioName) {
@@ -221,15 +223,15 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadGame() {
-        File saveFile = resourceInSaveFolder("player");
-        if (!saveFile.exists()) {
-            throw new RuntimeException("Unable to load save data: Save data file not found: "+ saveFile);
+        File playerSaveFile = resourceInCurrentSaveFolder(PLAYER_SAVE_FILE);
+        if (!playerSaveFile.exists()) {
+            throw new RuntimeException("Unable to load save data: Player save data file not found: "+ playerSaveFile);
         }
-        if (!saveFile.canRead()) {
-            throw new RuntimeException("Unable to read save file");
+        if (!playerSaveFile.canRead()) {
+            throw new RuntimeException("Unable to read player save file");
         }
         try(
-                InputStream mapDataStream = new FileInputStream(saveFile);
+                InputStream mapDataStream = new FileInputStream(playerSaveFile);
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
             String mapName = buffer.readLine();
             loadMap(mapName);
@@ -255,7 +257,7 @@ public class WorldQuest extends JFrame {
     }
 
     void saveGame() {
-        File saveFile = resourceInSaveFolder("player");
+        File saveFile = resourceInCurrentSaveFolder("player");
         try {
             Files.createDirectories(Paths.get(saveFile.getParent()));
             if (!saveFile.exists()) {
@@ -286,7 +288,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void saveMap(String mapResourceName) {
-        File mapFile = resourceInSaveFolder(mapResourceName);
+        File mapFile = resourceInCurrentSaveFolder(mapResourceName);
         try(
                 OutputStream mapDataStream = new FileOutputStream(mapFile);
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
@@ -324,11 +326,11 @@ public class WorldQuest extends JFrame {
     private void loadMap(String mapResourceName) {
         boolean copied;
         try {
-            copied = copyScenarioMapIfNotFoundOrNewer(mapResourceName);
+            copied = copyCurrentScenarioMapIfNotFoundOrNewer(mapResourceName);
         } catch (IOException e) {
             throw new RuntimeException("Resource not found: " + mapResourceName, e);
         }
-        File mapFile = resourceInSaveFolder(mapResourceName);
+        File mapFile = resourceInCurrentSaveFolder(mapResourceName);
         if (!mapFile.exists()) {
             throw new RuntimeException(
                     "Unable to load map data: Map data file not found: " + mapFile.getAbsolutePath());
@@ -356,7 +358,7 @@ public class WorldQuest extends JFrame {
         } catch (Exception e) {
             try {
                 if (copied) {
-                    Files.delete(resourceInSaveFolder(mapResourceName).toPath());
+                    Files.delete(resourceInCurrentSaveFolder(mapResourceName).toPath());
                 }
             } catch (IOException deleteError) {
                 throw new RuntimeException("Unable to delete bad copy", deleteError);
@@ -365,27 +367,27 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private File resourceInSaveFolder(String resource) {
-        return new File("saves"+File.separator+this.saveFolder+File.separator+resource+FILE_EXTENSION);
+    private File resourceInCurrentSaveFolder(String resource) {
+        return resourceInSaveFolder(this.saveFolder, resource);
     }
 
-    private File resourceInScenarioFolder(String scenarioName, String resource) {
-        return new File("scenario"+File.separator+scenarioName+File.separator+resource+FILE_EXTENSION);
+    private File resourceInCurrentScenarioFolder(String resource) {
+        return resourceInScenarioFolder(this.scenario, resource);
     }
 
-    private boolean copyScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
-        if (resourceInSaveFolder(resource).exists() && scenarioFileIsNewer(this.scenario, resource)) {
-            Files.delete(resourceInSaveFolder(resource).toPath());
+    private boolean copyCurrentScenarioMapIfNotFoundOrNewer(String resource) throws IOException {
+        if (resourceInCurrentSaveFolder(resource).exists() && currentScenarioFileIsNewer(resource)) {
+            Files.delete(resourceInCurrentSaveFolder(resource).toPath());
         }
-        if(!resourceInSaveFolder(resource).exists()) {
-            Files.copy(resourceInScenarioFolder(this.scenario, resource).toPath(), resourceInSaveFolder(resource).toPath());
+        if(!resourceInCurrentSaveFolder(resource).exists()) {
+            Files.copy(resourceInCurrentScenarioFolder(resource).toPath(), resourceInCurrentSaveFolder(resource).toPath());
             return true;
         }
         return false;
     }
 
-    private boolean scenarioFileIsNewer(String scenario, String resource) {
-        return resourceInScenarioFolder(scenario, resource).lastModified() > resourceInSaveFolder(resource).lastModified();
+    private boolean currentScenarioFileIsNewer(String resource) {
+        return resourceInCurrentScenarioFolder(resource).lastModified() > resourceInCurrentSaveFolder(resource).lastModified();
     }
 
     public void reportHit(GameCharacter attacker, GameCharacter defender, int damage) {
