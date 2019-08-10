@@ -1,6 +1,6 @@
 # Roadmap
 
-Goals for version 1.0 (Public Release)
+### V1.0
 
 * Hunger, food
 * Armour and healing
@@ -22,13 +22,13 @@ Goals for version 1.0 (Public Release)
 * Right-click actions
 * Less text, more item graphics in UI
 
-Goals for version 2.0
+### V2.0
 
 * Auto-generated, persistent dungeons
 * Auto-generated, persistent surface landscape
 * Deeper conversational AI
 * Enemy respawn mechanics
 
-Other aims:
+### Technical Improvements
 
 * Binary data format instead of text
