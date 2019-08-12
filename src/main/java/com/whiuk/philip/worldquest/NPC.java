@@ -93,3 +93,14 @@ class ShopListing {
         return basePrice;
     }
 }
+
+class CraftingOptions {
+
+    public final String name;
+    public final List<Recipe> recipes;
+
+    public CraftingOptions(String name, List<Recipe> recipes) {
+        this.name = name;
+        this.recipes = recipes;
+    }
+}

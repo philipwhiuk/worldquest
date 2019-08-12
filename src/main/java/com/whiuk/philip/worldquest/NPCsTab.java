@@ -37,7 +37,7 @@ class NPCsTab extends SidebarTab {
 
     @Override
     public void onClick(MouseEvent e) {
-        for (int i = 0; i < game.player.inventory.size(); i++) {
+        for (int i = 0; i < game.visibleNpcs.size(); i++) {
             if (npcButtonTalkLocation(i).contains(e.getPoint())) {
                 game.talkTo(i);
             }

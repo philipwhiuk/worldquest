@@ -23,8 +23,8 @@ public class QuestProvider {
         }
         int stepIndex = Integer.parseInt(buffer.readLine());
 
-        Boolean finished = Boolean.parseBoolean(buffer.readLine());
-        return new Quest(questName, questSteps, stepIndex, finished);
+        QuestStatus status = QuestStatus.valueOf(buffer.readLine());
+        return new Quest(questName, questSteps, stepIndex, status);
     }
 
     public static void writeQuest(BufferedWriter buffer, Quest quest) throws IOException {

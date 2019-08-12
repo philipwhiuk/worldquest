@@ -26,6 +26,7 @@ public class ConversationPainter {
         g.drawRect(9, CONVERSATION_Y, BORDER_WIDTH, CONVERSATION_HEIGHT);
         QuestState state = new QuestState(game);
         List<ConversationChoice> options = ccs.conversationOptions.stream()
+                .map(choice -> game.gameData.conversationChoices.get(choice))
                 .filter(choice -> choice.canSee.test(state))
                 .collect(Collectors.toList());
         for (int i = 0; i < options.size(); i++) {

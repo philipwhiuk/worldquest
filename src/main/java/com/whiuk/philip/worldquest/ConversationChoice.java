@@ -31,9 +31,9 @@ interface NPCAction {
 }
 
 class ConversationChoiceSelection implements NPCAction {
-    List<ConversationChoice> conversationOptions;
+    List<String> conversationOptions;
 
-    ConversationChoiceSelection(List<ConversationChoice> conversationOptions) {
+    ConversationChoiceSelection(List<String> conversationOptions) {
         this.conversationOptions = conversationOptions;
     }
 

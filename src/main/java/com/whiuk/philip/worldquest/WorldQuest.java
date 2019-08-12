@@ -83,6 +83,7 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
+    GameData gameData = new GameData(DEFAULT_SCENARIO);
     private Map<Integer, TileType> tileTypes = new HashMap<>();
     private Map<String, NPCType> npcTypes = new HashMap<>();
     private Map<String, ItemAction> itemUses = new HashMap<>();
@@ -306,21 +307,25 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadTileTypes() {
-        tileTypes.putAll(GameData.tileTypes);
+        tileTypes.putAll(gameData.tileTypes);
     }
 
     private void loadNpcTypes() {
-        npcTypes.putAll(GameData.npcTypes);
+        npcTypes.putAll(gameData.npcTypes);
     }
 
     private void loadItemUses() {
-        itemUses.putAll(GameData.itemUses);
-        tileItemUses.putAll(GameData.tileItemUses);
-        objectItemUses.putAll(GameData.objectItemUses);
+        itemUses.putAll(gameData.itemUses);
+        tileItemUses.putAll(gameData.tileItemUses);
+        objectItemUses.putAll(gameData.objectItemUses);
     }
 
     private void loadQuestList() {
-        questList.putAll(GameData.questList);
+        questList.putAll(gameData.quests);
+    }
+
+    private boolean mapExists(String mapResourceName) {
+        return resourceInCurrentScenarioFolder(mapResourceName).exists();
     }
 
     private void loadMap(String mapResourceName) {
@@ -402,6 +407,10 @@ public class WorldQuest extends JFrame {
 
     public void eventMessage(String message) {
         eventHistory.add(message);
+    }
+
+    public void attemptResourceGathering(GameData.ResourceGathering resourceGathering) {
+        resourceGathering.gather(this, player, map[player.x][player.y]);
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -819,7 +828,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void displayConversation() {
-        if (talkingTo.currentConversation.playerText != null) {
+        if (talkingTo.currentConversation.playerText != null && talkingTo.currentConversation.playerText.length() == 0) {
             messageState = PLAYER_TALKING;
         } else {
             messageState = NPC_TALKING;
@@ -846,6 +855,7 @@ public class WorldQuest extends JFrame {
         ConversationChoiceSelection selection = ((ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
         List<ConversationChoice> options = selection
                 .conversationOptions.stream()
+                .map(choice -> gameData.conversationChoices.get(choice))
                 .filter(choice -> choice.canSee.test(new QuestState(this)))
                 .collect(Collectors.toList());
         talkingTo.currentConversation = options.get(i-1);
@@ -916,10 +926,14 @@ public class WorldQuest extends JFrame {
     }
 
     void switchMap(String map, int startX, int startY) {
-        saveMap(mapName);
-        loadMap(map);
-        player.x = startX;
-        player.y = startY;
+        if (mapExists(map)) {
+            saveMap(mapName);
+            loadMap(map);
+            player.x = startX;
+            player.y = startY;
+        } else {
+            eventMessage("You've reached the edge of the world!");
+        }
     }
 
     void npcAttacked(NPC npc) {
@@ -947,6 +961,10 @@ public class WorldQuest extends JFrame {
 
     void showShop(Shop shop) {
         gameScreen.showWindow(new ShopWindow(this, shop));
+    }
+
+    void showCrafting(CraftingOptions craftingOptions) {
+        gameScreen.showWindow(new CraftingWindow(this, craftingOptions));
     }
 
     private void closeShop() {
@@ -1029,6 +1047,13 @@ public class WorldQuest extends JFrame {
                 player.money -= s.getPrice();
                 player.inventory.add(s.item.copy());
             }
+        }
+    }
+
+    public void craftRecipe(CraftingOptions craftingOptions, int i) {
+        Recipe recipe = craftingOptions.recipes.get(i);
+        if (recipe.canBeDone(player)) {
+            recipe.perform(player);
         }
     }
 }

@@ -13,7 +13,7 @@ public class PlayerLoadSaveTest {
         Player player = new Player(0, 0);
         player.quests.put("A", new Quest("A", Arrays.asList(
                 new QuestStep(new HashMap<>())
-        ), 0, false));
+        ), 0, QuestStatus.STARTED));
 
 
         StringWriter stringWriter = new StringWriter();

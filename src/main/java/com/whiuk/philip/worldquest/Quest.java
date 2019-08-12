@@ -28,35 +28,42 @@ class QuestStep {
 }
 
 public class Quest {
-    private boolean finished;
+    private QuestStatus status;
     String name;
     int stepIndex;
     List<QuestStep> steps;
 
-    Quest(String name, List<QuestStep> steps, int stepIndex, boolean finished) {
+    Quest(String name, List<QuestStep> steps, int stepIndex, QuestStatus status) {
         this.name = name;
         this.steps = steps;
         this.stepIndex = stepIndex;
-        this.finished = finished;
+        this.status = status;
     }
 
     void finish(Player player) {
-        this.finished = true;
+        this.status = QuestStatus.FINISHED;
     }
 
     public boolean isFinished() {
-        return finished;
+        return this.status == QuestStatus.FINISHED;
     }
 
     public void npcDeath(String name) {
         steps.get(stepIndex).npcDeath(name);
+        if (isQuestComplete()) {
+            status = QuestStatus.COMPLETE;
+        }
     }
 
-    public boolean isQuestComplete() {
+    private boolean isQuestComplete() {
         return stepIndex + 1 == steps.size() && steps.get(stepIndex).isFinished();
     }
 
     public Quest start() {
-        return new Quest(name, steps, stepIndex, false);
+        return new Quest(name, steps, stepIndex, QuestStatus.STARTED);
+    }
+
+    public boolean hasStatus(QuestStatus value) {
+        return status == value;
     }
 }

@@ -9,12 +9,14 @@ class Recipe {
     final int percentageSuccessChance;
     final Map<String, Integer> skillRequirements;
     final Map<String, Integer> experienceGained;
+    public String outputName;
 
-    Recipe(List<Item> input, List<Item> output,
+    Recipe(List<Item> input, List<Item> output, String outputName,
            int percentageSuccessChance,
            Map<String, Integer> skillRequirements, Map<String, Integer> experienceGained) {
         this.input = input;
         this.output = output;
+        this.outputName = outputName;
         this.percentageSuccessChance = percentageSuccessChance;
         this.skillRequirements = skillRequirements;
         this.experienceGained = experienceGained;
@@ -39,5 +41,26 @@ class Recipe {
             return false;
         }
         return canBeDone;
+    }
+
+    public void perform(Player player) {
+        if (canBeDone(player)) {
+            for (Item item : input) {
+                player.inventory.remove(item);
+            }
+            boolean success = isSuccess();
+            if (success) {
+                for (Map.Entry<String, Integer> experience : experienceGained.entrySet()) {
+                    String skill = experience.getKey();
+                    int expGain = experience.getValue();
+                    Experience skillXp = player.skills.getOrDefault(skill, Experience.NoExperience());
+                    skillXp.experience += expGain;
+                    player.skills.put(skill, skillXp);
+                }
+                for (Item item: output) {
+                    player.inventory.add(item.copy());
+                }
+            }
+        }
     }
 }

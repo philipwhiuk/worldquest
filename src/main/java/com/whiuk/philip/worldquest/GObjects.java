@@ -17,7 +17,7 @@ public class GObjects {
         HashMap<String, GameObjectBuilder> gameObjectBuilders = new HashMap<>();
         gameObjectBuilders.put("Stairs", new GObjects.StairsBuilder());
         gameObjectBuilders.put("Tree", new GObjects.TreeBuilder());
-        gameObjectBuilders.put("MineralVein", new GObjects.MineralVeinBuilder());
+        gameObjectBuilders.put("ResourceProvider", new GObjects.ResourceProviderBuilder());
         gameObjectBuilders.put("Furnace", new GObjects.FurnaceBuilder());
         gameObjectBuilders.put("Door", new GObjects.DoorBuilder());
         gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
@@ -381,18 +381,19 @@ public class GObjects {
         }
     }
 
-    static class MineralVeinBuilder extends GameObjectBuilder {
+    static class ResourceProviderBuilder extends GameObjectBuilder {
         public GameObject build(String[] arguments) {
-            return new MineralVein(arguments);
+            return new ResourceProvider(arguments);
         }
     }
 
-    static class MineralVein extends GameObject {
+    static class ResourceProvider extends GameObject {
+        public String name;
         final Item resource;
         final String cssDef;
         final Color veinColour;
 
-        MineralVein(String[] arguments) {
+        ResourceProvider(String[] arguments) {
             String resourceData = arguments[0].replaceAll("\\|",",");
             this.resource = ItemProvider.parseItem(resourceData);
             this.cssDef = arguments[1];
@@ -411,7 +412,7 @@ public class GObjects {
                     TILE_WIDTH - 6, TILE_HEIGHT - 6);
         }
 
-        public Item mine() {
+        public Item extract() {
             return resource.copy();
         }
 
@@ -422,7 +423,7 @@ public class GObjects {
 
         @Override
         public String id() {
-            return "MineralVein";
+            return "ResourceProvider";
         }
     }
 
