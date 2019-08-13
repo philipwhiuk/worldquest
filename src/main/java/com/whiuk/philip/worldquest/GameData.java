@@ -19,6 +19,11 @@ public class GameData {
     Map<String, ItemAction> itemActions = new HashMap<>();
     private Map<String, List<Recipe>> recipeList = new HashMap<>();
     private Map<String, ResourceGathering> resourceGathering = new HashMap<>();
+    public int playerStartX;
+    public int playerStartY;
+    HashMap<String, ItemAction> itemUses;
+    Map<String, ItemAction> tileItemUses;
+    Map<String, ItemAction> objectItemUses;
 
     GameData(String scenario) {
 
@@ -35,6 +40,7 @@ public class GameData {
             loadItemActions(buffer);
             loadRecipes(buffer);
             loadResourceGathering(buffer);
+            loadUses(buffer);
         } catch (Exception e) {
             throw new RuntimeException("Unable to load scenario: " + e.getMessage(), e);
         }
@@ -278,6 +284,20 @@ public class GameData {
         }
     }
 
+    public Player newPlayer() {
+        List playerItems = Arrays.asList(
+                items.get("BronzeDagger").copy(),
+                items.get("BronzeHatchet").copy(),
+                items.get("SteelFlint").copy(),
+                items.get("Shovel").copy(),
+                items.get("Pickaxe").copy(),
+                items.get("Hammer").copy());
+        return new Player(
+                10, 10,
+                0, Collections.emptyMap(), Collections.emptyMap(), null, Collections.emptyMap(), playerItems, Collections.emptyMap(),
+                playerStartX, playerStartY);
+    }
+
     private class QuestTreeSwitchSelector implements Function<QuestState, ConversationChoice> {
         private final Map<QuestStatus, String> statusMap;
         private final String questName;
@@ -309,31 +329,31 @@ public class GameData {
         itemActions.put("DigGrass", new ItemAction() {
             @Override
             void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
-                game.attemptResourceGathering(resourceGathering.get("DigGrass"));
+                game.attemptResourceGathering(resourceGathering.get("DigGrass"), tile);
             }
         });
         itemActions.put("DigDirt", new ItemAction() {
             @Override
             void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
-                game.attemptResourceGathering(resourceGathering.get("DigDirt"));
+                game.attemptResourceGathering(resourceGathering.get("DigDirt"), tile);
             }
         });
         itemActions.put("Mine", new ItemAction() {
             @Override
             void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
-                game.attemptResourceGathering(resourceGathering.get("Mine"));
+                game.attemptResourceGathering(resourceGathering.get("Mine"), tile);
             }
         });
         itemActions.put("Smelt", new ItemAction() {
             @Override
             void perform(WorldQuest game, Tile tile, Player player, int ore1, int na) {
-                game.showCrafting(new CraftingOptions("Smelting", recipeList.get("Smelting")));
+                game.showCrafting(new CraftingOptions("Smelting", recipeList.get("Smelt")));
             }
         });
         itemActions.put("Smith", new ItemAction() {
             @Override
             void perform(WorldQuest game, Tile tile, Player player, int bar, int na) {
-                game.showCrafting(new CraftingOptions("Smithing", recipeList.get("Smithing")));
+                game.showCrafting(new CraftingOptions("Smithing", recipeList.get("Smith")));
             }
         });
     }
@@ -385,38 +405,41 @@ public class GameData {
 
     private void loadRecipes(BufferedReader buffer) {
         Recipe Bronze = new Recipe(
-                Arrays.asList(items.get("CopperOre"), items.get("TinOre")),
-                Arrays.asList(items.get("BronzeBar")),
+                Arrays.asList(
+                        Recipe.RecipeItem.one(items.get("CopperOre")),
+                        Recipe.RecipeItem.one(items.get("TinOre"))),
+                Arrays.asList(Recipe.RecipeItem.one(items.get("BronzeBar"))),
                 "Bronze Bar",
                 100,
                 Collections.emptyMap(),
                 Collections.singletonMap("Smelting", 10));
         recipeList.put("Smelt", Arrays.asList(Bronze));
         Recipe BronzeSword = new Recipe(
-                Arrays.asList(items.get("BronzeBar"), items.get("BronzeBar")),
-                Arrays.asList(items.get("BronzeSword")),
+                Arrays.asList(new Recipe.RecipeItem(items.get("BronzeBar"), 2)),
+                Arrays.asList(Recipe.RecipeItem.one(items.get("BronzeSword")),
                 "Bronze Sword",
                 100,
                 Collections.emptyMap(),
                 Collections.singletonMap("Smithing", 10));
-        recipeList.put("Smithing", Arrays.asList(BronzeSword));
+        recipeList.put("Smith", Arrays.asList(BronzeSword));
     }
 
-
-    Map<String, ItemAction> itemUses = new HashMap<>();
-    {
-        itemUses.put("Steel & flint,Oak logs", itemActions.get("Firemaking"));
-    }
-    Map<String, ItemAction> tileItemUses = new HashMap<>();
-    {
-        tileItemUses.put("Grass,Shovel", itemActions.get("DigGrass"));
-        tileItemUses.put("Dirt,Shovel", itemActions.get("DigDirt"));
-        tileItemUses.put("Rock,Pickaxe", itemActions.get("Mine"));
-    }
-    Map<String, ItemAction> objectItemUses = new HashMap<>();
-    {
-        objectItemUses.put("Furnace,Copper ore", itemActions.get("Smelt"));
-        objectItemUses.put("Furnace,Tin ore", itemActions.get("Smelt"));
-        objectItemUses.put("Anvil,Hammer", itemActions.get("Smith"));
+    private void loadUses(BufferedReader buffer) {
+        itemUses = new HashMap<>();
+        {
+            itemUses.put("Steel & flint,Oak logs", itemActions.get("Firemaking"));
+        }
+        tileItemUses = new HashMap<>();
+        {
+            tileItemUses.put("Grass,Shovel", itemActions.get("DigGrass"));
+            tileItemUses.put("Dirt,Shovel", itemActions.get("DigDirt"));
+            tileItemUses.put("Rock,Pickaxe", itemActions.get("Mine"));
+        }
+        objectItemUses = new HashMap<>();
+        {
+            objectItemUses.put("Furnace,Copper ore", itemActions.get("Smelt"));
+            objectItemUses.put("Furnace,Tin ore", itemActions.get("Smelt"));
+            objectItemUses.put("Anvil,Hammer", itemActions.get("Smith"));
+        }
     }
 }

@@ -13,16 +13,18 @@ public class Inventory implements Iterable<Item> {
         items = new ArrayList<>();
     }
 
-    void addAll(List<Item> items) {
-        if (hasSpaceForItems(items)) {
-            for (Item item : items) {
-                this.items.add(item);
-            }
+    void addAll(List<Item> newItems) {
+        if (hasSpaceForItems(newItems)) {
+            this.items.addAll(newItems);
         }
     }
 
-    boolean hasSpaceForItems(List<Item> items) {
-        return this.items.size() + items.size() <= MAX_INVENTORY_SIZE;
+    boolean hasSpaceForItems(int totalCount) {
+        return this.items.size() + totalCount <= MAX_INVENTORY_SIZE;
+    }
+
+    boolean hasSpaceForItems(List<Item> newItems) {
+        return this.items.size() + newItems.size() <= MAX_INVENTORY_SIZE;
     }
 
     boolean hasSpaceForItem(Item item) {
@@ -63,5 +65,9 @@ public class Inventory implements Iterable<Item> {
 
     public boolean containsItem(String itemName) {
         return items.stream().anyMatch(item -> item.name.equals(itemName));
+    }
+
+    public boolean contains(Item searchItem, int quantity) {
+        return items.stream().filter(item -> item.name.equals(searchItem.name)).count() >= quantity;
     }
 }

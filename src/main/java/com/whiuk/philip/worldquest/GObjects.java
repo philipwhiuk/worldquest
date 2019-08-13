@@ -22,6 +22,7 @@ public class GObjects {
         gameObjectBuilders.put("Door", new GObjects.DoorBuilder());
         gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
         gameObjectBuilders.put("Fence", new GObjects.FenceBuilder());
+        gameObjectBuilders.put("ItemDrop", new GObjects.ItemDropBuilder());
         return gameObjectBuilders;
     }
 
@@ -323,6 +324,19 @@ public class GObjects {
         }
     }
 
+    static class ItemDropBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            if (arguments.length != 2) {
+                throw new IllegalArgumentException("Expected money and item only: " + Arrays.toString(arguments));
+            }
+            if (arguments[0].length() > 0) {
+                return new ItemDrop(Integer.parseInt(arguments[0]));
+            } else {
+                return new ItemDrop(ItemProvider.parseItem(arguments[1]));
+            }
+        }
+    }
+
     static class ItemDrop extends GObjects.GameObject {
         private Item item;
         private int money;
@@ -388,7 +402,7 @@ public class GObjects {
     }
 
     static class ResourceProvider extends GameObject {
-        public String name;
+        final String name;
         final Item resource;
         final String cssDef;
         final Color veinColour;
@@ -398,6 +412,7 @@ public class GObjects {
             this.resource = ItemProvider.parseItem(resourceData);
             this.cssDef = arguments[1];
             this.veinColour = fromCSSDef(cssDef);
+            this.name = arguments[2];
         }
 
         private Color fromCSSDef(String value) {
@@ -418,7 +433,10 @@ public class GObjects {
 
         @Override
         public String asString() {
-            return ItemProvider.printItem(resource).replaceAll(",","\\|")+","+cssDef;
+            return String.join(",",
+                    ItemProvider.printItem(resource).replaceAll(",","\\|"),
+                    cssDef,
+                    name);
         }
 
         @Override

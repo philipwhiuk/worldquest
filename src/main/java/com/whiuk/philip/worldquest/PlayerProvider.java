@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class PlayerProvider {
 
-    static Player createPlayer() {
-        return new Player(10, 10);
+    static Player createPlayer(GameData gameData) {
+        return gameData.newPlayer();
     }
 
     public static Player loadPlayer(BufferedReader buffer) throws IOException {
@@ -85,8 +85,8 @@ public class PlayerProvider {
                     Integer.parseInt(playerStatus[1]),
                     Integer.parseInt(playerStatus[2]),
                     stats, skills, weapon, armour, inventory, quests,
-                    Integer.parseInt(playerStatus[4]),
-                    Integer.parseInt(playerStatus[5])
+                    Integer.parseInt(playerStatus[3]),
+                    Integer.parseInt(playerStatus[4])
             );
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse player", e);

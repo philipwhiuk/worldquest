@@ -5,7 +5,7 @@ BronzeHatchet,Hatchet,Bronze hatchet,true,3
 LeatherTunic,Armour,Leather tunic,false,CHEST,2
 SteelFlint,Item,Steel & flint,true
 Shovel,Item,Shovel,true
-Hammer,Item,Hammer,false
+Hammer,Item,Hammer,true
 Pickaxe,Item,Pickaxe,true
 PileOfDirt,Item,Pile of dirt,false
 RockShards,Item,Rock shards,false

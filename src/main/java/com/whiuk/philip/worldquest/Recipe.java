@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 class Recipe {
-    final List<Item> input;
-    final List<Item> output;
+    final List<RecipeItem> input;
+    final List<RecipeItem> output;
     final int percentageSuccessChance;
     final Map<String, Integer> skillRequirements;
     final Map<String, Integer> experienceGained;
     public String outputName;
 
-    Recipe(List<Item> input, List<Item> output, String outputName,
+    Recipe(List<RecipeItem> input, List<RecipeItem> output, String outputName,
            int percentageSuccessChance,
            Map<String, Integer> skillRequirements, Map<String, Integer> experienceGained) {
         this.input = input;
@@ -28,8 +28,8 @@ class Recipe {
 
     public boolean canBeDone(Player player) {
         boolean canBeDone = true;
-        for (Item i : input) {
-            canBeDone &= player.inventory.contains(i);
+        for (RecipeItem i : input) {
+            canBeDone &= player.inventory.contains(i.item, i.quantity);
         }
         if (!canBeDone) {
             return false;
@@ -37,7 +37,8 @@ class Recipe {
         for (Map.Entry<String, Integer> skillReq : skillRequirements.entrySet()) {
             canBeDone &= player.skills.getOrDefault(skillReq.getKey(), Experience.NoExperience()).level >= skillReq.getValue();
         }
-        if (!player.inventory.hasSpaceForItems(output)) {
+        int totalCount = output.stream().map(r -> r.quantity).mapToInt(x -> x).sum();
+        if (!player.inventory.hasSpaceForItems(totalCount)) {
             return false;
         }
         return canBeDone;
@@ -45,8 +46,10 @@ class Recipe {
 
     public void perform(Player player) {
         if (canBeDone(player)) {
-            for (Item item : input) {
-                player.inventory.remove(item);
+            for (RecipeItem recipeItem : input) {
+                for (int i = 0; i < recipeItem.quantity; i++) {
+                    player.inventory.remove(recipeItem.item);
+                }
             }
             boolean success = isSuccess();
             if (success) {
@@ -57,10 +60,26 @@ class Recipe {
                     skillXp.experience += expGain;
                     player.skills.put(skill, skillXp);
                 }
-                for (Item item: output) {
-                    player.inventory.add(item.copy());
+                for (RecipeItem recipeItem: output) {
+                    for (int i = 0; i < recipeItem.quantity; i++) {
+                        player.inventory.add(recipeItem.item.copy());
+                    }
                 }
             }
+        }
+    }
+
+    static class RecipeItem {
+        final Item item;
+        final int quantity;
+
+        public RecipeItem(Item item, int quantity) {
+            this.item = item;
+            this.quantity = quantity;
+        }
+
+        public static RecipeItem one(Item item) {
+            return new RecipeItem(item, 1);
         }
     }
 }

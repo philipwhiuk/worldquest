@@ -46,8 +46,8 @@ Chicken,21,19,Zonal|19|17|3|3
 22
 33,14,Stairs,map100:15:10:DOWN
 4,4,Tree,Item|Oak logs|true
-1,39,ResourceProvider,Item|Copper ore|true:0XFFA500
-1,38,ResourceProvider,Item|Tin ore|true:0XDDDDDD
+1,39,ResourceProvider,Item|Copper ore|true:0XFFA500:CopperVein
+1,38,ResourceProvider,Item|Tin ore|true:0XDDDDDD:TinVein
 21,7,Furnace
 30,12,Door,SOUTH:WEST
 15,12,Door,SOUTH:WEST

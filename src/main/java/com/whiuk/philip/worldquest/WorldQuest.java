@@ -219,7 +219,7 @@ public class WorldQuest extends JFrame {
 
     private void newGame() {
         loadMap(INITIAL_MAP_FILE);
-        this.player = PlayerProvider.createPlayer();
+        this.player = PlayerProvider.createPlayer(gameData);
         eventHistory = new ArrayList<>();
     }
 
@@ -409,8 +409,8 @@ public class WorldQuest extends JFrame {
         eventHistory.add(message);
     }
 
-    public void attemptResourceGathering(GameData.ResourceGathering resourceGathering) {
-        resourceGathering.gather(this, player, map[player.x][player.y]);
+    public void attemptResourceGathering(GameData.ResourceGathering resourceGathering, Tile tile) {
+        resourceGathering.gather(this, player, tile);
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -763,17 +763,18 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    boolean useItem(int index) {
+    void useItem(int index) {
         if (player.itemBeingUsed == index) {
             player.itemBeingUsed = -1;
-            return false;
         } else if (player.itemBeingUsed == -1) {
             player.itemBeingUsed = index;
-            return false;
         } else {
             int firstItem = player.itemBeingUsed;
             player.itemBeingUsed = -1;
-            return useItems(firstItem, index);
+            boolean actionPerformed = useItems(firstItem, index);
+            if (!actionPerformed) {
+                eventMessage("Nothing happens");
+            }
         }
     }
 
