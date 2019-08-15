@@ -99,3 +99,23 @@ NOT_STARTED,King_DefaultOpening
 FINISHED,King_DefaultOpening
 STARTED,King_GoblinSlayerProgressRequest
 COMPLETE,King_GoblinSlayerProgressRequest
+3
+Bronze,2,1,Bronze Bar,100,0,1
+CopperOre,1
+TinOre,1
+BronzeBar,1
+Smelting,10
+BronzeSword,1,1,Bronze Sword,100,0,1
+BronzeBar,2
+BronzeSword,1
+Smithing,10
+BronzeHatchet,1,1,Bronze Hatchet,100,0,1
+BronzeBar,1
+BronzeHatchet,1
+Smithing,10
+2
+Smelt,1
+Bronze
+Smith,2
+BronzeHatchet
+BronzeSword
