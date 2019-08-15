@@ -829,7 +829,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void displayConversation() {
-        if (talkingTo.currentConversation.playerText != null && talkingTo.currentConversation.playerText.length() == 0) {
+        if (talkingTo.currentConversation.playerText != null && talkingTo.currentConversation.playerText.length() != 0) {
             messageState = PLAYER_TALKING;
         } else {
             messageState = NPC_TALKING;
