@@ -2,9 +2,10 @@
 
 ### V1.0
 
+* Fishing
+* Cooking
 * Hunger, food
 * Armour and healing
-* Smithing
 * A decent-size game world with rivers, bridges, forests and dungeons
 * Doors that require keys
 * Fetch quests
@@ -15,10 +16,12 @@
 * Selling items
 * Hit splats
 * AI with different combat strategies
-* Crafting
+* Leatherworking
 * Ranged weapons
+* Fletching
 * Magecraft
 * Prospecting
+* House building
 * Right-click actions
 * Less text, more item graphics in UI
 
@@ -28,6 +31,7 @@
 * Auto-generated, persistent surface landscape
 * Deeper conversational AI
 * Enemy respawn mechanics
+* Economy
 
 ### Technical Improvements
 
