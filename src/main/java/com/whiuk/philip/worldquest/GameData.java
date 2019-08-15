@@ -468,6 +468,7 @@ public class GameData {
             tileItemUses.put("Grass,Shovel", itemActions.get("DigGrass"));
             tileItemUses.put("Dirt,Shovel", itemActions.get("DigDirt"));
             tileItemUses.put("Rock,Pickaxe", itemActions.get("Mine"));
+            tileItemUses.put("Water,FishingRod", itemActions.get("Fish"));
         }
         objectItemUses = new HashMap<>();
         {
