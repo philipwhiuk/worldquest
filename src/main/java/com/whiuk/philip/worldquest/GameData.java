@@ -84,7 +84,7 @@ public class GameData {
             if (hasNpcAction) {
                 String[] npcActionData = buffer.readLine().split(",");
                 switch (npcActionData[0]) {
-                    case "ShopDialog":
+                    case "ShopDisplay":
                         npcAction = new ShopDisplay();
                         break;
                     case "ConversationChoiceSelection":
