@@ -1,4 +1,4 @@
-17
+18
 BronzeDagger,Weapon,Bronze dagger,false,Dagger,2
 BronzeSword,Weapon,Bronze sword,false,Sword,4
 BronzeHatchet,Hatchet,Bronze hatchet,true,3
@@ -16,6 +16,7 @@ OakLogs,Item,Oak logs,true
 Feathers,Item,Feathers,true
 Bones,Item,Bones,true
 RawChicken,Item,Raw chicken,true
+FishingRod,Item,FishingRod,true
 1
 GoblinSlaying,1
 Goblin,5
@@ -69,11 +70,12 @@ King_Finished,
 King_SomethingElse
 Always
 1
-GeneralStore,General Store,4
+GeneralStore,General Store,5
 Hammer,1,1,5
 Shovel,1,1,5
 Pickaxe,1,1,5
 SteelFlint,1,1,5
+FishingRod,1,1,5
 7
 Chicken,Chicken,255,255,255,true,true,false,2,1,3,false,null
 Item,Feathers
