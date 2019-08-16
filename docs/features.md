@@ -19,6 +19,7 @@
 * Mining
 * Smelting
 * Smithing
+* Fishing
 * Experience
 
 ## Items

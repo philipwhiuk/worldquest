@@ -2,7 +2,6 @@
 
 ### V1.0
 
-* Fishing
 * Cooking
 * Hunger, food
 * Armour and healing
@@ -22,6 +21,7 @@
 * Magecraft
 * Prospecting
 * House building
+* Fishing spots with different types of fish
 * Right-click actions
 * Less text, more item graphics in UI
 

@@ -1,4 +1,4 @@
-18
+19
 BronzeDagger,Weapon,Bronze dagger,false,Dagger,2
 BronzeSword,Weapon,Bronze sword,false,Sword,4
 BronzeHatchet,Hatchet,Bronze hatchet,true,3
@@ -16,7 +16,8 @@ OakLogs,Item,Oak logs,true
 Feathers,Item,Feathers,true
 Bones,Item,Bones,true
 RawChicken,Item,Raw chicken,true
-FishingRod,Item,FishingRod,true
+FishingRod,Item,Fishing rod,true
+RawCatfish,Item,Raw catfish,true
 1
 GoblinSlaying,1
 Goblin,5

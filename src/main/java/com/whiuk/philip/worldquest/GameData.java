@@ -68,6 +68,13 @@ public class GameData {
                 Collections.emptyList(),
                 "Digging",
                 10));
+        resourceGathering.put("Fish", new ResourceGathering(
+                "Water",
+                "Water",
+                "RawCatfish",
+                Collections.emptyList(),
+                "Fishing",
+                10));
     }
 
     private void loadConversationChoices(BufferedReader buffer) throws IOException {
@@ -340,7 +347,7 @@ public class GameData {
         });
         itemActions.put("Mine", new ItemAction() {
             @Override
-            void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
+            void perform(WorldQuest game, Tile tile, Player player, int pickaxe, int na) {
                 game.attemptResourceGathering(resourceGathering.get("Mine"), tile);
             }
         });
@@ -352,13 +359,13 @@ public class GameData {
         });
         itemActions.put("Smith", new ItemAction() {
             @Override
-            void perform(WorldQuest game, Tile tile, Player player, int bar, int na) {
+            void perform(WorldQuest game, Tile tile, Player player, int hammer, int na) {
                 game.showCrafting(new CraftingOptions("Smithing", recipeList.get("Smith")));
             }
         });
         itemActions.put("Fish", new ItemAction() {
             @Override
-            void perform(WorldQuest game, Tile tile, Player player, int bar, int na) {
+            void perform(WorldQuest game, Tile tile, Player player, int rod, int na) {
                 game.attemptResourceGathering(resourceGathering.get("Fish"), tile);
             }
         });
@@ -468,7 +475,7 @@ public class GameData {
             tileItemUses.put("Grass,Shovel", itemActions.get("DigGrass"));
             tileItemUses.put("Dirt,Shovel", itemActions.get("DigDirt"));
             tileItemUses.put("Rock,Pickaxe", itemActions.get("Mine"));
-            tileItemUses.put("Water,FishingRod", itemActions.get("Fish"));
+            tileItemUses.put("Water,Fishing rod", itemActions.get("Fish"));
         }
         objectItemUses = new HashMap<>();
         {
