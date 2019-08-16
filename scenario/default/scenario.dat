@@ -1,4 +1,4 @@
-19
+20
 BronzeDagger,Weapon,Bronze dagger,false,Dagger,2
 BronzeSword,Weapon,Bronze sword,false,Sword,4
 BronzeHatchet,Hatchet,Bronze hatchet,true,3
@@ -18,6 +18,7 @@ Bones,Item,Bones,true
 RawChicken,Item,Raw chicken,true
 FishingRod,Item,Fishing rod,true
 RawCatfish,Item,Raw catfish,true
+Catfish,Item,Catfish,true
 1
 GoblinSlaying,1
 Goblin,5
@@ -102,7 +103,7 @@ NOT_STARTED,King_DefaultOpening
 FINISHED,King_DefaultOpening
 STARTED,King_GoblinSlayerProgressRequest
 COMPLETE,King_GoblinSlayerProgressRequest
-3
+4
 Bronze,2,1,Bronze Bar,100,0,1
 CopperOre,1
 TinOre,1
@@ -116,12 +117,18 @@ BronzeHatchet,1,1,Bronze Hatchet,100,0,1
 BronzeBar,1
 BronzeHatchet,1
 Smithing,10
-2
+Catfish,1,1,Catfish,100,0,1
+RawCatfish,1
+Catfish,1
+Cooking,10
+3
 Smelt,1
 Bronze
 Smith,2
 BronzeHatchet
 BronzeSword
+Cook,1
+Catfish
 1
 Steel & flint,Oak logs:Firemaking
 4
@@ -129,7 +136,8 @@ Grass,Shovel:DigGrass
 Dirt,Shovel:DigDirt
 Rock,Pickaxe:Mine
 Water,Fishing rod:Fish
-3
+4
 Furnace,Copper ore:Smelt
 Furnace,Tin ore:Smelt
 Anvil,Hammer:Smith
+Fire,Raw catfish:Cook

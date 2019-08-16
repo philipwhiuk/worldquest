@@ -369,6 +369,12 @@ public class GameData {
                 game.attemptResourceGathering(resourceGathering.get("Fish"), tile);
             }
         });
+        itemActions.put("Cook", new ItemAction() {
+            @Override
+            void perform(WorldQuest game, Tile tile, Player player, int food, int na) {
+                game.showCrafting(new CraftingOptions("Cooking", recipeList.get("Cook")));
+            }
+        });
     }
 
     class ResourceGathering {
