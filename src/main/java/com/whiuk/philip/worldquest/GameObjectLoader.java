@@ -23,7 +23,7 @@ public class GameObjectLoader {
                 }
                 newMap[x][y].objects.add(builder.build(args));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid object format for game object: "+i);
+                throw new IllegalArgumentException("Invalid object format for game object: "+i, e);
             }
         }
     }
