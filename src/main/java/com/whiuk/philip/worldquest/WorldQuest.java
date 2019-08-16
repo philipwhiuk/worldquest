@@ -1066,7 +1066,8 @@ public class WorldQuest extends JFrame {
             s.get().quantity += 1;
             player.money += s.get().getPrice();
         } else {
-            currentShop.items.add(new ShopListing(item, 1, 1, 0));
+            currentShop.items.add(new ShopListing(item, 1, 1, 1));
+            player.money += 1;
         }
     }
 
