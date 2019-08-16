@@ -122,3 +122,14 @@ Bronze
 Smith,2
 BronzeHatchet
 BronzeSword
+1
+Steel & flint,Oak logs:Firemaking
+4
+Grass,Shovel:DigGrass
+Dirt,Shovel:DigDirt
+Rock,Pickaxe:Mine
+Water,Fishing rod:Fish
+3
+Furnace,Copper ore:Smelt
+Furnace,Tin ore:Smelt
+Anvil,Hammer:Smith

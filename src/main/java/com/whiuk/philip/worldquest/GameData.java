@@ -21,9 +21,9 @@ public class GameData {
     private Map<String, ResourceGathering> resourceGathering = new HashMap<>();
     public int playerStartX;
     public int playerStartY;
-    HashMap<String, ItemAction> itemUses;
-    Map<String, ItemAction> tileItemUses;
-    Map<String, ItemAction> objectItemUses;
+    HashMap<String, ItemAction> itemUses = new HashMap<>();
+    Map<String, ItemAction> tileItemUses = new HashMap<>();
+    Map<String, ItemAction> objectItemUses = new HashMap<>();
 
     GameData(String scenario) {
 
@@ -465,23 +465,23 @@ public class GameData {
         }
     }
 
-    private void loadUses(BufferedReader buffer) {
-        itemUses = new HashMap<>();
-        {
-            itemUses.put("Steel & flint,Oak logs", itemActions.get("Firemaking"));
+    private void loadUses(BufferedReader buffer) throws IOException {
+        int itemUsesCount = Integer.parseInt(buffer.readLine());
+        for (int i = 0; i < itemUsesCount; i++) {
+            String[] itemUseData = buffer.readLine().split(":");
+            itemUses.put(itemUseData[0], itemActions.get(itemUseData[1]));
         }
-        tileItemUses = new HashMap<>();
-        {
-            tileItemUses.put("Grass,Shovel", itemActions.get("DigGrass"));
-            tileItemUses.put("Dirt,Shovel", itemActions.get("DigDirt"));
-            tileItemUses.put("Rock,Pickaxe", itemActions.get("Mine"));
-            tileItemUses.put("Water,Fishing rod", itemActions.get("Fish"));
+
+        int tileItemUsesCount = Integer.parseInt(buffer.readLine());
+        for (int t = 0; t < tileItemUsesCount; t++) {
+            String[] tileItemUseData = buffer.readLine().split(":");
+            tileItemUses.put(tileItemUseData[0], itemActions.get(tileItemUseData[1]));
         }
-        objectItemUses = new HashMap<>();
-        {
-            objectItemUses.put("Furnace,Copper ore", itemActions.get("Smelt"));
-            objectItemUses.put("Furnace,Tin ore", itemActions.get("Smelt"));
-            objectItemUses.put("Anvil,Hammer", itemActions.get("Smith"));
+
+        int objectItemUsesCount = Integer.parseInt(buffer.readLine());
+        for (int t = 0; t < objectItemUsesCount; t++) {
+            String[] objectItemUseData = buffer.readLine().split(":");
+            objectItemUses.put(objectItemUseData[0], itemActions.get(objectItemUseData[1]));
         }
     }
 }
