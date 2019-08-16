@@ -23,6 +23,7 @@ public class GObjects {
         gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
         gameObjectBuilders.put("Fence", new GObjects.FenceBuilder());
         gameObjectBuilders.put("ItemDrop", new GObjects.ItemDropBuilder());
+        gameObjectBuilders.put("Fire", new GObjects.FireBuilder());
         return gameObjectBuilders;
     }
 
@@ -178,6 +179,12 @@ public class GObjects {
         @Override
         public String id() {
             return "Tree";
+        }
+    }
+
+    static class FireBuilder extends GameObjectBuilder {
+        public GameObject build(String[] arguments) {
+            return new Fire();
         }
     }
 
