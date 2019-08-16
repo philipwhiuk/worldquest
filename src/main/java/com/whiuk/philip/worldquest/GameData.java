@@ -448,7 +448,7 @@ public class GameData {
             Map<String, Integer> experienceGained = new HashMap<>(experienceGainedCount);
             for (int i = 0; i < experienceGainedCount; i++) {
                 String[] experienceGainData = buffer.readLine().split(",");
-                skillRequirements.put(experienceGainData[0], Integer.parseInt(experienceGainData[1]));
+                experienceGained.put(experienceGainData[0], Integer.parseInt(experienceGainData[1]));
             }
             Recipe recipe = new Recipe(inputItems, outputItems, outputName, successChance, skillRequirements, experienceGained);
             allRecipes.put(recipeName, recipe);
