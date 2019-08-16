@@ -1009,16 +1009,16 @@ public class WorldQuest extends JFrame {
 
     private boolean visibleRoomEdge(int x, int y) {
         Room mapRoom = map[x][y].room;
-        if (player.x < x && ((int) mapRoom.getMinX()) == x) {
+        if (player.x < x && mapRoom.getMinX() == x) {
             return true;
         }
-        if (player.x > x && ((int) mapRoom.getMaxX()) == x+1) {
+        if (player.x > x && mapRoom.getMaxX() == x+1) {
             return true;
         }
-        if (player.y < y && ((int) mapRoom.getMinY()) == y) {
+        if (player.y < y && mapRoom.getMinY() == y) {
             return true;
         }
-        if (player.y > y && ((int) mapRoom.getMaxY()) == y+1) {
+        if (player.y > y && mapRoom.getMaxY() == y+1) {
             return true;
         }
         return false;
