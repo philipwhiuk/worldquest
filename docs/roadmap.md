@@ -2,7 +2,6 @@
 
 ### V1.0
 
-* Cooking
 * Hunger, food
 * Armour and healing
 * A decent-size game world with rivers, bridges, forests and dungeons
@@ -22,6 +21,8 @@
 * Prospecting
 * House building
 * Fishing spots with different types of fish
+* "Ability" to burn food
+* More complex food (pies, bread, etc)
 * Right-click actions
 * Less text, more item graphics in UI
 

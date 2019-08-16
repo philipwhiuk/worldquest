@@ -20,6 +20,7 @@
 * Smelting
 * Smithing
 * Fishing
+* Cooking
 * Experience
 
 ## Items
