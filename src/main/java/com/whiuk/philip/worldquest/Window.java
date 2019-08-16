@@ -49,8 +49,12 @@ abstract class Window extends Rectangle implements UI {
     }
 
     private void close() {
+        handleClose();
         if (onCloseListener != null) {
             onCloseListener.run();
         }
+    }
+
+    void handleClose() {
     }
 }

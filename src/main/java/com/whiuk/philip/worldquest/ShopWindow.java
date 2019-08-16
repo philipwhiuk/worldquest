@@ -44,4 +44,9 @@ class ShopWindow extends Window {
             ButtonPainter.paintButton(g, Color.GREEN, Color.BLACK, 250, (i*20)+88, "+");
         }
     }
+
+    @Override
+    void handleClose() {
+        game.closeShop();
+    }
 }

@@ -117,6 +117,7 @@ public class WorldQuest extends JFrame {
     private String eastMap;
     private String southMap;
     private String westMap;
+    private Shop currentShop;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -411,6 +412,10 @@ public class WorldQuest extends JFrame {
 
     public void attemptResourceGathering(GameData.ResourceGathering resourceGathering, Tile tile) {
         resourceGathering.gather(this, player, tile);
+    }
+
+    public boolean inShop() {
+        return gameState == SHOP;
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -961,6 +966,8 @@ public class WorldQuest extends JFrame {
     }
 
     void showShop(Shop shop) {
+        gameState = SHOP;
+        currentShop = shop;
         gameScreen.showWindow(new ShopWindow(this, shop));
     }
 
@@ -968,8 +975,9 @@ public class WorldQuest extends JFrame {
         gameScreen.showWindow(new CraftingWindow(this, craftingOptions));
     }
 
-    private void closeShop() {
+    void closeShop() {
         gameState = RUNNING;
+        currentShop = null;
     }
 
     boolean isVisible(int x, int y) {
@@ -1048,6 +1056,17 @@ public class WorldQuest extends JFrame {
                 player.money -= s.getPrice();
                 player.inventory.add(s.item.copy());
             }
+        }
+    }
+
+    public void sellItem(int index) {
+        Item item = player.inventory.remove(index);
+        Optional<ShopListing> s = this.currentShop.items.stream().filter(l -> l.item.name.equals(item.name)).findFirst();
+        if (s.isPresent()) {
+            s.get().quantity += 1;
+            player.money += s.get().getPrice();
+        } else {
+            currentShop.items.add(new ShopListing(item, 1, 1, 0));
         }
     }
 

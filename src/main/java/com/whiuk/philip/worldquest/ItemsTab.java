@@ -63,7 +63,11 @@ class ItemsTab extends SidebarTab {
                 game.equipItem(i);
                 return;
             } else if (inventoryButtonLocation(i, 2).contains(e.getPoint())) {
-                game.dropItem(i);
+                if (game.inShop()) {
+                    game.sellItem(i);
+                } else {
+                    game.dropItem(i);
+                }
                 return;
             }
         }
