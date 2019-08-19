@@ -4,7 +4,7 @@ WorldQuest RPG is a single-player role-playing game set in a fantasy world.
 
 ![Screenshot](docs/screenshot1.png "Screenshot")
 
-See [website](for full details)
+See [website](https://philipwhiuk.github.io/worldquest/) for full details
 
 ## Release & Downloads
 
