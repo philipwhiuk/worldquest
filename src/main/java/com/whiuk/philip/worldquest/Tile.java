@@ -10,7 +10,7 @@ class Tile {
 
     final TileType type;
     final List<GObjects.GameObject> objects;
-    private boolean hasSeen = false;
+    boolean hasSeen = false;
     final int x;
     final int y;
     Room room;

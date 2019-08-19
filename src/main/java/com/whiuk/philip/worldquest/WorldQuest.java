@@ -83,14 +83,8 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
-    GameData gameData = new GameData(DEFAULT_SCENARIO);
-    private Map<Integer, TileType> tileTypes = new HashMap<>();
-    private Map<String, NPCType> npcTypes = new HashMap<>();
-    private Map<String, ItemAction> itemUses = new HashMap<>();
-    private Map<String, ItemAction> tileItemUses = new HashMap<>();
-    private Map<String, ItemAction> objectItemUses = new HashMap<>();
+    GameData gameData;
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
-    private Map<String, Quest> questList = new HashMap<>();
 
     private GameUI gameUI;
     private LoadingScreen loadingScreen;
@@ -211,10 +205,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadScenario(String scenarioName) {
-        loadTileTypes();
-        loadNpcTypes();
-        loadItemUses();
-        loadQuestList();
+        gameData = new GameData(scenarioName);
         gameObjectBuilders = GObjects.provideBuilders();
     }
 
@@ -295,7 +286,8 @@ public class WorldQuest extends JFrame {
                 OutputStream mapDataStream = new FileOutputStream(mapFile);
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
             MapTileLoader.saveMapTiles(map, buffer);
-            NPCLoader.saveNPCs(npcTypes, npcs, buffer);
+            MapTileLoader.saveMapExploration(map, buffer);
+            NPCLoader.saveNPCs(gameData.npcTypes, npcs, buffer);
             GameObjectLoader.saveGameObjects(buffer, map);
             RoomLoader.saveRooms(buffer, rooms);
             buffer.write(northMap); buffer.newLine();
@@ -305,24 +297,6 @@ public class WorldQuest extends JFrame {
         } catch (IOException e) {
             throw new RuntimeException("Unable to save map: " + e.getMessage(), e);
         }
-    }
-
-    private void loadTileTypes() {
-        tileTypes.putAll(gameData.tileTypes);
-    }
-
-    private void loadNpcTypes() {
-        npcTypes.putAll(gameData.npcTypes);
-    }
-
-    private void loadItemUses() {
-        itemUses.putAll(gameData.itemUses);
-        tileItemUses.putAll(gameData.tileItemUses);
-        objectItemUses.putAll(gameData.objectItemUses);
-    }
-
-    private void loadQuestList() {
-        questList.putAll(gameData.quests);
     }
 
     private boolean mapExists(String mapResourceName) {
@@ -347,8 +321,9 @@ public class WorldQuest extends JFrame {
         try(
                 InputStream mapDataStream = new FileInputStream(mapFile);
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
-            Tile[][] newMap = MapTileLoader.loadMapTiles(tileTypes, buffer);
-            List<NPC> npcs = NPCLoader.loadNPCs(npcTypes, buffer);
+            Tile[][] newMap = MapTileLoader.loadMapTiles(gameData.tileTypes, buffer);
+            MapTileLoader.markExploration(newMap, buffer);
+            List<NPC> npcs = NPCLoader.loadNPCs(gameData.npcTypes, buffer);
             GameObjectLoader.loadGameObjects(gameObjectBuilders, buffer, newMap);
             this.rooms = RoomLoader.loadRooms(buffer, newMap);
             this.northMap = buffer.readLine();
@@ -784,13 +759,13 @@ public class WorldQuest extends JFrame {
     }
 
     private boolean useItems(int firstItemIndex, int secondItemIndex) {
-        ItemAction action = itemUses.get(
+        ItemAction action = gameData.itemUses.get(
                 player.inventory.get(firstItemIndex).name+","+player.inventory.get(secondItemIndex).name);
         if (action != null) {
             action.perform(this, map[player.x][player.y], player, firstItemIndex, secondItemIndex);
             return true;
         } else {
-            action = itemUses.get(
+            action = gameData.itemUses.get(
                     player.inventory.get(secondItemIndex).name+","+player.inventory.get(firstItemIndex).name);
             if (action != null) {
                 action.perform(this, map[player.x][player.y], player, secondItemIndex, firstItemIndex);
@@ -803,14 +778,14 @@ public class WorldQuest extends JFrame {
     private boolean useItemOnTile(int itemIndex, Tile tile) {
         String itemName = player.inventory.get(itemIndex).name;
         String key = tile.type.name+","+player.inventory.get(itemIndex).name;
-        ItemAction action = tileItemUses.get(key);
+        ItemAction action = gameData.tileItemUses.get(key);
         if (action != null) {
             action.perform(this, tile, player, itemIndex, -1);
             return true;
         }
         for (GObjects.GameObject object : tile.objects) {
             key = object.getClass().getSimpleName()+","+itemName;
-            action = objectItemUses.get(key);
+            action = gameData.objectItemUses.get(key);
             if (action != null) {
                 action.perform(this, tile, player, itemIndex, -1);
                 return true;
@@ -955,7 +930,7 @@ public class WorldQuest extends JFrame {
     }
 
     public void startQuest(String questName) {
-        Quest quest = questList.get(questName);
+        Quest quest = gameData.quests.get(questName);
         if (quest == null) {
             throw new RuntimeException("Unable to start quest "+questName+" - quest not found");
         } else if (player.quests.containsKey(questName)) {
