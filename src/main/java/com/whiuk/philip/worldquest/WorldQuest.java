@@ -15,6 +15,9 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.GameFileUtils.*;
+import static com.whiuk.philip.worldquest.Item.ItemAction.EAT;
+import static com.whiuk.philip.worldquest.Item.ItemAction.EQUIP;
+import static com.whiuk.philip.worldquest.Item.ItemAction.USE;
 import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
@@ -612,9 +615,10 @@ public class WorldQuest extends JFrame {
 
     private void processPlayerInputWhileRunning(BooleanSupplier processor) {
         int initialPlayerHealth = player.health;
+        int initialPlayerFood = player.food;
         boolean shouldTick = processor.getAsBoolean();
         if (shouldTick) {
-            tick(initialPlayerHealth);
+            tick(initialPlayerHealth, initialPlayerFood);
         }
     }
 
@@ -715,8 +719,22 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    void equipItem(int index) {
+    public void actionItem(int index) {
         Item i = player.inventory.get(index);
+        switch(i.getPrimaryAction()) {
+            case USE:
+                useItem(index);
+                break;
+            case EQUIP:
+                equipItem(i);
+                break;
+            case EAT:
+                eatItem(i);
+                break;
+        }
+    }
+
+    private void equipItem(Item i) {
         if (i instanceof Weapon) {
             Weapon w = (Weapon) i;
             if (player.mainHandWeapon != null && ! player.inventory.hasSpaceForItem(player.mainHandWeapon)) {
@@ -729,6 +747,25 @@ public class WorldQuest extends JFrame {
                 player.inventory.remove(w);
                 player.mainHandWeapon = w;
             }
+        } else if (i instanceof Armour) {
+            Armour a = (Armour) i;
+            if (player.armour.get(a.slot) != null && ! player.inventory.hasSpaceForItem(player.armour.get(a.slot))) {
+                eventMessage("No space to store the item you're currently wielding");
+            } else {
+                Armour removed = player.armour.put(a.slot, a);
+                if (removed != null) {
+                    player.inventory.add(removed);
+                }
+                player.inventory.remove(a);
+            }
+        }
+    }
+
+    private void eatItem(Item i) {
+        if (i instanceof Consumable) {
+            Consumable f = (Consumable) i;
+            player.inventory.remove(f);
+            player.applyStatChanges(f.statChanges);
         } else if (i instanceof Armour) {
             Armour a = (Armour) i;
             if (player.armour.get(a.slot) != null && ! player.inventory.hasSpaceForItem(player.armour.get(a.slot))) {
@@ -843,7 +880,7 @@ public class WorldQuest extends JFrame {
         displayConversation();
     }
 
-    private void tick(int initialPlayerHealth) {
+    private void tick(int initialPlayerHealth, int initialPlayerFood) {
         for (NPC npc: npcs) {
             tickNPC(npc);
         }
@@ -858,8 +895,22 @@ public class WorldQuest extends JFrame {
         }
         if (player.isDead()) {
             gameOver();
-        } else if (player.health == initialPlayerHealth && player.health < player.maxHealth) {
-            player.health += 1;
+        } else {
+            if (player.health == initialPlayerHealth && player.health < player.maxHealth) {
+                player.health += 1;
+            }
+            if (player.food == initialPlayerFood) {
+                if (player.food > 0) {
+                     if (player.foodTick <= 10) {
+                         player.foodTick += 1;
+                     } else {
+                         player.foodTick = 0;
+                         player.food -= 1;
+                     }
+                }
+            } else {
+                player.foodTick = 0;
+            }
         }
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
     }

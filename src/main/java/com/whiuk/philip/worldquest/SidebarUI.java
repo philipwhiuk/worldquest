@@ -23,37 +23,37 @@ class SidebarUI extends Rectangle implements UI {
                 new QuestsTab(game)
         };
         tabButtons = new TextButton[]{
-                new TextButton(Color.GREEN, Color.BLACK, 425, 80, "Stats", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 425, 100, "Stats", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(0);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 80, "Skills", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 475, 100, "Skills", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(1);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 525, 80, "Equip.", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 525, 100, "Equip.", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(2);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 425, 105, "Items", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 425, 125, "Items", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(3);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 105, "NPCs", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 475, 125, "NPCs", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(4);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 525, 105, "Quests", false) {
+                new TextButton(Color.GREEN, Color.BLACK, 525, 125, "Quests", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(5);
@@ -86,7 +86,13 @@ class SidebarUI extends Rectangle implements UI {
         }
 
         g.setColor(Color.WHITE);
-        g.drawString("Money: " + game.player.money, 450, 60);
+        g.drawString("Food: ", 450, 60);
+        g.drawRect(499, 46, 101, 15);
+        g.setColor(Color.ORANGE);
+        g.fillRect(500, 47, (game.player.food), 14);
+
+        g.setColor(Color.WHITE);
+        g.drawString("Money: " + game.player.money, 450, 80);
 
         g.setColor(Color.WHITE);
     }

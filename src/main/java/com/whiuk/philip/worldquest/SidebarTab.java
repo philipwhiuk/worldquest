@@ -4,6 +4,6 @@ import java.awt.*;
 
 abstract class SidebarTab extends Rectangle implements UI {
     SidebarTab() {
-        super(420, 150, 240, 330);
+        super(420, 170, 240, 330);
     }
 }

@@ -1,24 +1,24 @@
 20
-BronzeDagger,Weapon,Bronze dagger,false,Dagger,2
-BronzeSword,Weapon,Bronze sword,false,Sword,4
-BronzeHatchet,Hatchet,Bronze hatchet,true,3
-LeatherTunic,Armour,Leather tunic,false,CHEST,2
-SteelFlint,Item,Steel & flint,true
-Shovel,Item,Shovel,true
-Hammer,Item,Hammer,true
-Pickaxe,Item,Pickaxe,true
-PileOfDirt,Item,Pile of dirt,false
-RockShards,Item,Rock shards,false
-CopperOre,Item,Copper ore,true
-TinOre,Item,Tin ore,true
-BronzeBar,Item,Bronze bar,true
-OakLogs,Item,Oak logs,true
-Feathers,Item,Feathers,true
-Bones,Item,Bones,true
-RawChicken,Item,Raw chicken,true
-FishingRod,Item,Fishing rod,true
-RawCatfish,Item,Raw catfish,true
-Catfish,Item,Catfish,true
+BronzeDagger,Weapon,Bronze dagger,EQUIP,Dagger,2
+BronzeSword,Weapon,Bronze sword,EQUIP,Sword,4
+BronzeHatchet,Hatchet,Bronze hatchet,EQUIP|USE,3
+LeatherTunic,Armour,Leather tunic,EQUIP,CHEST,2
+SteelFlint,Item,Steel & flint,USE
+Shovel,Item,Shovel,USE
+Hammer,Item,Hammer,USE
+Pickaxe,Item,Pickaxe,USE
+PileOfDirt,Item,Pile of dirt,USE
+RockShards,Item,Rock shards,USE
+CopperOre,Item,Copper ore,USE
+TinOre,Item,Tin ore,USE
+BronzeBar,Item,Bronze bar,USE
+OakLogs,Item,Oak logs,USE
+Feathers,Item,Feathers,USE
+Bones,Item,Bones,USE
+RawChicken,Item,Raw chicken,USE
+FishingRod,Item,Fishing rod,USE
+RawCatfish,Item,Raw catfish,USE
+Catfish,Consumable,Catfish,EAT|USE,Food|5
 1
 GoblinSlaying,1
 Goblin,5

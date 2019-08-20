@@ -12,15 +12,15 @@ public class GameData {
     private Map<String, QuestStep> questSteps = new HashMap<>();
     Map<String, Quest> quests = new HashMap<>();
     Map<Integer, TileType> tileTypes = new HashMap<>();
-    Map<String, TileType> tileTypesByName = new HashMap<>();
+    private Map<String, TileType> tileTypesByName = new HashMap<>();
     private Map<String, Shop> shops = new HashMap<>();
     Map<String, NPCType> npcTypes = new HashMap<>();
     Map<String, ConversationChoice> conversationChoices = new HashMap<>();
-    Map<String, ItemAction> itemActions = new HashMap<>();
+    private Map<String, ItemAction> itemActions = new HashMap<>();
     private Map<String, List<Recipe>> recipeList = new HashMap<>();
     private Map<String, ResourceGathering> resourceGathering = new HashMap<>();
-    public int playerStartX;
-    public int playerStartY;
+    private int playerStartX;
+    private int playerStartY;
     HashMap<String, ItemAction> itemUses = new HashMap<>();
     Map<String, ItemAction> tileItemUses = new HashMap<>();
     Map<String, ItemAction> objectItemUses = new HashMap<>();
@@ -46,6 +46,7 @@ public class GameData {
         }
     }
 
+    @SuppressWarnings("unused") //TODO: Load Resource Gathering Methods from buffer
     private void loadResourceGathering(BufferedReader buffer) {
         resourceGathering.put("Mine", new ResourceGathering(
                 "Rock",
@@ -139,20 +140,26 @@ public class GameData {
                 String itemClass = itemData[1];
                 switch(itemClass) {
                     case "Item":
-                        items.put(itemID, new Item(itemData[2], Boolean.parseBoolean(itemData[3])));
+                        items.put(itemID, new Item(itemData[2], Item.parseActions(itemData[3])));
                         break;
                     case "Weapon":
                         items.put(itemID, new Weapon(itemData[2],
-                                Boolean.parseBoolean(itemData[3]), itemData[4], Integer.parseInt(itemData[5])));
+                                Item.parseActions(itemData[3]), itemData[4], Integer.parseInt(itemData[5])));
                         break;
                     case "Hatchet":
                         items.put(itemID, new Hatchet(itemData[2],
-                                Boolean.parseBoolean(itemData[3]), Integer.parseInt(itemData[4])));
+                                Item.parseActions(itemData[3]), Integer.parseInt(itemData[4])));
                         break;
                     case "Armour":
-                        items.put(itemID, new Armour(itemData[2], Boolean.parseBoolean(itemData[3]),
+                        items.put(itemID, new Armour(itemData[2], Item.parseActions(itemData[3]),
                                 Slot.valueOf(itemData[4]), Integer.parseInt(itemData[5])));
                         break;
+                    case "Consumable":
+                        items.put(itemID, new Consumable(itemData[2], Item.parseActions(itemData[3]),
+                                Consumable.parseStatChanges(itemData[4])));
+                        break;
+                    default:
+                        throw new IllegalArgumentException(itemClass);
                 }
 
             }
@@ -292,7 +299,7 @@ public class GameData {
     }
 
     public Player newPlayer() {
-        List playerItems = Arrays.asList(
+        List<Item> playerItems = Arrays.asList(
                 items.get("BronzeDagger").copy(),
                 items.get("BronzeHatchet").copy(),
                 items.get("SteelFlint").copy(),
@@ -301,7 +308,9 @@ public class GameData {
                 items.get("Hammer").copy());
         return new Player(
                 10, 10,
-                0, Collections.emptyMap(), Collections.emptyMap(), null, Collections.emptyMap(), playerItems, Collections.emptyMap(),
+                100, 100,
+                0, Collections.emptyMap(), Collections.emptyMap(), null, Collections.emptyMap(),
+                playerItems, Collections.emptyMap(),
                 playerStartX, playerStartY);
     }
 
@@ -320,6 +329,7 @@ public class GameData {
         }
     }
 
+    @SuppressWarnings("unused") //TODO: Load ItemActions from buffer
     private void loadItemActions(BufferedReader buffer) {
         itemActions.put("Firemaking", new ItemAction() {
             @Override

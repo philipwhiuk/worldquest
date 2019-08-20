@@ -14,9 +14,14 @@ public class Player extends GameCharacter {
     Map<String, Quest> quests;
     int money;
     int itemBeingUsed = -1;
+    int maxFood;
+    int food;
+    int foodTick;
 
     Player(int x, int y) {
         super(Color.YELLOW, x, y, 10, 10);
+        this.food = 100;
+        this.maxFood = 100;
         this.armour = new HashMap<>();
         this.inventory = new Inventory();
         this.stats = new HashMap<>();
@@ -25,17 +30,21 @@ public class Player extends GameCharacter {
     }
 
     Player(
-            int maxHealth, int health, int money,
+            int maxHealth, int health,
+            int maxFood, int food,
+            int money,
             Map<String,Experience> stats,
             Map<String,Experience> skills,
             Weapon mainHandWeapon, Map<Slot, Armour> armour,
             List<Item> items, Map<String, Quest> quests,
             int x, int y) {
         this(x, y);
-        this.mainHandWeapon = mainHandWeapon;
         this.maxHealth = maxHealth;
         this.health = health;
+        this.maxFood = maxFood;
+        this.food = food;
         this.money = money;
+        this.mainHandWeapon = mainHandWeapon;
         this.armour = new HashMap<>();
         this.armour.putAll(armour);
         this.inventory = new Inventory();
@@ -155,5 +164,22 @@ public class Player extends GameCharacter {
 
     public Quest getQuest(String name) {
         return quests.get(name);
+    }
+
+    public void applyStatChanges(List<StatChange> statChanges) {
+        for (StatChange s : statChanges) {
+            switch(s.stat) {
+                case "Health":
+                    health += s.change;
+                    if (health > maxHealth)
+                        health = maxHealth;
+                    break;
+                case "Food":
+                    food += s.change;
+                    if (food > maxFood)
+                        food = maxFood;
+                    break;
+            }
+        }
     }
 }

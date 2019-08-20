@@ -46,6 +46,6 @@ class NPCsTab extends SidebarTab {
 
     private Rectangle npcButtonTalkLocation(int index) {
         int offset = 20*index;
-        return new Rectangle(433,155+offset, 15, 15);
+        return new Rectangle(433,y+15+offset, 15, 15);
     }
 }

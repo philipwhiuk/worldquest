@@ -1,35 +1,57 @@
 package com.whiuk.philip.worldquest;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.whiuk.philip.worldquest.Item.ItemAction.EQUIP;
+import static com.whiuk.philip.worldquest.Item.ItemAction.USE;
 
 public class Item {
+
+    enum ItemAction {
+        EQUIP, USE, EAT
+    }
+
     static Item parseItem(String itemData) {
         String[] data = itemData.split(",");
-        return new Item(data[0], Boolean.parseBoolean(data[1]));
+        return new Item(data[0], parseActions(data[1]));
+    }
+
+    static List<ItemAction> parseActions(String actionData) {
+        return Arrays
+                .stream(actionData.split("\\|"))
+                .map(ItemAction::valueOf)
+                .collect(Collectors.toList());
     }
 
     final String name;
-    final boolean useable;
+    final List<ItemAction> actions;
 
-    Item(String name, boolean useable) {
+    Item(String name, List<ItemAction> actions) {
         this.name = name;
-        this.useable = useable;
+        this.actions = actions;
     }
 
     public Item copy() {
-        return new Item(this.name, this.useable);
+        return new Item(this.name, this.actions);
     }
 
     public boolean canUse() {
-        return useable;
+        return actions.contains(USE);
     }
 
     public boolean canEquip() {
-        return false;
+        return actions.contains(EQUIP);
     }
 
     public String print() {
-        return this.name+","+useable;
+        return this.name+","+actions.stream().map(Enum::name).collect(Collectors.joining("|"));
+    }
+
+    public ItemAction getPrimaryAction() {
+        return actions.get(0);
     }
 
     @Override
@@ -40,6 +62,10 @@ public class Item {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    public boolean hasAction() {
+        return !actions.isEmpty();
     }
 }
 
@@ -52,20 +78,20 @@ class Armour extends Item {
     static Armour parseItem(String itemData) {
         String[] itemDataFields = itemData.split(",");
         return new Armour(itemDataFields[0],
-                Boolean.parseBoolean(itemDataFields[1]),
+                parseActions(itemDataFields[1]),
                 Slot.valueOf(itemDataFields[2]),
                 Integer.parseInt(itemDataFields[3]));
     }
 
-    Armour(String name, boolean useable, Slot slot, int protection) {
-        super(name, useable);
+    Armour(String name, List<ItemAction> actions, Slot slot, int protection) {
+        super(name, actions);
         this.slot = slot;
         this.protection = protection;
     }
 
     @Override
     public Armour copy() {
-        return new Armour(name, useable, slot, protection);
+        return new Armour(name, actions, slot, protection);
     }
 
     @Override
@@ -87,20 +113,20 @@ class Weapon extends Item {
         String[] itemDataFields = itemData.split(",");
         return new Weapon(
                 itemDataFields[0],
-                Boolean.parseBoolean(itemDataFields[1]),
+                parseActions(itemDataFields[1]),
                 itemDataFields[2],
                 Integer.parseInt(itemDataFields[3]));
     }
 
-        Weapon(String name, boolean useable, String type, int damage) {
-        super(name, useable);
+        Weapon(String name, List<ItemAction> actions, String type, int damage) {
+        super(name, actions);
         this.type = type;
         this.damage = damage;
     }
 
     @Override
     public Weapon copy() {
-        return new Weapon(this.name, this.useable, this.type, damage);
+        return new Weapon(this.name, this.actions, this.type, damage);
     }
 
     @Override
@@ -114,20 +140,78 @@ class Weapon extends Item {
     }
 }
 
+class Consumable extends Item {
+
+    public List<StatChange> statChanges;
+
+    static Consumable parseItem(String itemData) {
+        String[] itemDataFields = itemData.split(",");
+        return new Consumable(itemDataFields[0],
+                parseActions(itemDataFields[1]),
+                parseStatChanges(itemDataFields[2]));
+    }
+
+    static List<StatChange> parseStatChanges(String statData) {
+        String[] data = statData.split("\\|");
+        List<StatChange> statChanges = new ArrayList<>();
+        for (int i = 0; i < data.length; i += 2) {
+            statChanges.add(new StatChange(data[i], Integer.parseInt(data[i+1])));
+        }
+        return statChanges;
+    }
+
+    static String printStatChanges(List<StatChange> statChanges) {
+        return statChanges
+                .stream()
+                .map(s -> s.stat+"|" + s.change)
+                .collect(Collectors.joining("|"));
+    }
+
+    Consumable(String name, List<ItemAction> actions, List<StatChange> statChanges) {
+        super(name, actions);
+        this.statChanges = statChanges;
+    }
+
+    @Override
+    public Consumable copy() {
+        return new Consumable(name, actions, statChanges);
+    }
+
+    @Override
+    public boolean canEquip() {
+        return true;
+    }
+
+    @Override
+    public String print() {
+        return super.print()+","+printStatChanges(statChanges);
+    }
+}
+
+class StatChange {
+    String stat;
+    int change;
+
+    StatChange(String stat, int change) {
+        this.stat = stat;
+        this.change = change;
+    }
+}
+
 class Hatchet extends Weapon {
 
     static Hatchet parseItem(String itemData) {
         String[] itemDataFields = itemData.split(",");
-        return new Hatchet(itemDataFields[0], Boolean.parseBoolean(itemDataFields[1]), Integer.parseInt(itemDataFields[3]));
+        return new Hatchet(itemDataFields[0], parseActions(itemDataFields[1]), Integer.parseInt(itemDataFields[3]));
     }
 
-    Hatchet(String name, boolean useable, int damage) {
-        super(name, useable, "Hatchet", damage);
+    Hatchet(String name, List<ItemAction> actions, int damage) {
+        super(name, actions, "Hatchet", damage);
     }
 
     @Override
     public Hatchet copy() {
-        return new Hatchet(this.name, this.useable, damage);
+        return new Hatchet(this.name, this.actions, damage);
     }
 
     @Override

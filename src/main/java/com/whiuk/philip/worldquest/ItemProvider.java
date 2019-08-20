@@ -12,6 +12,8 @@ public class ItemProvider {
                 return Armour.parseItem(itemClassData[1]);
             case "Hatchet":
                 return Hatchet.parseItem(itemClassData[1]);
+            case "Consumable":
+                return Consumable.parseItem(itemClassData[1]);
         }
         throw new IllegalArgumentException(itemClassData[0]);
     }

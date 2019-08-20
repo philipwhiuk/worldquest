@@ -31,7 +31,7 @@ class ItemsTab extends SidebarTab {
             );
         }
 
-        if (item.canEquip()) {
+        if (item.hasAction()) {
             ButtonPainter.paintButton(g,
                     Color.GREEN,
                     Color.DARK_GRAY,
@@ -60,7 +60,7 @@ class ItemsTab extends SidebarTab {
                 game.useItem(i);
                 return;
             } else if (inventoryButtonLocation(i, 1).contains(e.getPoint())) {
-                game.equipItem(i);
+                game.actionItem(i);
                 return;
             } else if (inventoryButtonLocation(i, 2).contains(e.getPoint())) {
                 if (game.inShop()) {

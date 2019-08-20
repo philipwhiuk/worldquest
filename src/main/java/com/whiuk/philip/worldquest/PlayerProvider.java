@@ -84,9 +84,11 @@ public class PlayerProvider {
                     Integer.parseInt(playerStatus[0]),
                     Integer.parseInt(playerStatus[1]),
                     Integer.parseInt(playerStatus[2]),
-                    stats, skills, weapon, armour, inventory, quests,
                     Integer.parseInt(playerStatus[3]),
-                    Integer.parseInt(playerStatus[4])
+                    Integer.parseInt(playerStatus[4]),
+                    stats, skills, weapon, armour, inventory, quests,
+                    Integer.parseInt(playerStatus[5]),
+                    Integer.parseInt(playerStatus[6])
             );
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse player", e);
@@ -95,7 +97,9 @@ public class PlayerProvider {
 
     public static void savePlayer(BufferedWriter buffer, Player player) throws IOException {
         buffer.write(String.join(",",
-                ""+player.maxHealth, ""+player.health, ""+player.money,
+                ""+player.maxHealth, ""+player.health,
+                ""+player.maxFood, ""+player.food,
+                ""+player.money,
                 ""+player.x, ""+player.y));
         buffer.newLine();
         buffer.write(""+player.stats.size());
