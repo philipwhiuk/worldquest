@@ -2,7 +2,6 @@
 
 ### V1.0
 
-* Hunger, food
 * Armour and healing
 * A decent-size game world with rivers, bridges, forests and dungeons
 * Doors that require keys
@@ -11,8 +10,8 @@
 * Quest requirements
 * Persistent NPC death & health
 * At least one multi-step quest
-* Selling items
 * Hit splats
+* Weapons with different attack speeds
 * AI with different combat strategies
 * Leatherworking
 * Ranged weapons
@@ -21,6 +20,7 @@
 * Prospecting
 * House building
 * Fishing spots with different types of fish
+* Impact of hunger and balancing changes
 * "Ability" to burn food
 * More complex food (pies, bread, etc)
 * Right-click actions
