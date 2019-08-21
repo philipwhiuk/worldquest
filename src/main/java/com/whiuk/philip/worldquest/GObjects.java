@@ -333,14 +333,13 @@ public class GObjects {
 
     static class ItemDropBuilder extends GameObjectBuilder {
         public GameObject build(String[] arguments) {
-            if (arguments.length != 2) {
+            if (arguments.length == 1) {
+                return new ItemDrop(Integer.parseInt(arguments[0]));
+            }
+            else if (arguments.length != 2) {
                 throw new IllegalArgumentException("Expected money and item only: " + Arrays.toString(arguments));
             }
-            if (arguments[0].length() > 0) {
-                return new ItemDrop(Integer.parseInt(arguments[0]));
-            } else {
-                return new ItemDrop(ItemProvider.parseItem(arguments[1]));
-            }
+            return new ItemDrop(ItemProvider.parseItem(arguments[1]));
         }
     }
 
@@ -377,7 +376,7 @@ public class GObjects {
 
         @Override
         public String asString() {
-            return money+","+(item != null ? ItemProvider.printItem(item).replaceAll(",","\\|") : "");
+            return money+","+(item != null ? ItemProvider.printItem(item).replaceAll(",","|") : "");
         }
 
         @Override

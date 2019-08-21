@@ -25,8 +25,12 @@ public class ItemProvider {
             return "Armour,"+resource.print();
         } else if (resource instanceof Weapon) {
             return "Weapon,"+resource.print();
-        } else {
+        } else if (resource instanceof Consumable) {
+            return "Consumable,"+resource.print();
+        } else if (resource.getClass().equals(Item.class)) {
             return "Item,"+resource.print();
+        } else {
+            throw new IllegalArgumentException("Unhandled class");
         }
     }
 }

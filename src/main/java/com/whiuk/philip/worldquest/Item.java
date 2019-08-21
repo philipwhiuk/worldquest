@@ -69,7 +69,12 @@ public class Item {
     }
 }
 
-enum Slot {OFF_HAND, CHEST }
+enum Slot {OFF_HAND("Off-hand"), CHEST("Chest"), LEGS("Legs"), ARMS("Arms"), HANDS("Hands"), FEET("Feet"), HEAD("Head");
+    public String friendlyName;
+    Slot(String friendlyName) {
+        this.friendlyName = friendlyName;
+    }
+}
 
 class Armour extends Item {
     final Slot slot;

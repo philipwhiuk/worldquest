@@ -1,4 +1,4 @@
-20
+26
 BronzeDagger,Weapon,Bronze dagger,EQUIP,Dagger,2
 BronzeSword,Weapon,Bronze sword,EQUIP,Sword,4
 BronzeHatchet,Hatchet,Bronze hatchet,EQUIP|USE,3
@@ -19,6 +19,12 @@ RawChicken,Item,Raw chicken,USE
 FishingRod,Item,Fishing rod,USE
 RawCatfish,Item,Raw catfish,USE
 Catfish,Consumable,Catfish,EAT|USE,Food|5
+BronzeChainbody,Armour,Bronze chainbody,EQUIP,CHEST,3
+BronzePlatebody,Armour,Bronze platebody,EQUIP,CHEST,4
+BronzePlatelegs,Armour,Bronze platelegs,EQUIP,LEGS,3
+BronzeNasalHelm,Armour,Bronze nasalhelm,EQUIP,HEAD,2
+BronzeGreatHelm,Armour,Bronze greathelm,EQUIP,HEAD,3
+BronzeBascinet,Armour,Bronze bascinet,EQUIP,HEAD,3
 1
 GoblinSlaying,1
 Goblin,5
@@ -103,7 +109,7 @@ NOT_STARTED,King_DefaultOpening
 FINISHED,King_DefaultOpening
 STARTED,King_GoblinSlayerProgressRequest
 COMPLETE,King_GoblinSlayerProgressRequest
-4
+10
 Bronze,2,1,Bronze Bar,100,0,1
 CopperOre,1
 TinOre,1
@@ -112,11 +118,35 @@ Smelting,10
 BronzeSword,1,1,Bronze Sword,100,0,1
 BronzeBar,2
 BronzeSword,1
-Smithing,10
+Smithing,20
 BronzeHatchet,1,1,Bronze Hatchet,100,0,1
 BronzeBar,1
 BronzeHatchet,1
 Smithing,10
+BronzeChainbody,1,1,Bronze Chainbody,100,0,1
+BronzeBar,3
+BronzeChainbody,1
+Smithing,30
+BronzePlatebody,1,1,Bronze Platebody,100,0,1
+BronzeBar,4
+BronzePlatebody,1
+Smithing,40
+BronzePlatelegs,1,1,Bronze Platelegs,100,0,1
+BronzeBar,3
+BronzePlatelegs,1
+Smithing,30
+BronzeNasalHelm,1,1,Bronze Nasalhelm,100,0,1
+BronzeBar,1
+BronzeNasalHelm,1
+Smithing,10
+BronzeGreatHelm,1,1,Bronze Greathelm,100,0,1
+BronzeBar,2
+BronzeGreatHelm,1
+Smithing,20
+BronzeBascinet,1,1,Bronze Bascinet,100,0,1
+BronzeBar,2
+BronzeBascinet,1
+Smithing,20
 Catfish,1,1,Catfish,100,0,1
 RawCatfish,1
 Catfish,1
@@ -124,9 +154,15 @@ Cooking,10
 3
 Smelt,1
 Bronze
-Smith,2
+Smith,8
 BronzeHatchet
 BronzeSword
+BronzeChainbody
+BronzePlatebody
+BronzePlatelegs
+BronzeNasalHelm
+BronzeGreatHelm
+BronzeBascinet
 Cook,1
 Catfish
 1

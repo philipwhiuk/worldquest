@@ -121,7 +121,8 @@ public class Player extends GameCharacter {
 
     @Override
     void takeHit(int damage) {
-        if (armour.get(Slot.CHEST) != null) {
+        Slot location = calculateSlot();
+        if (armour.get(location) != null) {
             damage -= armour.get(Slot.CHEST).protection;
         }
         if (damage < 0) {
@@ -133,6 +134,30 @@ public class Player extends GameCharacter {
         } else {
             health -= damage;
         }
+    }
+
+    private Slot calculateSlot() {
+        int locationRoll = RandomSource.getRandom().nextInt(100);
+        if (locationRoll < 44) {
+            return Slot.CHEST;
+        }
+        locationRoll -= 44;
+        if (locationRoll < 22) {
+            return Slot.LEGS;
+        }
+        locationRoll -= 22;
+        if (locationRoll < 16) {
+            return Slot.HEAD;
+        }
+        locationRoll -= 16;
+        if (locationRoll < 12) {
+            return Slot.ARMS;
+        }
+        locationRoll -= 12;
+        if (locationRoll < 3) {
+            return Slot.HANDS;
+        }
+        return Slot.FEET;
     }
 
     @Override

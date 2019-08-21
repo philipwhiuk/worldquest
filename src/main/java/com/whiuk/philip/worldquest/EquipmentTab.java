@@ -2,6 +2,7 @@ package com.whiuk.philip.worldquest;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 class EquipmentTab extends SidebarTab {
     WorldQuest game;
@@ -23,11 +24,15 @@ class EquipmentTab extends SidebarTab {
         g.drawString("Armour:", 425, offset);
         offset += 20;
 
-        Armour chestArmour = game.player.armour.get(Slot.CHEST);
-        String chestArmourName = chestArmour != null ?
-                chestArmour.name + " (+"+chestArmour.protection+")" :
-                "";
-        g.drawString("Chest: " + chestArmourName, 450, offset);
+        for (Map.Entry<Slot, Armour> piece : game.player.armour.entrySet()) {
+            Slot slot = piece.getKey();
+            Armour armour = piece.getValue();
+            String armourDescription = armour != null ?
+                    armour.name + " (+"+armour.protection+")" :
+                    "";
+            g.drawString(slot.friendlyName+": " + armourDescription, 450, offset);
+            offset += 20;
+        }
     }
 
     @Override
