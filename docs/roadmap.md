@@ -2,14 +2,14 @@
 
 ### V1.0
 
-* Armour and healing
-* A decent-size game world with rivers, bridges, forests and dungeons
+* A decent-size game world with farms, rivers, bridges, forests and dungeons
 * Doors that require keys
 * Fetch quests
 * Quest rewards
 * Quest requirements
 * Persistent NPC death & health
 * At least one multi-step quest
+* Healing
 * Hit splats
 * Weapons with different attack speeds
 * AI with different combat strategies
