@@ -1,5 +1,7 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ButtonPainter;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 

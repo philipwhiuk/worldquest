@@ -1,8 +1,8 @@
-package com.whiuk.philip.worldquest;
+package com.whiuk.philip.worldquest.ui;
 
 import java.awt.*;
 
-abstract public class TextButton extends Rectangle implements UI {
+abstract public class ToggleButton extends Rectangle implements UI {
 
     private final Color primaryColor;
     private final Color secondaryColour;
@@ -11,7 +11,7 @@ abstract public class TextButton extends Rectangle implements UI {
     private final String text;
     private boolean isToggled;
 
-    TextButton(Color primaryColor, Color secondaryColour, int x, int y, String text, boolean isToggled) {
+    public ToggleButton(Color primaryColor, Color secondaryColour, int x, int y, String text, boolean isToggled) {
         super(x,y, 45, 20);
         this.primaryColor = primaryColor;
         this.secondaryColour = secondaryColour;
@@ -30,7 +30,7 @@ abstract public class TextButton extends Rectangle implements UI {
         g.drawString(text, x+5, y + 14);
     }
 
-    void changeToggleState(boolean newState) {
+    public void changeToggleState(boolean newState) {
         this.isToggled = newState;
     }
 }

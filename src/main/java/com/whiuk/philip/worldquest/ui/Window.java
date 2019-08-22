@@ -1,15 +1,15 @@
-package com.whiuk.philip.worldquest;
+package com.whiuk.philip.worldquest.ui;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-abstract class Window extends Rectangle implements UI {
-    private final Button closeButton;
+public abstract class Window extends Rectangle implements UI {
+    private final com.whiuk.philip.worldquest.ui.Button closeButton;
     private final String title;
     private final Rectangle frame;
     private Runnable onCloseListener = null;
 
-    Window(int x, int y, int width, int height, String title) {
+    protected Window(int x, int y, int width, int height, String title) {
         super(x, y, width, height);
         this.title = title;
         this.frame = new Rectangle(x,y+40, width, height-40);
@@ -42,9 +42,9 @@ abstract class Window extends Rectangle implements UI {
         renderWindowFrame(g);
     }
 
-    abstract void renderWindowFrame(Graphics2D g);
+    protected abstract void renderWindowFrame(Graphics2D g);
 
-    void setOnClose(Runnable onCloseListener) {
+    public void setOnClose(Runnable onCloseListener) {
         this.onCloseListener = onCloseListener;
     }
 
@@ -55,6 +55,6 @@ abstract class Window extends Rectangle implements UI {
         }
     }
 
-    void handleClose() {
+    protected void handleClose() {
     }
 }

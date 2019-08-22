@@ -1,5 +1,8 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ToggleButton;
+import com.whiuk.philip.worldquest.ui.UI;
+
 import java.awt.event.MouseEvent;
 import java.awt.*;
 
@@ -8,7 +11,7 @@ import static com.whiuk.philip.worldquest.WorldQuest.GameState.DEAD;
 class SidebarUI extends Rectangle implements UI {
     private WorldQuest game;
     private SidebarTab[] tabs;
-    private TextButton[] tabButtons;
+    private ToggleButton[] tabButtons;
     private SidebarTab activeTab;
 
     SidebarUI(WorldQuest game) {
@@ -22,38 +25,38 @@ class SidebarUI extends Rectangle implements UI {
                 new NPCsTab(game),
                 new QuestsTab(game)
         };
-        tabButtons = new TextButton[]{
-                new TextButton(Color.GREEN, Color.BLACK, 425, 100, "Stats", false) {
+        tabButtons = new ToggleButton[]{
+                new ToggleButton(Color.GREEN, Color.BLACK, 425, 100, "Stats", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(0);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 100, "Skills", false) {
+                new ToggleButton(Color.GREEN, Color.BLACK, 475, 100, "Skills", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(1);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 525, 100, "Equip.", false) {
+                new ToggleButton(Color.GREEN, Color.BLACK, 525, 100, "Equip.", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(2);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 425, 125, "Items", false) {
+                new ToggleButton(Color.GREEN, Color.BLACK, 425, 125, "Items", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(3);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 475, 125, "NPCs", false) {
+                new ToggleButton(Color.GREEN, Color.BLACK, 475, 125, "NPCs", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(4);
                     }
                 },
-                new TextButton(Color.GREEN, Color.BLACK, 525, 125, "Quests", false) {
+                new ToggleButton(Color.GREEN, Color.BLACK, 525, 125, "Quests", false) {
                     @Override
                     public void onClick(MouseEvent e) {
                         setActiveTab(5);
@@ -66,7 +69,7 @@ class SidebarUI extends Rectangle implements UI {
     @Override
     public void render(Graphics2D g) {
         paintStats(g, game);
-        for (TextButton button : tabButtons) {
+        for (ToggleButton button : tabButtons) {
             button.render(g);
         }
         activeTab.render(g);
@@ -99,7 +102,7 @@ class SidebarUI extends Rectangle implements UI {
 
     @Override
     public void onClick(MouseEvent e) {
-        for (TextButton button : tabButtons) {
+        for (ToggleButton button : tabButtons) {
             if (button.contains(e.getPoint())) {
                 button.onClick(e);
                 return;

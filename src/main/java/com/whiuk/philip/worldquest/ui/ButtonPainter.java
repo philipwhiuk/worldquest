@@ -1,4 +1,4 @@
-package com.whiuk.philip.worldquest;
+package com.whiuk.philip.worldquest.ui;
 
 import java.awt.*;
 

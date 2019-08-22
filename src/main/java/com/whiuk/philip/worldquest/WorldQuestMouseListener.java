@@ -1,5 +1,7 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.UI;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 

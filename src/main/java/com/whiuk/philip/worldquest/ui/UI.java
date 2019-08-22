@@ -1,9 +1,9 @@
-package com.whiuk.philip.worldquest;
+package com.whiuk.philip.worldquest.ui;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-interface UI {
+public interface UI {
     void render(Graphics2D g);
     void onClick(MouseEvent e);
 }

@@ -1,5 +1,7 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.UI;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,9 +17,6 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.GameFileUtils.*;
-import static com.whiuk.philip.worldquest.Item.ItemAction.EAT;
-import static com.whiuk.philip.worldquest.Item.ItemAction.EQUIP;
-import static com.whiuk.philip.worldquest.Item.ItemAction.USE;
 import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
 import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
@@ -93,8 +92,6 @@ public class WorldQuest extends JFrame {
     private LoadingScreen loadingScreen;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
-    private SidebarUI sidebar;
-    private MessageDisplay messages;
     private MessageState messageState;
 
     private String scenario = DEFAULT_SCENARIO;
@@ -162,7 +159,7 @@ public class WorldQuest extends JFrame {
         return menuBar;
     }
 
-    void loadSave(String scenarioName, String saveFolder) {
+    void loadSave(String saveFolder) {
         if (!GameFileUtils.savedGameExists(saveFolder)) {
             JOptionPane.showMessageDialog(WorldQuest.this,
                     "Saved Game Doesn't Exist",
@@ -171,9 +168,10 @@ public class WorldQuest extends JFrame {
         }
         try {
             gameState = LOADING;
-            scenario = scenarioName;
+            //TODO: fetch scenarioName from save
+            scenario = "default";
             this.saveFolder = saveFolder;
-            loadScenario(scenarioName);
+            loadScenario(scenario);
             loadGame();
             continueGame();
         } catch (Exception e) {
@@ -190,6 +188,7 @@ public class WorldQuest extends JFrame {
         try {
             gameState = LOADING;
             scenario = scenarioName;
+            //TODO: New Save Folder
             this.saveFolder = saveFolder;
             loadScenario(scenarioName);
             GameFileUtils.deleteDirectory(new File("saves/"+saveFolder).toPath());
@@ -246,9 +245,9 @@ public class WorldQuest extends JFrame {
     private void continueGame() {
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
         gameUI = new GameUI();
-        gameScreen = new GameScreen(new MapView());
-        sidebar = new SidebarUI(this);
-        messages = new MessageDisplay();
+        SidebarUI sidebar = new SidebarUI(this);
+        MessageDisplay messages = new MessageDisplay();
+        gameScreen = new GameScreen(new MapView(), sidebar, messages);
         gameState = RUNNING;
     }
 
@@ -396,6 +395,10 @@ public class WorldQuest extends JFrame {
         return gameState == SHOP;
     }
 
+    public boolean isRunning() {
+        return gameState == SHOP || gameState == RUNNING;
+    }
+
     private class WorldQuestCanvas extends JPanel implements Runnable {
 
         WorldQuestCanvas(WorldQuestKeyListener keyListener, WorldQuestMouseListener mouseListener) {
@@ -430,38 +433,34 @@ public class WorldQuest extends JFrame {
 
         @Override
         public void render(Graphics2D g) {
+            selectScreen().render(g);
+            //TODO For Game Screen:
+            /*
+            gameScreen.render(g);
+            sidebar.render(g);
+            messages.render(g);
+             */
+        }
+
+        private Screen selectScreen() {
             if (gameState == LAUNCHING || gameState == LOADING) {
-                loadingScreen.render(g);
+                return loadingScreen;
             } else if (gameState == MENU_SCREEN) {
-                menuScreen.render(g);
+                return menuScreen;
             } else if (gameState != DEAD) {
-                gameScreen.render(g);
-                sidebar.render(g);
-                messages.render(g);
+                return gameScreen;
             } else {
-                deathScreen.render(g);
+                return deathScreen;
             }
         }
 
         @Override
         public void onClick(MouseEvent e) {
-            if (gameState == LAUNCHING || gameState == LOADING) {
-                loadingScreen.onClick(e);
-            } else if (gameState == GameState.MENU_SCREEN) {
-                menuScreen.onClick(e);
-            } else {
-                if (gameScreen.contains(e.getPoint())) {
-                    gameScreen.onClick(e);
-                } else if (sidebar.contains(e.getPoint())) {
-                    sidebar.onClick(e);
-                } else if (messages.contains(e.getPoint())) {
-                    messages.onClick(e);
-                }
-            }
+            selectScreen().onClick(e);
         }
     }
 
-    class LoadingScreen implements UI {
+    class LoadingScreen implements Screen {
 
         @Override
         public void render(Graphics2D g) {

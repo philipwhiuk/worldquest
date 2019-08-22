@@ -1,12 +1,14 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ButtonPainter;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class CraftingWindow extends Window {
+class CraftingWindow extends com.whiuk.philip.worldquest.ui.Window {
     private WorldQuest game;
     private CraftingOptions craftingOptions;
 
@@ -17,7 +19,7 @@ class CraftingWindow extends Window {
     }
 
     @Override
-    public void renderWindowFrame(Graphics2D g) {
+    protected void renderWindowFrame(Graphics2D g) {
         paintRecipes(g, craftingOptions.recipes);
     }
 

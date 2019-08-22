@@ -1,10 +1,12 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ButtonPainter;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-class ShopWindow extends Window {
+class ShopWindow extends com.whiuk.philip.worldquest.ui.Window {
     private Shop shop;
     private WorldQuest game;
 
@@ -46,7 +48,7 @@ class ShopWindow extends Window {
     }
 
     @Override
-    void handleClose() {
+    protected void handleClose() {
         game.closeShop();
     }
 }
