@@ -20,7 +20,7 @@ public class MenuScreen extends Rectangle implements Screen {
         Button newGameButton = new Button(Color.WHITE, Color.BLACK, "New", 100, 100) {
             @Override
             public void handleClick(MouseEvent e) {
-                worldQuest.newSaveGame(selectedScenario, selectedSave);
+                worldQuest.newSaveGame(selectedScenario);
             }
         };
         ListSelect scenarioSelector = new ListSelect(

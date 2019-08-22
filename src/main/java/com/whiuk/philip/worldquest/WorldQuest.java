@@ -168,8 +168,7 @@ public class WorldQuest extends JFrame {
         }
         try {
             gameState = LOADING;
-            //TODO: fetch scenarioName from save
-            scenario = "default";
+            String scenario = Files.readAllLines(resourceInSaveFolder(saveFolder, "scenario").toPath()).get(0);
             this.saveFolder = saveFolder;
             loadScenario(scenario);
             loadGame();
@@ -184,15 +183,15 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    void newSaveGame(String scenarioName, String saveFolder) {
+    void newSaveGame(String scenarioName) {
         try {
             gameState = LOADING;
             scenario = scenarioName;
-            //TODO: New Save Folder
-            this.saveFolder = saveFolder;
+            this.saveFolder = GameFileUtils.newSaveFolder();
             loadScenario(scenarioName);
-            GameFileUtils.deleteDirectory(new File("saves/"+saveFolder).toPath());
-            Files.createDirectories(new File("saves/"+saveFolder).toPath());
+            GameFileUtils.deleteSave(saveFolder);
+            GameFileUtils.createSave(saveFolder);
+            writeSaveScenarioFile();
             newGame();
             continueGame();
         } catch (Exception e) {
@@ -204,6 +203,16 @@ public class WorldQuest extends JFrame {
             System.exit(1);
         }
 
+    }
+
+    private void writeSaveScenarioFile() throws IOException {
+        File scenarioFile = resourceInSaveFolder(saveFolder, "scenario");
+        OutputStream scenarioDataStream = new FileOutputStream(scenarioFile);
+        BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(scenarioDataStream));
+        buffer.write(scenario);
+        buffer.flush();
+        buffer.close();
+        scenarioDataStream.close();
     }
 
     private void loadScenario(String scenarioName) {
@@ -434,12 +443,6 @@ public class WorldQuest extends JFrame {
         @Override
         public void render(Graphics2D g) {
             selectScreen().render(g);
-            //TODO For Game Screen:
-            /*
-            gameScreen.render(g);
-            sidebar.render(g);
-            messages.render(g);
-             */
         }
 
         private Screen selectScreen() {
