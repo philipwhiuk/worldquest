@@ -14,7 +14,7 @@ public class WorldQuestWindowAdapter extends WindowAdapter {
     @Override
     public void windowClosing(WindowEvent e) {
         super.windowClosing(e);
-        if (game.isRunning()) {
+        if (game.isGameRunning()) {
             String[] options = {"Save", "Quit", "Cancel"};
             int option = JOptionPane.showOptionDialog(
                     game,

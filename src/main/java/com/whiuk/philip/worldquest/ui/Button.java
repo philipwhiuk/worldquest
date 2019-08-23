@@ -3,7 +3,7 @@ package com.whiuk.philip.worldquest.ui;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public abstract class Button extends Rectangle implements UI {
+public abstract class Button extends ClickableUI {
     private Color primaryColor;
     private Color backgroundColor;
     private String symbol;

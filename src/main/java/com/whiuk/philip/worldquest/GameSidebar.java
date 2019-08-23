@@ -1,21 +1,21 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.Sidebar;
 import com.whiuk.philip.worldquest.ui.ToggleButton;
-import com.whiuk.philip.worldquest.ui.UI;
 
 import java.awt.event.MouseEvent;
 import java.awt.*;
 
-import static com.whiuk.philip.worldquest.WorldQuest.GameState.DEAD;
+import static com.whiuk.philip.worldquest.AppState.GAME_DEAD;
 
-class SidebarUI extends Rectangle implements UI {
+class GameSidebar extends Sidebar {
     private WorldQuest game;
     private SidebarTab[] tabs;
     private ToggleButton[] tabButtons;
     private SidebarTab activeTab;
 
-    SidebarUI(WorldQuest game) {
-        super(400, 0, 240, 480);
+    GameSidebar(WorldQuest game) {
+        super();
         this.game = game;
         tabs = new SidebarTab[]{
                 new StatsTab(game),
@@ -79,7 +79,7 @@ class SidebarUI extends Rectangle implements UI {
         g.setColor(Color.WHITE);
         g.drawString("Stats", 425, 20);
 
-        if (game.gameState == DEAD) {
+        if (game.appState == GAME_DEAD) {
             g.drawString("GAME OVER!", 450, 40);
         } else {
             g.drawString("Health: ", 450, 40);

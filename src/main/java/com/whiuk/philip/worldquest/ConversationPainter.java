@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 import static com.whiuk.philip.worldquest.MapConstants.*;
 
 public class ConversationPainter {
-    public static void paintConversation(Graphics2D g, WorldQuest.MessageState messageState, NPC talkingTo) {
+    public static void paintConversation(Graphics2D g, MessageState messageState, NPC talkingTo) {
         String text = "...";
-        if (messageState == WorldQuest.MessageState.PLAYER_TALKING) {
+        if (messageState == MessageState.PLAYER_TALKING) {
             text = "Player: "+talkingTo.currentConversation.playerText;
-        } else if (messageState == WorldQuest.MessageState.NPC_TALKING) {
+        } else if (messageState == MessageState.NPC_TALKING) {
             text = talkingTo.type.name+": "+talkingTo.currentConversation.npcResponse;
         }
         g.setColor(Color.WHITE);
@@ -26,7 +26,7 @@ public class ConversationPainter {
         g.drawRect(9, CONVERSATION_Y, BORDER_WIDTH, CONVERSATION_HEIGHT);
         QuestState state = new QuestState(game);
         List<ConversationChoice> options = ccs.conversationOptions.stream()
-                .map(choice -> game.gameData.conversationChoices.get(choice))
+                .map(choice -> game.scenarioData.conversationChoices.get(choice))
                 .filter(choice -> choice.canSee.test(state))
                 .collect(Collectors.toList());
         for (int i = 0; i < options.size(); i++) {

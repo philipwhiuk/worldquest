@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.GameFileUtils.*;
 import static com.whiuk.philip.worldquest.MapConstants.*;
-import static com.whiuk.philip.worldquest.WorldQuest.GameState.*;
-import static com.whiuk.philip.worldquest.WorldQuest.MessageState.*;
+import static com.whiuk.philip.worldquest.AppState.*;
+import static com.whiuk.philip.worldquest.MessageState.*;
 
 public class WorldQuest extends JFrame {
+    static final String LICENSE_TEXT = "All rights reserved, Philip Whitehouse (2018)";
     private static final String DEFAULT_SCENARIO = "default";
-    private static final String LICENSE_TEXT = "All rights reserved, Philip Whitehouse (2018)";
     private static final String INITIAL_MAP_FILE = "map000";
     private static final String KEYMAP_FILE = "keymap";
 
@@ -31,6 +31,10 @@ public class WorldQuest extends JFrame {
     private static final HashMap<Integer, Action> keyPressMap = new HashMap<>();
 
     static {
+        setupKeymap();
+    }
+
+    private static void setupKeymap() {
         if (Files.exists(new File(KEYMAP_FILE+FILE_EXTENSION).toPath())) {
             try {
                 readKeymap();
@@ -85,14 +89,17 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
-    GameData gameData;
+    ScenarioData scenarioData;
     private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
 
     private GameUI gameUI;
     private LoadingScreen loadingScreen;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
+    private DeathScreen deathScreen;
+    private Screen editorScreen;
     private MessageState messageState;
+
 
     private String scenario = DEFAULT_SCENARIO;
     private String saveFolder;
@@ -103,9 +110,8 @@ public class WorldQuest extends JFrame {
     List<NPC> visibleNpcs;
     Player player;
     private List<String> eventHistory;
-    GameState gameState = LAUNCHING;
+    AppState appState = LAUNCHING;
     private NPC talkingTo;
-    private DeathScreen deathScreen;
     private List<Room> rooms;
     private String northMap;
     private String eastMap;
@@ -121,8 +127,7 @@ public class WorldQuest extends JFrame {
     private WorldQuest() {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
-        setJMenuBar(buildMenuBar());
-
+        setJMenuBar(new WorldQuestMenuBar(this));
         WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
         gameUI = new GameUI();
         WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this, gameUI);
@@ -144,19 +149,7 @@ public class WorldQuest extends JFrame {
 
     private void showMenu() {
         menuScreen = new MenuScreen(this);
-        gameState = MENU_SCREEN;
-    }
-
-    private JMenuBar buildMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("WorldQuest");
-        JMenuItem licenseItem = new JMenuItem("License");
-        licenseItem.addActionListener(e -> JOptionPane.showMessageDialog(
-                WorldQuest.this,
-                LICENSE_TEXT));
-        menu.add(licenseItem);
-        menuBar.add(menu);
-        return menuBar;
+        appState = MENU_SCREEN;
     }
 
     void loadSave(String saveFolder) {
@@ -167,25 +160,20 @@ public class WorldQuest extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
         try {
-            gameState = LOADING;
+            appState = LOADING;
             String scenario = Files.readAllLines(resourceInSaveFolder(saveFolder, "scenario").toPath()).get(0);
             this.saveFolder = saveFolder;
             loadScenario(scenario);
             loadGame();
             continueGame();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(WorldQuest.this,
-                    e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-            System.exit(1);
+            crashOnError(e);
         }
     }
 
     void newSaveGame(String scenarioName) {
         try {
-            gameState = LOADING;
+            appState = LOADING;
             scenario = scenarioName;
             this.saveFolder = GameFileUtils.newSaveFolder();
             loadScenario(scenarioName);
@@ -195,14 +183,41 @@ public class WorldQuest extends JFrame {
             newGame();
             continueGame();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(WorldQuest.this,
-                    e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-            System.exit(1);
+            crashOnError(e);
         }
+    }
 
+    public void newScenario() {
+        try {
+            appState = LOADING;
+            scenarioData = new ScenarioData();
+            gameObjectBuilders = GObjects.provideBuilders();
+            editorScreen = new EditorScreen();
+            appState = EDITOR_RUNNING;
+        } catch (Exception e) {
+            crashOnError(e);
+        }
+    }
+
+    public void editScenario(String scenarioName) {
+        try {
+            appState = LOADING;
+            scenario = scenarioName;
+            scenarioData = new ScenarioData(scenario);
+            gameObjectBuilders = GObjects.provideBuilders();
+            appState = EDITOR_RUNNING;
+        } catch (Exception e) {
+            crashOnError(e);
+        }
+    }
+
+    private void crashOnError(Throwable e) {
+        JOptionPane.showMessageDialog(WorldQuest.this,
+                e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+        System.exit(1);
     }
 
     private void writeSaveScenarioFile() throws IOException {
@@ -216,13 +231,13 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadScenario(String scenarioName) {
-        gameData = new GameData(scenarioName);
+        scenarioData = new ScenarioData(scenarioName);
         gameObjectBuilders = GObjects.provideBuilders();
     }
 
     private void newGame() {
         loadMap(INITIAL_MAP_FILE);
-        this.player = PlayerProvider.createPlayer(gameData);
+        this.player = PlayerProvider.createPlayer(scenarioData);
         eventHistory = new ArrayList<>();
     }
 
@@ -254,10 +269,10 @@ public class WorldQuest extends JFrame {
     private void continueGame() {
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
         gameUI = new GameUI();
-        SidebarUI sidebar = new SidebarUI(this);
+        GameSidebar sidebar = new GameSidebar(this);
         MessageDisplay messages = new MessageDisplay();
         gameScreen = new GameScreen(new MapView(), sidebar, messages);
-        gameState = RUNNING;
+        appState = GAME_RUNNING;
     }
 
     void saveGame() {
@@ -298,7 +313,7 @@ public class WorldQuest extends JFrame {
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
             MapTileLoader.saveMapTiles(map, buffer);
             MapTileLoader.saveMapExploration(map, buffer);
-            NPCLoader.saveNPCs(gameData.npcTypes, npcs, buffer);
+            NPCLoader.saveNPCs(scenarioData.npcTypes, npcs, buffer);
             GameObjectLoader.saveGameObjects(buffer, map);
             RoomLoader.saveRooms(buffer, rooms);
             buffer.write(northMap); buffer.newLine();
@@ -332,9 +347,9 @@ public class WorldQuest extends JFrame {
         try(
                 InputStream mapDataStream = new FileInputStream(mapFile);
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
-            Tile[][] newMap = MapTileLoader.loadMapTiles(gameData.tileTypes, buffer);
+            Tile[][] newMap = MapTileLoader.loadMapTiles(scenarioData.tileTypes, buffer);
             MapTileLoader.markExploration(newMap, buffer);
-            List<NPC> npcs = NPCLoader.loadNPCs(gameData.npcTypes, buffer);
+            List<NPC> npcs = NPCLoader.loadNPCs(scenarioData.npcTypes, buffer);
             GameObjectLoader.loadGameObjects(gameObjectBuilders, buffer, newMap);
             this.rooms = RoomLoader.loadRooms(buffer, newMap);
             this.northMap = buffer.readLine();
@@ -396,16 +411,16 @@ public class WorldQuest extends JFrame {
         eventHistory.add(message);
     }
 
-    public void attemptResourceGathering(GameData.ResourceGathering resourceGathering, Tile tile) {
+    public void attemptResourceGathering(ScenarioData.ResourceGathering resourceGathering, Tile tile) {
         resourceGathering.gather(this, player, tile);
     }
 
     public boolean inShop() {
-        return gameState == SHOP;
+        return appState == GAME_SHOP;
     }
 
-    public boolean isRunning() {
-        return gameState == SHOP || gameState == RUNNING;
+    public boolean isGameRunning() {
+        return appState == GAME_SHOP || appState == GAME_RUNNING;
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -446,11 +461,13 @@ public class WorldQuest extends JFrame {
         }
 
         private Screen selectScreen() {
-            if (gameState == LAUNCHING || gameState == LOADING) {
+            if (appState == LAUNCHING || appState == LOADING) {
                 return loadingScreen;
-            } else if (gameState == MENU_SCREEN) {
+            } else if (appState == MENU_SCREEN) {
                 return menuScreen;
-            } else if (gameState != DEAD) {
+            } else if (appState == EDITOR_RUNNING) {
+                return editorScreen;
+            } else if (appState != GAME_DEAD) {
                 return gameScreen;
             } else {
                 return deathScreen;
@@ -460,71 +477,6 @@ public class WorldQuest extends JFrame {
         @Override
         public void onClick(MouseEvent e) {
             selectScreen().onClick(e);
-        }
-    }
-
-    class LoadingScreen implements Screen {
-
-        @Override
-        public void render(Graphics2D g) {
-            g.setColor(Color.WHITE);
-            g.drawRect(9,9, BORDER_WIDTH, BORDER_HEIGHT);
-            g.drawString("Loading game", 200, 200);
-        }
-
-        @Override
-        public void onClick(MouseEvent e) {}
-    }
-
-    class MapView implements UI {
-
-        @Override
-        public void render(Graphics2D g) {
-            MapViewPainter.paintMapView(g, WorldQuest.this, map, visibleNpcs, player);
-        }
-
-        @Override
-        public void onClick(MouseEvent e) {
-            Tile t = checkForTileInterception(e.getPoint());
-            if (t != null) {
-                processTileClick(t);
-            }
-        }
-
-        Tile checkForTileInterception(Point p) {
-            double x = p.getX();
-            double y = p.getY();
-            if (x > MAP_SPACING && x < MAP_SPACING+MAP_WIDTH & y > MAP_SPACING & y < MAP_SPACING+MAP_HEIGHT) {
-                int tileX = (int) Math.floor((x - MAP_SPACING)/TILE_WIDTH);
-                int tileY = (int) Math.floor((y - MAP_SPACING)/TILE_HEIGHT);
-                return map[tileX][tileY];
-            }
-            return null;
-        }
-    }
-
-    class DeathScreen implements Screen {
-
-        private void paintEventHistory(Graphics2D g) {
-            g.setColor(Color.BLACK);
-            g.fillRect(40, 40, 560, 400);
-            g.setColor(Color.WHITE);
-            g.drawRect(40, 40, 560, 400);
-            g.drawString("Events", 60, 60);
-            for (int i = 0; i < eventHistory.size() && i < 15; i++) {
-                g.drawString(eventHistory.get(i), 80, 80+(i*20));
-            }
-            g.drawString("New Game? Y/N", 60, 400);
-        }
-
-        @Override
-        public void render(Graphics2D g) {
-            paintEventHistory(g);
-        }
-
-        @Override
-        public void onClick(MouseEvent e) {
-
         }
     }
 
@@ -544,7 +496,7 @@ public class WorldQuest extends JFrame {
                 for (int i = 0; i < 5 && last-i > 0; i++) {
                     g.setColor(Color.WHITE);
                     g.setFont(g.getFont().deriveFont(Font.BOLD,11));
-                    g.drawString(eventHistory.get(last-i), 25, CONVERSATION_Y+80-(i*20));
+                    g.drawString(eventHistory.get(last-i), 25, CONVERSATION_Y+100-(i*20));
                 }
             }
         }
@@ -564,15 +516,15 @@ public class WorldQuest extends JFrame {
     }
 
     void processAction(Action a, KeyEvent e) {
-        if (gameState == RUNNING) {
+        if (appState == GAME_RUNNING) {
             if (messageState == PLAYER_TALKING || messageState == NPC_TALKING || messageState == CONVERSATION_OPTION) {
                 processActionWhileTalking(a, e);
             } else {
                 processActionWhileRunning(a);
             }
-        } else  if (gameState == SHOP) {
+        } else  if (appState == GAME_SHOP) {
             processActionWhileShopping(a);
-        } else if (gameState == DEAD) {
+        } else if (appState == GAME_DEAD) {
             processActionWhileGameOver(a);
         }
     }
@@ -798,13 +750,13 @@ public class WorldQuest extends JFrame {
     }
 
     private boolean useItems(int firstItemIndex, int secondItemIndex) {
-        ItemAction action = gameData.itemUses.get(
+        ItemAction action = scenarioData.itemUses.get(
                 player.inventory.get(firstItemIndex).name+","+player.inventory.get(secondItemIndex).name);
         if (action != null) {
             action.perform(this, map[player.x][player.y], player, firstItemIndex, secondItemIndex);
             return true;
         } else {
-            action = gameData.itemUses.get(
+            action = scenarioData.itemUses.get(
                     player.inventory.get(secondItemIndex).name+","+player.inventory.get(firstItemIndex).name);
             if (action != null) {
                 action.perform(this, map[player.x][player.y], player, secondItemIndex, firstItemIndex);
@@ -817,14 +769,14 @@ public class WorldQuest extends JFrame {
     private boolean useItemOnTile(int itemIndex, Tile tile) {
         String itemName = player.inventory.get(itemIndex).name;
         String key = tile.type.name+","+player.inventory.get(itemIndex).name;
-        ItemAction action = gameData.tileItemUses.get(key);
+        ItemAction action = scenarioData.tileItemUses.get(key);
         if (action != null) {
             action.perform(this, tile, player, itemIndex, -1);
             return true;
         }
         for (GObjects.GameObject object : tile.objects) {
             key = object.getClass().getSimpleName()+","+itemName;
-            action = gameData.objectItemUses.get(key);
+            action = scenarioData.objectItemUses.get(key);
             if (action != null) {
                 action.perform(this, tile, player, itemIndex, -1);
                 return true;
@@ -875,7 +827,7 @@ public class WorldQuest extends JFrame {
         ConversationChoiceSelection selection = ((ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
         List<ConversationChoice> options = selection
                 .conversationOptions.stream()
-                .map(choice -> gameData.conversationChoices.get(choice))
+                .map(choice -> scenarioData.conversationChoices.get(choice))
                 .filter(choice -> choice.canSee.test(new QuestState(this)))
                 .collect(Collectors.toList());
         talkingTo.currentConversation = options.get(i-1);
@@ -955,8 +907,8 @@ public class WorldQuest extends JFrame {
     }
 
     private void gameOver() {
-        gameState = DEAD;
-        deathScreen = new DeathScreen();
+        appState = GAME_DEAD;
+        deathScreen = new DeathScreen(eventHistory);
     }
 
     void switchMap(String map, int startX, int startY) {
@@ -983,7 +935,7 @@ public class WorldQuest extends JFrame {
     }
 
     public void startQuest(String questName) {
-        Quest quest = gameData.quests.get(questName);
+        Quest quest = scenarioData.quests.get(questName);
         if (quest == null) {
             throw new RuntimeException("Unable to start quest "+questName+" - quest not found");
         } else if (player.quests.containsKey(questName)) {
@@ -994,7 +946,7 @@ public class WorldQuest extends JFrame {
     }
 
     void showShop(Shop shop) {
-        gameState = SHOP;
+        appState = GAME_SHOP;
         currentShop = shop;
         gameScreen.showWindow(new ShopWindow(this, shop));
     }
@@ -1004,7 +956,7 @@ public class WorldQuest extends JFrame {
     }
 
     void closeShop() {
-        gameState = RUNNING;
+        appState = GAME_RUNNING;
         currentShop = null;
     }
 
@@ -1021,6 +973,7 @@ public class WorldQuest extends JFrame {
         if (inSameRoom(x, y)) {
             return true;
         }
+        //noinspection RedundantIfStatement
         if (map[player.x][player.y].room == null && visibleRoomEdge(x,y)) {
                 return true;
         }
@@ -1046,6 +999,7 @@ public class WorldQuest extends JFrame {
         if (player.y < y && mapRoom.getMinY() == y) {
             return true;
         }
+        //noinspection RedundantIfStatement
         if (player.y > y && mapRoom.getMaxY() == y+1) {
             return true;
         }
@@ -1063,18 +1017,6 @@ public class WorldQuest extends JFrame {
         messageState = CHATBOX;
     }
 
-    enum GameState {
-        LAUNCHING, LOADING,
-        RUNNING,
-        SHOP,
-        MENU_SCREEN, DEAD
-    }
-
-    enum MessageState {
-        CHATBOX,
-        CONVERSATION_OPTION,
-        PLAYER_TALKING, NPC_TALKING
-    }
 
     public void buyItem(Shop shop, int i) {
         ShopListing s = shop.items.get(i);

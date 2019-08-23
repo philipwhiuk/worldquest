@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class PlayerProvider {
 
-    static Player createPlayer(GameData gameData) {
-        return gameData.newPlayer();
+    static Player createPlayer(ScenarioData scenarioData) {
+        return scenarioData.newPlayer();
     }
 
     public static Player loadPlayer(BufferedReader buffer) throws IOException {

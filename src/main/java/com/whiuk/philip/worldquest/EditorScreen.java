@@ -7,13 +7,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Stack;
 
-class GameScreen extends Rectangle implements Screen {
+class EditorScreen extends Rectangle implements Screen {
     private final Rectangle mainViewSize;
-    private final GameSidebar sidebar;
+    private final EditorSidebar sidebar;
     private final WorldQuest.MessageDisplay messageDisplay;
     private Stack<UI> mainViewStack = new Stack<>();
 
-    GameScreen(UI initialView, GameSidebar sidebar, WorldQuest.MessageDisplay messageDisplay) {
+    EditorScreen(UI initialView, EditorSidebar sidebar, WorldQuest.MessageDisplay messageDisplay) {
         mainViewSize = new Rectangle(0, 0, 420, 420);
         mainViewStack.push(initialView);
         this.sidebar = sidebar;

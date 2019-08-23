@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class ListSelect implements UI {
+public abstract class ListSelect extends ClickableUI {
     private final Color primary;
     private final Color secondary;
     private String selectedItem;
@@ -24,6 +24,7 @@ public abstract class ListSelect implements UI {
             String selectedItem,
             List<String> items,
             Function<String, String> renderFunction) {
+        super(x,y, 100, items.size()*20);
         this.x = x;
         this.y = y;
         this.primary = primary;
@@ -40,7 +41,7 @@ public abstract class ListSelect implements UI {
     @Override
     public void render(Graphics2D g) {
         g.setColor(primary);
-        g.drawRect(x,y, 100, items.size()*20);
+        g.draw(this);
         for (int i = 0; i < items.size(); i++) {
             String item = items.get(i);
             boolean itemSelected = isSelected(item);
@@ -70,7 +71,7 @@ public abstract class ListSelect implements UI {
         return item.equals(selectedItem);
     }
 
-    public void setSelected(String item) {
+    protected void setSelected(String item) {
         this.selectedItem = item;
     }
 }

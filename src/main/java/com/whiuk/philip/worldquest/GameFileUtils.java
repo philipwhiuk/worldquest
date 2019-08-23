@@ -43,6 +43,7 @@ public class GameFileUtils {
                     .list(new File(SCENARIOS_FOLDER).toPath())
                     .filter(p -> p.toFile().isDirectory())
                     .map(p -> p.getFileName().toString())
+                    .sorted()
                     .collect(Collectors.toList());
         } catch (IOException e) {
             System.err.println("Unable to find scenarios");
@@ -57,6 +58,7 @@ public class GameFileUtils {
                     .filter(p -> p.toFile().isDirectory())
                     .map(p -> p.getFileName().toString())
                     .filter(s -> s.matches("save[0-9]*"))
+                    .sorted()
                     .collect(Collectors.toList());
         } catch (IOException e) {
             System.err.println("Unable to find saved games");

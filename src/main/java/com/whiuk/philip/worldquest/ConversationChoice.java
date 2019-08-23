@@ -38,7 +38,7 @@ class ConversationChoiceSelection implements NPCAction {
     }
 
     public void doAction(WorldQuest game, NPC npc) {
-        game.setMessageState(WorldQuest.MessageState.CONVERSATION_OPTION);
+        game.setMessageState(MessageState.CONVERSATION_OPTION);
     }
 }
 
