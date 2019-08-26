@@ -42,3 +42,5 @@
 * Map-click actions
 * WASD controls
 * Game messages for feedback
+* Multiple saved games
+* Multiple scenarios

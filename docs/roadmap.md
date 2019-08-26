@@ -2,7 +2,6 @@
 
 ### V1.0
 
-* Multiple scenarios
 * Scenario editor
 * A decent-size game world with farms, rivers, bridges, forests and dungeons
 * Doors that require keys
