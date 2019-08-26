@@ -14,6 +14,7 @@ public class GameFileUtils {
     static final String FILE_EXTENSION = ".dat";
     static final String PLAYER_SAVE_FILE = "player";
     static final String SCENARIOS_FOLDER = "scenario";
+    static final String BASE_FOLDER = "base";
     static final String SAVES_FOLDER = "saves";
 
     static void deleteDirectory(Path pathToBeDeleted) throws IOException {
@@ -35,6 +36,10 @@ public class GameFileUtils {
 
     static File resourceInScenarioFolder(String scenario, String resource) {
         return new File(SCENARIOS_FOLDER+File.separator+scenario+File.separator+resource+FILE_EXTENSION);
+    }
+
+    static File resourceInBaseFolder(String resource) {
+        return new File(BASE_FOLDER+File.separator+resource+FILE_EXTENSION);
     }
 
     static List<String> scenarioList() {

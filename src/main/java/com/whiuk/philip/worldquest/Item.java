@@ -1,14 +1,56 @@
 package com.whiuk.philip.worldquest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.whiuk.philip.worldquest.Item.ItemAction.EQUIP;
 import static com.whiuk.philip.worldquest.Item.ItemAction.USE;
 
 public class Item {
+
+    static class Provider {
+        static Map<String, Item> loadItemsFromBuffer(BufferedReader buffer) throws IOException {
+            Map<String, Item> items = new HashMap<>();
+            int itemCount = Integer.parseInt(buffer.readLine());
+            for (int i = 0; i < itemCount; i++) {
+                String[] itemData = buffer.readLine().split(",");
+                String itemID = itemData[0];
+                String itemClass = itemData[1];
+                switch(itemClass) {
+                    case "Item":
+                        items.put(itemID, new Item(itemData[2], Item.parseActions(itemData[3])));
+                        break;
+                    case "Weapon":
+                        items.put(itemID, new Weapon(itemData[2],
+                                Item.parseActions(itemData[3]), itemData[4], Integer.parseInt(itemData[5])));
+                        break;
+                    case "Hatchet":
+                        items.put(itemID, new Hatchet(itemData[2],
+                                Item.parseActions(itemData[3]), Integer.parseInt(itemData[4])));
+                        break;
+                    case "Armour":
+                        items.put(itemID, new Armour(itemData[2], Item.parseActions(itemData[3]),
+                                Slot.valueOf(itemData[4]), Integer.parseInt(itemData[5])));
+                        break;
+                    case "Consumable":
+                        items.put(itemID, new Consumable(itemData[2], Item.parseActions(itemData[3]),
+                                Consumable.parseStatChanges(itemData[4])));
+                        break;
+                    default:
+                        throw new IllegalArgumentException(itemClass);
+                }
+
+            }
+            return items;
+        }
+    }
+    static class Persistor {
+        static void saveItemsToBuffer(Map<String, Item> items, BufferedWriter buffer) {
+        }
+    }
 
     enum ItemAction {
         EQUIP, USE, EAT

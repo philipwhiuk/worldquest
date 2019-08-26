@@ -104,9 +104,9 @@ public class WorldQuest extends JFrame {
     private String scenario = DEFAULT_SCENARIO;
     private String saveFolder;
 
-    private Tile[][] map;
+    Tile[][] map;
     private String mapName;
-    private List<NPC> npcs;
+    List<NPC> npcs;
     List<NPC> visibleNpcs;
     Player player;
     private List<String> eventHistory;
@@ -190,25 +190,46 @@ public class WorldQuest extends JFrame {
     public void newScenario() {
         try {
             appState = LOADING;
-            scenarioData = new ScenarioData();
-            gameObjectBuilders = GObjects.provideBuilders();
-            editorScreen = new EditorScreen();
-            appState = EDITOR_RUNNING;
-        } catch (Exception e) {
+            //Create scenario
+            createScenario();
+            //Write Scenario
+            String scenarioName = saveAsNewScenario();
+            //Load Scenario
+            loadScenario(scenarioName);
+            continueEditingScenario();
+            } catch (Exception e) {
             crashOnError(e);
         }
+    }
+
+    private void createScenario() {
+        scenarioData = new ScenarioData();
+    }
+
+    private String saveAsNewScenario() {
+        String name = "";
+        ScenarioData.Persistor.saveScenario(scenarioData, name);
+        return name;
     }
 
     public void editScenario(String scenarioName) {
         try {
             appState = LOADING;
             scenario = scenarioName;
-            scenarioData = new ScenarioData(scenario);
-            gameObjectBuilders = GObjects.provideBuilders();
-            appState = EDITOR_RUNNING;
+            loadScenario(scenarioName);
+            continueEditingScenario();
         } catch (Exception e) {
             crashOnError(e);
         }
+    }
+
+    private void continueEditingScenario() {
+        loadMap(INITIAL_MAP_FILE);
+        EditorSidebar sidebar = new EditorSidebar();
+        MessageDisplay messages = new MessageDisplay();
+        MapView mapView = new EditorMapView(this, this::processEditorTileClick);
+        editorScreen = new EditorScreen(mapView, sidebar, messages);
+        appState = EDITOR_RUNNING;
     }
 
     private void crashOnError(Throwable e) {
@@ -231,7 +252,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void loadScenario(String scenarioName) {
-        scenarioData = new ScenarioData(scenarioName);
+        scenarioData = ScenarioData.Provider.loadScenarioByName(scenarioName);
         gameObjectBuilders = GObjects.provideBuilders();
     }
 
@@ -268,10 +289,9 @@ public class WorldQuest extends JFrame {
 
     private void continueGame() {
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
-        gameUI = new GameUI();
         GameSidebar sidebar = new GameSidebar(this);
         MessageDisplay messages = new MessageDisplay();
-        gameScreen = new GameScreen(new MapView(), sidebar, messages);
+        gameScreen = new GameScreen(new GameMapView(this, this::processGameTileClick), sidebar, messages);
         appState = GAME_RUNNING;
     }
 
@@ -289,8 +309,8 @@ public class WorldQuest extends JFrame {
             throw new RuntimeException("Unable to update save file");
         }
         try(
-                OutputStream mapDataStream = new FileOutputStream(saveFile);
-                BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
+                OutputStream saveFileDataStream = new FileOutputStream(saveFile);
+                BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(saveFileDataStream))) {
             buffer.write(mapName);
             buffer.newLine();
             saveMap(mapName);
@@ -411,7 +431,7 @@ public class WorldQuest extends JFrame {
         eventHistory.add(message);
     }
 
-    public void attemptResourceGathering(ScenarioData.ResourceGathering resourceGathering, Tile tile) {
+    public void attemptResourceGathering(ResourceGathering resourceGathering, Tile tile) {
         resourceGathering.gather(this, player, tile);
     }
 
@@ -529,7 +549,12 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private void processTileClick(Tile tile) {
+    private void processEditorTileClick(Tile tile) {
+        //TODO: Show tile details
+        System.out.println(tile.type.name);
+    }
+
+    private void processGameTileClick(Tile tile) {
         processPlayerInputWhileRunning(() -> {
             if (player.itemBeingUsed != -1) {
                 int item = player.itemBeingUsed;
