@@ -116,10 +116,14 @@ public class WorldQuest extends JFrame {
     private String southMap;
     private String westMap;
 
+    //TODO: Refactor into GameInProgress class
     Player player;
     List<NPC> visibleNpcs;
     private NPC talkingTo;
     private Shop currentShop;
+
+    //TODO: Refactor into ScenarioBeingChanged class
+    Tile tileSelected;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -244,7 +248,7 @@ public class WorldQuest extends JFrame {
 
     private void continueEditingScenario() {
         loadScenarioMap(INITIAL_MAP_FILE);
-        EditorSidebar sidebar = new EditorSidebar();
+        EditorSidebar sidebar = new EditorSidebar(this);
         MessageDisplay messages = new MessageDisplay();
         MapView mapView = new EditorMapView(this, this::processEditorTileClick);
         editorScreen = new EditorScreen(mapView, sidebar, messages);
@@ -588,8 +592,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void processEditorTileClick(Tile tile) {
-        //TODO: Show tile details
-        System.out.println(tile.type.name);
+        tileSelected = tile;
     }
 
     private void processGameTileClick(Tile tile) {

@@ -68,14 +68,14 @@ class GameSidebar extends Sidebar {
 
     @Override
     public void render(Graphics2D g) {
-        paintStats(g, game);
+        paintStats(g);
         for (ToggleButton button : tabButtons) {
             button.render(g);
         }
         activeTab.render(g);
     }
 
-    private static void paintStats(Graphics2D g, WorldQuest game) {
+    private void paintStats(Graphics2D g) {
         g.setColor(Color.WHITE);
         g.drawString("Stats", 425, 20);
 
