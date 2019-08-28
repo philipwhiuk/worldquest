@@ -42,7 +42,7 @@ public class PlayerProvider {
         Weapon weapon = null;
         try {
             if (!mainHandWeaponString.isEmpty()) {
-                weapon = (Weapon) ItemProvider.parseItem(mainHandWeaponString);
+                weapon = (Weapon) Item.Provider.parseItem(mainHandWeaponString);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse weapon", e);
@@ -52,7 +52,7 @@ public class PlayerProvider {
             for (int i = 0; i < armourCount; i++) {
                 String[] armourData = buffer.readLine().split(":");
                 try {
-                    armour.put(Slot.valueOf(armourData[0]), (Armour) ItemProvider.parseItem(armourData[1]));
+                    armour.put(Slot.valueOf(armourData[0]), (Armour) Item.Provider.parseItem(armourData[1]));
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Unable to parse armour in slot: " + armourData[0], e);
                 }
@@ -61,7 +61,7 @@ public class PlayerProvider {
         List<Item> inventory = new ArrayList<>();
         for (int i = 0; i < inventoryCount; i++) {
             try {
-                inventory.add(ItemProvider.parseItem(buffer.readLine()));
+                inventory.add(Item.Provider.parseItem(buffer.readLine()));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Unable to parse inventory item: " + i, e);
             }
@@ -72,7 +72,7 @@ public class PlayerProvider {
         Map<String, Quest> quests = new HashMap<>();
         for (int i = 0; i < questCount; i++) {
             try {
-                Quest quest = QuestProvider.parseQuest(buffer);
+                Quest quest = Quest.Provider.parseQuest(buffer);
                 quests.put(quest.name, quest);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Unable to parse quest: " + i, e);
@@ -131,7 +131,7 @@ public class PlayerProvider {
         buffer.write(""+player.quests.size());
         buffer.newLine();
         for (Quest quest : player.quests.values()) {
-            QuestProvider.writeQuest(buffer, quest);
+            Quest.Provider.writeQuest(buffer, quest);
         }
 
     }

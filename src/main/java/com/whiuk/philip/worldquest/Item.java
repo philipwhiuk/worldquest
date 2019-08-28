@@ -46,9 +46,52 @@ public class Item {
             }
             return items;
         }
+
+        static Item parseItem(String itemData) {
+            String[] itemClassData = itemData.split(",", 2);
+            switch (itemClassData[0]) {
+                case "Item":
+                    return Item.parseItem(itemClassData[1]);
+                case "Weapon":
+                    return Weapon.parseItem(itemClassData[1]);
+                case "Armour":
+                    return Armour.parseItem(itemClassData[1]);
+                case "Hatchet":
+                    return Hatchet.parseItem(itemClassData[1]);
+                case "Consumable":
+                    return Consumable.parseItem(itemClassData[1]);
+            }
+            throw new IllegalArgumentException(itemClassData[0]);
+        }
+
+        public static String printItem(Item resource) {
+            if (resource instanceof Hatchet) {
+                return "Hatchet,"+resource.print();
+            } else if (resource instanceof Armour) {
+                return "Armour,"+resource.print();
+            } else if (resource instanceof Weapon) {
+                return "Weapon,"+resource.print();
+            } else if (resource instanceof Consumable) {
+                return "Consumable,"+resource.print();
+            } else if (resource.getClass().equals(Item.class)) {
+                return "Item,"+resource.print();
+            } else {
+                throw new IllegalArgumentException("Unhandled class");
+            }
+        }
     }
+
     static class Persistor {
-        static void saveItemsToBuffer(Map<String, Item> items, BufferedWriter buffer) {
+        static void saveItemsToBuffer(Map<String, Item> items, BufferedWriter buffer) throws IOException {
+            buffer.write(Integer.toString(items.size()));
+            buffer.newLine();
+            for (Map.Entry<String, Item> item: items.entrySet()) {
+                buffer.write(item.getKey());
+                buffer.write(",");
+                buffer.write(item.getValue().getClass().getSimpleName());
+                buffer.write(",");
+                buffer.write(item.getValue().print());
+            }
         }
     }
 

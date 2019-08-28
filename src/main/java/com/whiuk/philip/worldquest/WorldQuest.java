@@ -89,8 +89,10 @@ public class WorldQuest extends JFrame {
         keyPressMap.put(KeyEvent.VK_ENTER, Action.TALK_CONTINUE);
     }
 
+    AppState appState = LAUNCHING;
+
     ScenarioData scenarioData;
-    private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders = new HashMap<>();
+    private Map<String, GObjects.GameObjectBuilder> gameObjectBuilders;
 
     private GameUI gameUI;
     private LoadingScreen loadingScreen;
@@ -99,6 +101,7 @@ public class WorldQuest extends JFrame {
     private DeathScreen deathScreen;
     private Screen editorScreen;
     private MessageState messageState;
+    private List<String> messageHistory;
 
 
     private String scenario = DEFAULT_SCENARIO;
@@ -107,16 +110,15 @@ public class WorldQuest extends JFrame {
     Tile[][] map;
     private String mapName;
     List<NPC> npcs;
-    List<NPC> visibleNpcs;
-    Player player;
-    private List<String> eventHistory;
-    AppState appState = LAUNCHING;
-    private NPC talkingTo;
     private List<Room> rooms;
     private String northMap;
     private String eastMap;
     private String southMap;
     private String westMap;
+
+    Player player;
+    List<NPC> visibleNpcs;
+    private NPC talkingTo;
     private Shop currentShop;
 
     public static void main(String[] args) {
@@ -203,13 +205,30 @@ public class WorldQuest extends JFrame {
     }
 
     private void createScenario() {
-        scenarioData = new ScenarioData();
+        scenarioData = ScenarioData.Provider.loadScenarioFromBase();
+        mapName = INITIAL_MAP_FILE;
+        map = MapTileLoader.newMap(scenarioData.tileTypes);
+        npcs = new ArrayList<>();
+        rooms = new ArrayList<>();
+        northMap = eastMap = westMap = southMap = "none";
     }
 
     private String saveAsNewScenario() {
-        String name = "";
-        ScenarioData.Persistor.saveScenario(scenarioData, name);
-        return name;
+        try {
+            String name = GameFileUtils.newScenarioFolder();
+            GameFileUtils.createScenario(name);
+            scenario = name;
+            saveScenario();
+            return name;
+        } catch (Exception e) {
+            crashOnError(e);
+            return null;
+        }
+    }
+
+    private void saveScenario() {
+        ScenarioData.Persistor.saveScenario(scenarioData, scenario);
+        saveScenarioMap(mapName);
     }
 
     public void editScenario(String scenarioName) {
@@ -224,11 +243,12 @@ public class WorldQuest extends JFrame {
     }
 
     private void continueEditingScenario() {
-        loadMap(INITIAL_MAP_FILE);
+        loadScenarioMap(INITIAL_MAP_FILE);
         EditorSidebar sidebar = new EditorSidebar();
         MessageDisplay messages = new MessageDisplay();
         MapView mapView = new EditorMapView(this, this::processEditorTileClick);
         editorScreen = new EditorScreen(mapView, sidebar, messages);
+        messageHistory = new ArrayList<>();
         appState = EDITOR_RUNNING;
     }
 
@@ -257,9 +277,9 @@ public class WorldQuest extends JFrame {
     }
 
     private void newGame() {
-        loadMap(INITIAL_MAP_FILE);
+        loadGameMap(INITIAL_MAP_FILE);
         this.player = PlayerProvider.createPlayer(scenarioData);
-        eventHistory = new ArrayList<>();
+        messageHistory = new ArrayList<>();
     }
 
     private void loadGame() {
@@ -274,14 +294,14 @@ public class WorldQuest extends JFrame {
                 InputStream mapDataStream = new FileInputStream(playerSaveFile);
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))) {
             String mapName = buffer.readLine();
-            loadMap(mapName);
+            loadGameMap(mapName);
             this.player = PlayerProvider.loadPlayer(buffer);
             int eventHistoryItems = Integer.parseInt(buffer.readLine());
             List<String> eventHistory = new ArrayList<>();
             for (int i = 0; i < eventHistoryItems; i++) {
                 eventHistory.add(buffer.readLine());
             }
-            this.eventHistory = eventHistory;
+            this.messageHistory = eventHistory;
         } catch (Exception e) {
             throw new RuntimeException("Unable to load saved game: " + e.getMessage(), e);
         }
@@ -313,11 +333,11 @@ public class WorldQuest extends JFrame {
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(saveFileDataStream))) {
             buffer.write(mapName);
             buffer.newLine();
-            saveMap(mapName);
+            saveGameMap(mapName);
             PlayerProvider.savePlayer(buffer, player);
-            buffer.write(""+eventHistory.size());
+            buffer.write(""+ messageHistory.size());
             buffer.newLine();
-            for (String line : eventHistory) {
+            for (String line : messageHistory) {
                 buffer.write(line);
                 buffer.newLine();
             }
@@ -326,8 +346,15 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private void saveMap(String mapResourceName) {
-        File mapFile = resourceInCurrentSaveFolder(mapResourceName);
+    private void saveScenarioMap(String mapResourceName) {
+        saveMap(resourceInCurrentScenarioFolder(mapResourceName));
+    }
+
+    private void saveGameMap(String mapResourceName) {
+        saveMap(resourceInCurrentSaveFolder(mapResourceName));
+    }
+
+    private void saveMap(File mapFile) {
         try(
                 OutputStream mapDataStream = new FileOutputStream(mapFile);
                 BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(mapDataStream))) {
@@ -349,14 +376,32 @@ public class WorldQuest extends JFrame {
         return resourceInCurrentScenarioFolder(mapResourceName).exists();
     }
 
-    private void loadMap(String mapResourceName) {
+    private void loadGameMap(String mapResourceName) {
         boolean copied;
         try {
             copied = copyCurrentScenarioMapIfNotFoundOrNewer(mapResourceName);
         } catch (IOException e) {
             throw new RuntimeException("Resource not found: " + mapResourceName, e);
         }
-        File mapFile = resourceInCurrentSaveFolder(mapResourceName);
+        try {
+            loadMap(mapResourceName, resourceInCurrentSaveFolder(mapResourceName));
+        } catch (Exception e) {
+            try {
+                if (copied) {
+                    Files.delete(resourceInCurrentSaveFolder(mapResourceName).toPath());
+                }
+            } catch (IOException deleteError) {
+                throw new RuntimeException("Unable to delete bad copy", deleteError);
+            }
+            throw new RuntimeException("Unable to load map data: " + e.getMessage(), e);
+        }
+    }
+
+    private void loadScenarioMap(String mapResourceName) {
+        loadMap(mapResourceName, resourceInCurrentScenarioFolder(mapResourceName));
+    }
+
+    private void loadMap(String mapResourceName, File mapFile) {
         if (!mapFile.exists()) {
             throw new RuntimeException(
                     "Unable to load map data: Map data file not found: " + mapFile.getAbsolutePath());
@@ -383,13 +428,6 @@ public class WorldQuest extends JFrame {
                 throw new RuntimeException("Map has unread data");
             }
         } catch (Exception e) {
-            try {
-                if (copied) {
-                    Files.delete(resourceInCurrentSaveFolder(mapResourceName).toPath());
-                }
-            } catch (IOException deleteError) {
-                throw new RuntimeException("Unable to delete bad copy", deleteError);
-            }
             throw new RuntimeException("Unable to load map data: " + e.getMessage(), e);
         }
     }
@@ -428,7 +466,7 @@ public class WorldQuest extends JFrame {
     }
 
     public void eventMessage(String message) {
-        eventHistory.add(message);
+        messageHistory.add(message);
     }
 
     public void attemptResourceGathering(ResourceGathering resourceGathering, Tile tile) {
@@ -512,11 +550,11 @@ public class WorldQuest extends JFrame {
                         WorldQuest.this,
                         (ConversationChoiceSelection) talkingTo.currentConversation.npcAction);
             } else {
-                int last = eventHistory.size()-1;
+                int last = messageHistory.size()-1;
                 for (int i = 0; i < 5 && last-i > 0; i++) {
                     g.setColor(Color.WHITE);
                     g.setFont(g.getFont().deriveFont(Font.BOLD,11));
-                    g.drawString(eventHistory.get(last-i), 25, CONVERSATION_Y+100-(i*20));
+                    g.drawString(messageHistory.get(last-i), 25, CONVERSATION_Y+100-(i*20));
                 }
             }
         }
@@ -634,7 +672,7 @@ public class WorldQuest extends JFrame {
         if (inBounds(subject.x, subject.y - 1)) {
             directionAction(subject, Direction.NORTH, subject.x, subject.y - 1);
         } else if (subject == player) {
-            switchMap(northMap, subject.x, MAX_Y);
+            switchGameMap(northMap, subject.x, MAX_Y);
         }
     }
 
@@ -642,7 +680,7 @@ public class WorldQuest extends JFrame {
         if (inBounds(subject.x, subject.y + 1)) {
             directionAction(subject, Direction.SOUTH, subject.x, subject.y + 1);
         } else if (subject == player) {
-            switchMap(southMap, subject.x, 0);
+            switchGameMap(southMap, subject.x, 0);
         }
     }
 
@@ -650,7 +688,7 @@ public class WorldQuest extends JFrame {
         if (inBounds(subject.x + 1, subject.y)) {
             directionAction(subject, Direction.EAST, subject.x + 1, subject.y);
         } else if (subject == player) {
-            switchMap(eastMap, 0, subject.y);
+            switchGameMap(eastMap, 0, subject.y);
         }
     }
 
@@ -658,7 +696,7 @@ public class WorldQuest extends JFrame {
         if (inBounds(subject.x - 1, subject.y)) {
             directionAction(subject,Direction.WEST, subject.x - 1, subject.y);
         } else if (subject == player) {
-            switchMap(westMap, MAX_X, 0);
+            switchGameMap(westMap, MAX_X, 0);
         }
     }
 
@@ -921,7 +959,7 @@ public class WorldQuest extends JFrame {
     private void attackPlayer(NPC npc) {
         npc.attack(this, player);
         if (player.isDead()) {
-            eventHistory.add("Killed by a "+npc.type.name);
+            messageHistory.add("Killed by a "+npc.type.name);
         }
     }
 
@@ -933,13 +971,13 @@ public class WorldQuest extends JFrame {
 
     private void gameOver() {
         appState = GAME_DEAD;
-        deathScreen = new DeathScreen(eventHistory);
+        deathScreen = new DeathScreen(messageHistory);
     }
 
-    void switchMap(String map, int startX, int startY) {
+    void switchGameMap(String map, int startX, int startY) {
         if (mapExists(map)) {
-            saveMap(mapName);
-            loadMap(map);
+            saveGameMap(mapName);
+            loadGameMap(map);
             player.x = startX;
             player.y = startY;
         } else {
@@ -951,7 +989,7 @@ public class WorldQuest extends JFrame {
         if (npc.isDead()) {
             map[npc.x][npc.y].objects.add(npc.dropItem());
             player.quests.forEach((name,quest) -> quest.npcDeath(npc.type.name));
-            eventHistory.add("Killed a "+npc.type.name);
+            messageHistory.add("Killed a "+npc.type.name);
         }
     }
 

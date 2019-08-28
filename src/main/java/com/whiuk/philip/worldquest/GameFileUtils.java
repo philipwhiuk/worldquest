@@ -16,6 +16,8 @@ public class GameFileUtils {
     static final String SCENARIOS_FOLDER = "scenario";
     static final String BASE_FOLDER = "base";
     static final String SAVES_FOLDER = "saves";
+    static final String SAVE_PREFIX = "save";
+    static final String SCENARIO_PREFIX = "scenario";
 
     static void deleteDirectory(Path pathToBeDeleted) throws IOException {
         if (pathToBeDeleted.toFile().exists()) {
@@ -62,7 +64,7 @@ public class GameFileUtils {
                     .list(new File(SAVES_FOLDER).toPath())
                     .filter(p -> p.toFile().isDirectory())
                     .map(p -> p.getFileName().toString())
-                    .filter(s -> s.matches("save[0-9]*"))
+                    .filter(s -> s.matches(SAVE_PREFIX+"[0-9]*"))
                     .sorted()
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -72,25 +74,22 @@ public class GameFileUtils {
     }
 
     public static String newSaveFolder() {
-        Set<Integer> usedIntegers = saveList()
-            .stream()
-            .map(s -> s.substring(4))
-            .map(sI -> {
-                if (sI.equals("")) {
-                    return 0;
-                } else {
-                    return Integer.parseInt(sI);
-                }
-            })
-            .sorted()
-            .collect(Collectors.toSet());
+        return newFolder(saveList(), SAVE_PREFIX);
+    }
+
+    public static String newScenarioFolder() {
+        return newFolder(scenarioList(), SCENARIO_PREFIX);
+    }
+
+    private static String newFolder(List<String> usedList, String prefix) {
+        Set<Integer> usedIntegers = usedFolderIntegers(usedList, prefix);
         int i = 0;
         while(i < Integer.MAX_VALUE) {
             if (!usedIntegers.contains(i)) {
                 if (i == 0) {
-                    return "save";
+                    return prefix;
                 } else {
-                    return "save"+i;
+                    return prefix+i;
                 }
             } else {
                 i++;
@@ -99,12 +98,31 @@ public class GameFileUtils {
         throw new UnsupportedOperationException();
     }
 
+    private static Set<Integer> usedFolderIntegers(List<String> usedList, String prefix) {
+        return usedList
+                .stream()
+                .filter(s -> s.startsWith(prefix))
+                .map(s -> s.substring(prefix.length()))
+                .map(sI -> {
+                    if (sI.equals("")) {
+                        return 0;
+                    } else {
+                        return Integer.parseInt(sI);
+                    }
+                })
+                .sorted()
+                .collect(Collectors.toSet());
+    }
+
     public static void deleteSave(String saveFolder) throws IOException {
         deleteDirectory(new File(SAVES_FOLDER+File.separator+saveFolder).toPath());
     }
 
     public static void createSave(String saveFolder) throws IOException {
         Files.createDirectories(new File(SAVES_FOLDER+File.separator+saveFolder).toPath());
+    }
 
+    public static void createScenario(String scenarioFolder) throws IOException {
+        Files.createDirectories(new File(SCENARIOS_FOLDER+File.separator+scenarioFolder).toPath());
     }
 }

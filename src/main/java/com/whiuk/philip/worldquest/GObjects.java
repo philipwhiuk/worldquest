@@ -79,7 +79,7 @@ public class GObjects {
         }
 
         void go(WorldQuest worldQuest) {
-            worldQuest.switchMap(map, startX, startY);
+            worldQuest.switchGameMap(map, startX, startY);
         }
 
         @Override
@@ -127,7 +127,7 @@ public class GObjects {
 
         public Tree(String[] arguments) {
             String resourceData = arguments[0].replaceAll("\\|",",");
-            this.resource = ItemProvider.parseItem(resourceData);
+            this.resource = Item.Provider.parseItem(resourceData);
         }
 
         @Override
@@ -173,7 +173,7 @@ public class GObjects {
 
         @Override
         public String asString() {
-            return ItemProvider.printItem(resource).replaceAll(",","\\|");
+            return Item.Provider.printItem(resource).replaceAll(",","\\|");
         }
 
         @Override
@@ -339,7 +339,7 @@ public class GObjects {
             else if (arguments.length != 2) {
                 throw new IllegalArgumentException("Expected money and item only: " + Arrays.toString(arguments));
             }
-            return new ItemDrop(ItemProvider.parseItem(arguments[1]));
+            return new ItemDrop(Item.Provider.parseItem(arguments[1]));
         }
     }
 
@@ -376,7 +376,7 @@ public class GObjects {
 
         @Override
         public String asString() {
-            return money+","+(item != null ? ItemProvider.printItem(item).replaceAll(",","|") : "");
+            return money+","+(item != null ? Item.Provider.printItem(item).replaceAll(",","|") : "");
         }
 
         @Override
@@ -415,7 +415,7 @@ public class GObjects {
 
         ResourceProvider(String[] arguments) {
             String resourceData = arguments[0].replaceAll("\\|",",");
-            this.resource = ItemProvider.parseItem(resourceData);
+            this.resource = Item.Provider.parseItem(resourceData);
             this.cssDef = arguments[1];
             this.veinColour = fromCSSDef(cssDef);
             this.name = arguments[2];
@@ -440,7 +440,7 @@ public class GObjects {
         @Override
         public String asString() {
             return String.join(",",
-                    ItemProvider.printItem(resource).replaceAll(",","\\|"),
+                    Item.Provider.printItem(resource).replaceAll(",","\\|"),
                     cssDef,
                     name);
         }
