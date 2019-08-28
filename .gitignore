@@ -1,3 +1,4 @@
 .idea/
 target/
 saves/
+scenario/scenario*/*
