@@ -1,15 +1,15 @@
 package com.whiuk.philip.worldquest;
 
-import com.whiuk.philip.worldquest.ui.Button;
-import com.whiuk.philip.worldquest.ui.ClickableUI;
-import com.whiuk.philip.worldquest.ui.ListSelect;
-import com.whiuk.philip.worldquest.ui.UI;
+import com.whiuk.philip.worldquest.ui.*;
 
 import java.awt.Rectangle;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class MenuScreen extends Rectangle implements Screen {
     private Stack<ClickableUI> visibleUI = new Stack<>();
@@ -33,14 +33,14 @@ public class MenuScreen extends Rectangle implements Screen {
                 this.setSelected(item);
             }
         };
-        Button loadGameButton = new Button(Color.WHITE, Color.BLACK, "Load Game", 100, 200) {
+        Button loadGameButton = new Button(Color.WHITE, Color.BLACK, "Load Game", 100, 130) {
             @Override
             public void handleClick(MouseEvent e) {
                 worldQuest.loadSave(selectedSave);
             }
         };
         ListSelect saveSelector = new ListSelect(
-                200, 200,
+                200, 130,
                 Color.WHITE, Color.BLACK, selectedSave, GameFileUtils.saveList(), (s -> s)) {
             @Override
             protected void onSelect(String item) {
@@ -48,13 +48,13 @@ public class MenuScreen extends Rectangle implements Screen {
                 this.setSelected(item);
             }
         };
-        Button newScenarioButton = new Button(Color.WHITE, Color.BLACK, "New Scenario", 100, 300) {
+        Button newScenarioButton = new Button(Color.WHITE, Color.BLACK, "New Scenario", 100, 160) {
             @Override
             public void handleClick(MouseEvent e) {
                 worldQuest.newScenario();
             }
         };
-        Button editScenarioButton = new Button(Color.WHITE, Color.BLACK, "Edit Scenario", 100, 350) {
+        Button editScenarioButton = new Button(Color.WHITE, Color.BLACK, "Edit Scenario", 100, 190) {
             @Override
             public void handleClick(MouseEvent e) {
                 worldQuest.editScenario(selectedScenario);
@@ -71,7 +71,9 @@ public class MenuScreen extends Rectangle implements Screen {
     }
 
     public void render(Graphics2D g) {
-        visibleUI.forEach(ui -> ui.render(g));
+        ArrayList<UI> renderList = new ArrayList<>(visibleUI);
+        Collections.reverse(renderList);
+        renderList.forEach(ui -> ui.render(g));
     }
 
     @Override
@@ -81,6 +83,11 @@ public class MenuScreen extends Rectangle implements Screen {
                 ui.onClick(e);
                 if (e.isConsumed()) {
                     break;
+                }
+            } else if (ui instanceof FocusableUI) {
+                FocusableUI fUI = (FocusableUI) ui;
+                if (fUI.hasFocus()) {
+                    fUI.loseFocus();
                 }
             }
         }

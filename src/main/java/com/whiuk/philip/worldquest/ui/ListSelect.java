@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class ListSelect extends ClickableUI {
+public abstract class ListSelect extends ClickableUI implements FocusableUI {
     private final Color primary;
     private final Color secondary;
     private String selectedItem;
@@ -15,6 +15,7 @@ public abstract class ListSelect extends ClickableUI {
     private final Function<String, String> renderFunction;
     private final int x;
     private final int y;
+    private boolean showOptions;
 
     public ListSelect(
             int x,
@@ -40,27 +41,46 @@ public abstract class ListSelect extends ClickableUI {
 
     @Override
     public void render(Graphics2D g) {
-        g.setColor(primary);
-        g.draw(this);
-        for (int i = 0; i < items.size(); i++) {
-            String item = items.get(i);
-            boolean itemSelected = isSelected(item);
-            if (itemSelected) {
-                g.setColor(primary);
-                g.fill(itemBounds.get(i));
+        if (showOptions) {
+            for (int i = 0; i < items.size(); i++) {
+                String item = items.get(i);
+                boolean itemSelected = isSelected(item);
+                if (itemSelected) {
+                    g.setColor(primary);
+                    g.fill(itemBounds.get(i));
+                } else {
+                    g.setColor(secondary);
+                    g.fill(itemBounds.get(i));
+                }
+                g.setColor(itemSelected ? secondary : primary);
+                String title = renderFunction.apply(item);
+                g.drawString(title, x + 5, y + 15 + (i * 20));
             }
-            g.setColor(itemSelected ? secondary : primary);
-            String title = renderFunction.apply(item);
-            g.drawString(title, x+5, y+15+(i*20));
+            g.setColor(primary);
+            g.draw(this);
+        } else {
+            g.setColor(primary);
+            g.draw(itemBounds.get(0));
+            g.setColor(primary);
+            String title = renderFunction.apply(selectedItem);
+            g.drawString(title, x+5, y+15);
         }
     }
 
     @Override
     public void onClick(MouseEvent e) {
-        for (int i = 0; i < itemBounds.size(); i++) {
-            if (itemBounds.get(i).contains(e.getPoint())) {
-                onSelect(items.get(i));
+        if (!showOptions) {
+            if (itemBounds.get(0).contains(e.getPoint())) {
+                showOptions = true;
                 e.consume();
+            }
+        } else {
+            showOptions = false;
+            for (int i = 0; i < itemBounds.size(); i++) {
+                if (itemBounds.get(i).contains(e.getPoint())) {
+                    onSelect(items.get(i));
+                    e.consume();
+                }
             }
         }
     }
@@ -73,5 +93,15 @@ public abstract class ListSelect extends ClickableUI {
 
     protected void setSelected(String item) {
         this.selectedItem = item;
+    }
+
+    @Override
+    public boolean hasFocus() {
+        return showOptions;
+    }
+
+    @Override
+    public void loseFocus() {
+        showOptions = false;
     }
 }
