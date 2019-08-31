@@ -19,13 +19,32 @@ public class EditorSidebar extends Sidebar {
     }
 
     private void showTileDetails(Graphics2D g) {
+        int yRow = 20;
         Tile tile = app.tileSelected;
         if (tile != null) {
             g.setColor(Color.WHITE);
-            g.drawString("Tile", 425, 20);
+            g.drawString("Tile", 425, yRow);
+            yRow += 20;
 
             g.setColor(Color.WHITE);
-            g.drawString("Type: " + tile.type.name, 450, 40);
+            g.drawString("Type: " + tile.type.name, 450, yRow);
+            yRow += 20;
+
+            g.drawString("Room: " + (tile.room != null ? tile.room.name : "<None>"), 450, yRow);
+            yRow += 20;
+
+            g.drawString("Objects: ", 450, yRow);
+            yRow += 20;
+            if (tile.objects.size() > 0) {
+                for (int i = 0; i < tile.objects.size(); i++) {
+                    GObjects.GameObject object = tile.objects.get(i);
+                    g.drawString(object.id(), 475, yRow);
+                    yRow += 20;
+                }
+            } else {
+                g.drawString("<None>", 475, yRow);
+                yRow += 20;
+            }
         }
     }
 
