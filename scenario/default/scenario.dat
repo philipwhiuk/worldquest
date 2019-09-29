@@ -1,4 +1,4 @@
-26
+44
 BronzeDagger,Weapon,Bronze dagger,EQUIP,Dagger,2
 BronzeSword,Weapon,Bronze sword,EQUIP,Sword,4
 BronzeHatchet,Hatchet,Bronze hatchet,EQUIP|USE,3
@@ -12,7 +12,9 @@ RockShards,Item,Rock shards,USE
 CopperOre,Item,Copper ore,USE
 TinOre,Item,Tin ore,USE
 BronzeBar,Item,Bronze bar,USE
-OakLogs,Item,Oak logs,USE
+IronOre,Item,Iron ore,USE
+IronBar,Item,Iron bar,USE
+FelledTree,Item,Felled tree,USE
 Feathers,Item,Feathers,USE
 Bones,Item,Bones,USE
 RawChicken,Item,Raw chicken,USE
@@ -25,6 +27,22 @@ BronzePlatelegs,Armour,Bronze platelegs,EQUIP,LEGS,3
 BronzeNasalHelm,Armour,Bronze nasalhelm,EQUIP,HEAD,2
 BronzeGreatHelm,Armour,Bronze greathelm,EQUIP,HEAD,3
 BronzeBascinet,Armour,Bronze bascinet,EQUIP,HEAD,3
+WoodScrap,Item,Wood scrap,USE
+Log,Item,Log,USE
+WoodenPallisadeGate,Item,Wooden pallisade gate,USE
+Pallisade,Item,Pallisade,USE
+KeelSection,Item,Keel section,USE
+Mast,Item,Mast,USE
+Kindling,Item,Kindling,USE
+IronSaw,Item,Iron saw,USE
+Plank,Item,Plank,USE
+Shaft,Item,Shaft,USE
+MalletHead,Item,Mallet head,USE
+Mallet,Item,Mallet,USE
+LargeNail,Item,Large nail,USE
+SmallNail,Item,Small nail,USE
+WoodShingle,Item,Wood shingle,USE
+SmallAnvil,Item,Small anvil,USE
 1
 GoblinSlaying,1
 Goblin,5
@@ -110,6 +128,17 @@ FINISHED,King_DefaultOpening
 STARTED,King_GoblinSlayerProgressRequest
 COMPLETE,King_GoblinSlayerProgressRequest
 10
+Firemaking,StructureCreation,Firemaking
+DigGrass,ResourceGathering,DigGrass
+DigDirt,ResourceGathering,DigDirt
+Mine,ResourceGathering,Mine
+Smelt,Crafting,Smelting,Smelt
+Smith,Crafting,Smithing,Smith
+Fish,ResourceGathering,Fish
+Cook,Crafting,Cooking,Cook
+Woodcutting,Crafting,Woodcutting,Woodcutting
+Carpentry,Crafting,Carpentry,Carpentry
+12
 Bronze,2,1,Bronze Bar,100,0,1
 CopperOre,1
 TinOre,1
@@ -151,7 +180,15 @@ Catfish,1,1,Catfish,100,0,1
 RawCatfish,1
 Catfish,1
 Cooking,10
-3
+Log,1,1,Log,100,0,1
+FelledTree,1
+Log,4
+Woodcutting,10
+Plank,1,1,Plank,100,0,1
+Log,1
+Plank,5
+Carpentry,10
+5
 Smelt,1
 Bronze
 Smith,8
@@ -165,8 +202,15 @@ BronzeGreatHelm
 BronzeBascinet
 Cook,1
 Catfish
-1
-Steel & flint,Oak logs:Firemaking
+Woodcutting,1
+Log
+Carpentry,1
+Plank
+4
+Steel & flint,Log:Firemaking
+Bronze hatchet,Felled tree:Woodcutting
+Iron saw,Felled tree:Woodcutting
+Iron saw,Log:Carpentry
 4
 Grass,Shovel:DigGrass
 Dirt,Shovel:DigDirt
@@ -177,3 +221,10 @@ Furnace,Copper ore:Smelt
 Furnace,Tin ore:Smelt
 Anvil,Hammer:Smith
 Fire,Raw catfish:Cook
+6
+IronSaw
+BronzeHatchet
+SteelFlint
+Shovel
+Pickaxe
+Hammer
