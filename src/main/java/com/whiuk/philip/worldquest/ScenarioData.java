@@ -52,10 +52,21 @@ public class ScenarioData {
             scenario.itemActions = ItemAction.Provider.loadItemActionsFromBuffer(scenario, buffer);
             scenario.recipeList = Recipe.Provider.loadRecipesFromBuffer(scenario, buffer);
             scenario.resourceGathering = ResourceGathering.Provider.loadResourceGatheringFromBuffer(buffer);
+            scenario.structureCreation = StructureCreation.Provider.loadStructureCreationFromBuffer(buffer);
             scenario.itemUses = Uses.Provider.loadItemUsesFromBuffer(scenario, buffer);
             scenario.objectItemUses = Uses.Provider.loadObjectItemUsesFromBuffer(scenario, buffer);
             scenario.tileItemUses = Uses.Provider.loadTileItemUsesFromBuffer(scenario, buffer);
+            scenario.initialItems = loadInitialItemsFromBuffer(buffer);
             return scenario;
+        }
+
+        private static List<String> loadInitialItemsFromBuffer(BufferedReader buffer) throws IOException {
+            int count = Integer.parseInt(buffer.readLine());
+            ArrayList<String> items = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                items.add(buffer.readLine());
+            }
+            return items;
         }
     }
     static class Persistor {
@@ -87,7 +98,7 @@ public class ScenarioData {
         }
     }
 
-    private Map<String, Item> items = new HashMap<>();
+    Map<String, Item> items = new HashMap<>();
     Map<String, QuestStep> questSteps = new HashMap<>();
     Map<String, Quest> quests = new HashMap<>();
     Map<Integer, TileType> tileTypes = new HashMap<>();
@@ -98,16 +109,22 @@ public class ScenarioData {
     Map<String, ItemAction> itemActions = new HashMap<>();
     Map<String, List<Recipe>> recipeList = new HashMap<>();
     Map<String, ResourceGathering> resourceGathering = new HashMap<>();
+    Map<String, StructureCreation> structureCreation = new HashMap<>();
     private int playerStartX;
     private int playerStartY;
     HashMap<String, ItemAction> itemUses = new HashMap<>();
     Map<String, ItemAction> tileItemUses = new HashMap<>();
     Map<String, ItemAction> objectItemUses = new HashMap<>();
+    List<String> initialItems = new ArrayList<>();
 
     ScenarioData() {}
 
     public Player newPlayer() {
-        List<Item> playerItems = Arrays.asList(
+        List<Item> playerItems = new ArrayList<>();
+        for (String initialItem : initialItems) {
+            playerItems.add(item(initialItem).copy());
+        }
+        Arrays.asList(
                 items.get("BronzeDagger").copy(),
                 items.get("BronzeHatchet").copy(),
                 items.get("SteelFlint").copy(),

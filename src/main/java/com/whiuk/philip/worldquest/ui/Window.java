@@ -3,7 +3,7 @@ package com.whiuk.philip.worldquest.ui;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public abstract class Window extends Rectangle implements UI {
+public abstract class Window extends ClickableUI {
     private final com.whiuk.philip.worldquest.ui.Button closeButton;
     private final String title;
     private final Rectangle frame;

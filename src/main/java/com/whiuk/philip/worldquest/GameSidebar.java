@@ -1,7 +1,8 @@
 package com.whiuk.philip.worldquest;
 
 import com.whiuk.philip.worldquest.ui.Sidebar;
-import com.whiuk.philip.worldquest.ui.ToggleButton;
+import com.whiuk.philip.worldquest.ui.Tab;
+import com.whiuk.philip.worldquest.ui.TabView;
 
 import java.awt.event.MouseEvent;
 import java.awt.*;
@@ -10,69 +11,32 @@ import static com.whiuk.philip.worldquest.AppState.GAME_DEAD;
 
 class GameSidebar extends Sidebar {
     private WorldQuest game;
-    private SidebarTab[] tabs;
-    private ToggleButton[] tabButtons;
-    private SidebarTab activeTab;
+    private final TabView tabView;
 
     GameSidebar(WorldQuest game) {
         super();
         this.game = game;
-        tabs = new SidebarTab[]{
-                new StatsTab(game),
-                new SkillsTab(game),
-                new EquipmentTab(game),
-                new ItemsTab(game),
-                new NPCsTab(game),
-                new QuestsTab(game)
-        };
-        tabButtons = new ToggleButton[]{
-                new ToggleButton(Color.GREEN, Color.BLACK, 425, 100, "Stats", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(0);
-                    }
-                },
-                new ToggleButton(Color.GREEN, Color.BLACK, 475, 100, "Skills", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(1);
-                    }
-                },
-                new ToggleButton(Color.GREEN, Color.BLACK, 525, 100, "Equip.", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(2);
-                    }
-                },
-                new ToggleButton(Color.GREEN, Color.BLACK, 425, 125, "Items", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(3);
-                    }
-                },
-                new ToggleButton(Color.GREEN, Color.BLACK, 475, 125, "NPCs", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(4);
-                    }
-                },
-                new ToggleButton(Color.GREEN, Color.BLACK, 525, 125, "Quests", false) {
-                    @Override
-                    public void onClick(MouseEvent e) {
-                        setActiveTab(5);
-                    }
-                }
-        };
-        setActiveTab(0);
+        tabView = new TabView(new Tab[]{
+                new Tab("Stats", 420, 170, 240, 330,
+                        new StatsView(game)),
+                new Tab("Skills", 420, 170, 240, 330,
+                        new SkillsView(game)),
+                new Tab("Equip.", 420, 170, 240, 330,
+                        new EquipmentView(game)),
+                new Tab("Items", 420, 170, 240, 330,
+                        new ItemsView(game)),
+                new Tab("NPCs", 420, 170, 240, 330,
+                        new NPCsView(game)),
+                new Tab("Quests", 420, 170, 240, 330,
+                        new QuestsView(game))
+        }, 425, 100, 525);
+        tabView.setActiveTab(0);
     }
 
     @Override
     public void render(Graphics2D g) {
         paintStats(g);
-        for (ToggleButton button : tabButtons) {
-            button.render(g);
-        }
-        activeTab.render(g);
+        tabView.render(g);
     }
 
     private void paintStats(Graphics2D g) {
@@ -100,25 +64,9 @@ class GameSidebar extends Sidebar {
         g.setColor(Color.WHITE);
     }
 
+
     @Override
     public void onClick(MouseEvent e) {
-        for (ToggleButton button : tabButtons) {
-            if (button.contains(e.getPoint())) {
-                button.onClick(e);
-                return;
-            }
-        }
-        if (activeTab.contains(e.getPoint())) {
-            activeTab.onClick(e);
-        }
+        tabView.onClick(e);
     }
-
-    private void setActiveTab(int activeTab) {
-        this.activeTab = tabs[activeTab];
-        for(int i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].changeToggleState(i == activeTab);
-        }
-    }
-
-
 }

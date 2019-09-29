@@ -6,7 +6,7 @@ import java.awt.event.MouseEvent;
 import static com.whiuk.philip.worldquest.MapConstants.BORDER_HEIGHT;
 import static com.whiuk.philip.worldquest.MapConstants.BORDER_WIDTH;
 
-public class LoadingScreen implements Screen {
+public class LoadingScreen extends Screen {
 
     @Override
     public void render(Graphics2D g) {

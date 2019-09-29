@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class ListSelect extends ClickableUI implements FocusableUI {
+public abstract class ListSelect<T> extends ClickableUI implements FocusableUI {
     private final Color primary;
     private final Color secondary;
-    private String selectedItem;
-    private final List<String> items;
+    private T selectedItem;
+    private final List<T> items;
     private final List<Rectangle> itemBounds;
-    private final Function<String, String> renderFunction;
+    private final Function<T, String> renderFunction;
     private final int x;
     private final int y;
     private boolean showOptions;
@@ -22,9 +22,9 @@ public abstract class ListSelect extends ClickableUI implements FocusableUI {
             int y,
             Color primary,
             Color secondary,
-            String selectedItem,
-            List<String> items,
-            Function<String, String> renderFunction) {
+            T selectedItem,
+            List<T> items,
+            Function<T, String> renderFunction) {
         super(x,y, 100, items.size()*20);
         this.x = x;
         this.y = y;
@@ -43,7 +43,7 @@ public abstract class ListSelect extends ClickableUI implements FocusableUI {
     public void render(Graphics2D g) {
         if (showOptions) {
             for (int i = 0; i < items.size(); i++) {
-                String item = items.get(i);
+                T item = items.get(i);
                 boolean itemSelected = isSelected(item);
                 if (itemSelected) {
                     g.setColor(primary);
@@ -85,13 +85,13 @@ public abstract class ListSelect extends ClickableUI implements FocusableUI {
         }
     }
 
-    protected abstract void onSelect(String item);
+    protected abstract void onSelect(T item);
 
-    private boolean isSelected(String item) {
+    private boolean isSelected(T item) {
         return item.equals(selectedItem);
     }
 
-    protected void setSelected(String item) {
+    public void setSelected(T item) {
         this.selectedItem = item;
     }
 

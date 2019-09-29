@@ -10,7 +10,7 @@ import static com.whiuk.philip.worldquest.MapConstants.MAP_TILES_WIDTH;
 
 public class MapTileLoader {
 
-    private static final int DEFAULT_TILE_ID = 1;
+    static final int DEFAULT_TILE_ID = 1;
 
     static Tile[][] loadMapTiles(Map<Integer, TileType> tileTypes, BufferedReader buffer) throws IOException {
         Tile[][] newMap = new Tile[MAP_TILES_WIDTH][MAP_TILES_HEIGHT];

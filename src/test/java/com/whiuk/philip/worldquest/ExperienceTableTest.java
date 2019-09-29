@@ -39,6 +39,12 @@ public class ExperienceTableTest {
     }
 
     @Test
+    public void getLevel_with_MAX_VALUExp_returns_99() {
+        int level = ExperienceTable.getLevel(Integer.MAX_VALUE);
+        assertEquals(99, level);
+    }
+
+    @Test
     public void toLevel_with_0xp_returns_levelXp() {
         int toNextLevel = ExperienceTable.toLevel(1, 0);
         assertEquals(ExperienceTable.experienceTable[1], toNextLevel);

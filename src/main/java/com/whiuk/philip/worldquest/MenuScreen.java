@@ -2,17 +2,10 @@ package com.whiuk.philip.worldquest;
 
 import com.whiuk.philip.worldquest.ui.*;
 
-import java.awt.Rectangle;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
-public class MenuScreen extends Rectangle implements Screen {
-    private Stack<ClickableUI> visibleUI = new Stack<>();
+public class MenuScreen extends Screen {
     private String selectedScenario = "default";
     private String selectedSave = "save";
 
@@ -24,7 +17,7 @@ public class MenuScreen extends Rectangle implements Screen {
                 worldQuest.newSaveGame(selectedScenario);
             }
         };
-        ListSelect scenarioSelector = new ListSelect(
+        ListSelect<String> scenarioSelector = new ListSelect<String>(
                 200, 100,
                 Color.WHITE, Color.BLACK, selectedScenario, GameFileUtils.scenarioList(), (s -> s)) {
             @Override
@@ -39,7 +32,7 @@ public class MenuScreen extends Rectangle implements Screen {
                 worldQuest.loadSave(selectedSave);
             }
         };
-        ListSelect saveSelector = new ListSelect(
+        ListSelect<String> saveSelector = new ListSelect<String>(
                 200, 130,
                 Color.WHITE, Color.BLACK, selectedSave, GameFileUtils.saveList(), (s -> s)) {
             @Override
@@ -61,35 +54,12 @@ public class MenuScreen extends Rectangle implements Screen {
             }
         };
 
-        visibleUI.add(newGameButton);
-        visibleUI.add(loadGameButton);
-        visibleUI.add(scenarioSelector);
-        visibleUI.add(saveSelector);
-        visibleUI.add(newScenarioButton);
-        visibleUI.add(editScenarioButton);
-        visibleUI.add(scenarioSelector);
-    }
-
-    public void render(Graphics2D g) {
-        ArrayList<UI> renderList = new ArrayList<>(visibleUI);
-        Collections.reverse(renderList);
-        renderList.forEach(ui -> ui.render(g));
-    }
-
-    @Override
-    public void onClick(MouseEvent e) {
-        for (ClickableUI ui: visibleUI) {
-            if (ui.contains(e.getPoint())) {
-                ui.onClick(e);
-                if (e.isConsumed()) {
-                    break;
-                }
-            } else if (ui instanceof FocusableUI) {
-                FocusableUI fUI = (FocusableUI) ui;
-                if (fUI.hasFocus()) {
-                    fUI.loseFocus();
-                }
-            }
-        }
+        children.add(newGameButton);
+        children.add(loadGameButton);
+        children.add(scenarioSelector);
+        children.add(saveSelector);
+        children.add(newScenarioButton);
+        children.add(editScenarioButton);
+        children.add(scenarioSelector);
     }
 }

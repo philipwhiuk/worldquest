@@ -1,5 +1,6 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ClickableUI;
 import com.whiuk.philip.worldquest.ui.UI;
 import com.whiuk.philip.worldquest.ui.Window;
 
@@ -7,13 +8,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Stack;
 
-class GameScreen extends Rectangle implements Screen {
+class GameScreen extends Screen {
     private final Rectangle mainViewSize;
     private final GameSidebar sidebar;
     private final WorldQuest.MessageDisplay messageDisplay;
-    private Stack<UI> mainViewStack = new Stack<>();
+    private Stack<ClickableUI> mainViewStack = new Stack<>();
 
-    GameScreen(UI initialView, GameSidebar sidebar, WorldQuest.MessageDisplay messageDisplay) {
+    GameScreen(ClickableUI initialView, GameSidebar sidebar, WorldQuest.MessageDisplay messageDisplay) {
         mainViewSize = new Rectangle(0, 0, 420, 420);
         mainViewStack.push(initialView);
         this.sidebar = sidebar;

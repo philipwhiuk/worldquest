@@ -12,62 +12,45 @@ abstract class ItemAction {
     static class Provider {
         @SuppressWarnings("unused")
         static //TODO: Load ItemActions from buffer
-        Map<String, ItemAction> loadItemActionsFromBuffer(ScenarioData data, BufferedReader buffer) {
+        Map<String, ItemAction> loadItemActionsFromBuffer(ScenarioData data, BufferedReader buffer) throws IOException {
             Map<String, ItemAction> itemActions = new HashMap<>();
-            itemActions.put("Firemaking", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int firemakingTool, int logs) {
-                    if (tile.isOutdoors()) {
-                        player.inventory.remove(logs);
-                        game.spawn(new GObjects.Fire(), player.x, player.y);
-                        player.gainExperience("Fire-making", 10);
-                    } else {
-                        game.eventMessage("You probably shouldn't make a fire here.");
-                    }
+            int count = Integer.parseInt(buffer.readLine());
+            for (int i = 0; i < count; i++) {
+                String[] actionData = buffer.readLine().split(",");
+                String itemActionName = actionData[0];
+                String type = actionData[1];
+
+                switch (type) {
+                    case "StructureCreation":
+                        String structureCreationName = actionData[2];
+                        itemActions.put(itemActionName, new ItemAction() {
+                            @Override
+                            void perform(WorldQuest game, Tile tile, Player player, int firemakingTool, int logs) {
+                                game.attemptStructureCreation(data.structureCreation.get(structureCreationName), tile, logs);
+                            }
+                        });
+                        break;
+                    case "ResourceGathering":
+                        String resourceGatheringName = actionData[2];
+                        itemActions.put(itemActionName, new ItemAction() {
+                            @Override
+                            void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
+                                game.attemptResourceGathering(data.resourceGathering.get(resourceGatheringName), tile);
+                            }
+                        });
+                        break;
+                    case "Crafting":
+                        String optionName = actionData[2];
+                        String recipeListName = actionData[3];
+                        itemActions.put(itemActionName, new ItemAction() {
+                            @Override
+                            void perform(WorldQuest game, Tile tile, Player player, int ore1, int na) {
+                                game.showCrafting(new CraftingOptions(optionName, data.recipeList.get(recipeListName)));
+                            }
+                        });
+                        break;
                 }
-            });
-            itemActions.put("DigGrass", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
-                    game.attemptResourceGathering(data.resourceGathering.get("DigGrass"), tile);
-                }
-            });
-            itemActions.put("DigDirt", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int shovel, int na) {
-                    game.attemptResourceGathering(data.resourceGathering.get("DigDirt"), tile);
-                }
-            });
-            itemActions.put("Mine", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int pickaxe, int na) {
-                    game.attemptResourceGathering(data.resourceGathering.get("Mine"), tile);
-                }
-            });
-            itemActions.put("Smelt", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int ore1, int na) {
-                    game.showCrafting(new CraftingOptions("Smelting", data.recipeList.get("Smelt")));
-                }
-            });
-            itemActions.put("Smith", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int hammer, int na) {
-                    game.showCrafting(new CraftingOptions("Smithing", data.recipeList.get("Smith")));
-                }
-            });
-            itemActions.put("Fish", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int rod, int na) {
-                    game.attemptResourceGathering(data.resourceGathering.get("Fish"), tile);
-                }
-            });
-            itemActions.put("Cook", new ItemAction() {
-                @Override
-                void perform(WorldQuest game, Tile tile, Player player, int food, int na) {
-                    game.showCrafting(new CraftingOptions("Cooking", data.recipeList.get("Cook")));
-                }
-            });
+            }
             return itemActions;
         }
     }

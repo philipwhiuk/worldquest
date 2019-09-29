@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-public class DeathScreen implements Screen {
+public class DeathScreen extends Screen {
 
     private final List<String> eventHistory;
 

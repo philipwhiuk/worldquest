@@ -121,13 +121,12 @@ public class GObjects {
     }
 
     static class Tree extends GameObject {
-        Item resource;
+        String resource;
         boolean cutDown;
         int ticksToRegrow;
 
         public Tree(String[] arguments) {
-            String resourceData = arguments[0].replaceAll("\\|",",");
-            this.resource = Item.Provider.parseItem(resourceData);
+            this.resource = arguments[0];
         }
 
         @Override
@@ -159,21 +158,22 @@ public class GObjects {
 
         @Override
         public void doAction(WorldQuest game, Player player) {
-            if (player.mainHandWeapon instanceof Hatchet && player.inventory.hasSpaceForItem(resource)) {
+            Item item = game.scenarioData.item(resource).copy();
+            if (player.mainHandWeapon instanceof Hatchet && player.inventory.hasSpaceForItem(item)) {
                 cutDown = true;
                 ticksToRegrow = 10;
-                player.inventory.add(resource.copy());
+                player.inventory.add(item);
                 player.gainExperience("Woodcutting", 10);
             } else if (!(player.mainHandWeapon instanceof Hatchet)) {
                 game.eventMessage("You need to wield a Hatchet to chop down trees");
-            } else if (!player.inventory.hasSpaceForItem(resource)) {
+            } else if (!player.inventory.hasSpaceForItem(item)) {
                 game.eventMessage("No space in your inventory");
             }
         }
 
         @Override
         public String asString() {
-            return Item.Provider.printItem(resource).replaceAll(",","\\|");
+            return resource;
         }
 
         @Override
@@ -409,13 +409,12 @@ public class GObjects {
 
     static class ResourceProvider extends GameObject {
         final String name;
-        final Item resource;
+        final String resource;
         final String cssDef;
         final Color veinColour;
 
         ResourceProvider(String[] arguments) {
-            String resourceData = arguments[0].replaceAll("\\|",",");
-            this.resource = Item.Provider.parseItem(resourceData);
+            this.resource = arguments[0];
             this.cssDef = arguments[1];
             this.veinColour = fromCSSDef(cssDef);
             this.name = arguments[2];
@@ -433,14 +432,14 @@ public class GObjects {
                     TILE_WIDTH - 6, TILE_HEIGHT - 6);
         }
 
-        public Item extract() {
-            return resource.copy();
+        public Item extract(WorldQuest game) {
+            return game.scenarioData.item(resource).copy();
         }
 
         @Override
         public String asString() {
             return String.join(",",
-                    Item.Provider.printItem(resource).replaceAll(",","\\|"),
+                    resource,
                     cssDef,
                     name);
         }

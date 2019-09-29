@@ -1,6 +1,13 @@
 package com.whiuk.philip.worldquest;
 
-import com.whiuk.philip.worldquest.ui.UI;
+import com.whiuk.philip.worldquest.ui.Component;
 
-interface Screen extends UI {
+abstract class Screen extends Component {
+    public Screen() {
+        super();
+    }
+
+    public Screen(int x, int y, int width, int height) {
+        super(x, y, width, height);
+    }
 }

@@ -1,15 +1,19 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.Component;
+import com.whiuk.philip.worldquest.ui.Tab;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-class StatsTab extends SidebarTab {
+class StatsView extends Component {
     WorldQuest game;
 
-    StatsTab(WorldQuest game) {
+    StatsView(WorldQuest game) {
+        super();
         this.game = game;
     }
 
@@ -23,7 +27,7 @@ class StatsTab extends SidebarTab {
             Experience experience = stat.getValue();
             String statDescriptor = stat.getKey() + ": " + experience.level + " (" + experience.experience + "xp)";
             g.setColor(Color.WHITE);
-            g.drawString(statDescriptor, 450, offset);
+            g.drawString(statDescriptor, 30, offset);
             offset += 20;
         }
     }

@@ -1,21 +1,22 @@
 package com.whiuk.philip.worldquest;
 
 import com.whiuk.philip.worldquest.ui.ButtonPainter;
+import com.whiuk.philip.worldquest.ui.Component;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-class NPCsTab extends SidebarTab {
+class NPCsView extends Component {
     WorldQuest game;
 
-    NPCsTab(WorldQuest game) {
+    NPCsView(WorldQuest game) {
         this.game = game;
     }
 
     @Override
     public void render(Graphics2D g) {
         int offset = y;
-        g.drawString("NPCs", 425, offset);
+        g.drawString("NPCs", 5, offset);
 
         offset += 20;
 
@@ -24,7 +25,7 @@ class NPCsTab extends SidebarTab {
                 ButtonPainter.paintButton(g,
                         npc.currentConversation != null ? Color.DARK_GRAY : Color.BLUE,
                         npc.currentConversation != null ? Color.BLUE : Color.DARK_GRAY,
-                        433,
+                        13,
                         offset-13,
                         "o"
                 );
@@ -32,7 +33,7 @@ class NPCsTab extends SidebarTab {
             String npcHealth = npc.canFight() ? ": " + npc.health + "/" + npc.type.health : "";
             String npcInfo = npc.type.name + npcHealth;
             g.setColor(Color.WHITE);
-            g.drawString(npcInfo, 500, offset);
+            g.drawString(npcInfo, 80, offset);
             offset += 20;
         }
     }
@@ -48,6 +49,6 @@ class NPCsTab extends SidebarTab {
 
     private Rectangle npcButtonTalkLocation(int index) {
         int offset = 20*index;
-        return new Rectangle(433,y+15+offset, 15, 15);
+        return new Rectangle(433,170+15+offset, 15, 15);
     }
 }

@@ -1,6 +1,8 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ClickableUI;
 import com.whiuk.philip.worldquest.ui.UI;
+import oracle.jvm.hotspot.jfr.JFR;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.whiuk.philip.worldquest.GameFileUtils.*;
 import static com.whiuk.philip.worldquest.MapConstants.*;
@@ -33,6 +36,9 @@ public class WorldQuest extends JFrame {
     static {
         setupKeymap();
     }
+
+    private List<TileSelectionListener> tileSelectionListeners = new ArrayList<>();
+    private WorldQuestMenuBar menuBar;
 
     private static void setupKeymap() {
         if (Files.exists(new File(KEYMAP_FILE+FILE_EXTENSION).toPath())) {
@@ -123,7 +129,6 @@ public class WorldQuest extends JFrame {
     private Shop currentShop;
 
     //TODO: Refactor into ScenarioBeingChanged class
-    Tile tileSelected;
 
     public static void main(String[] args) {
         ExperienceTable.initializeExpTable();
@@ -133,7 +138,8 @@ public class WorldQuest extends JFrame {
     private WorldQuest() {
         super("WorldQuest v0.0.1");
         setSize(640, 480);
-        setJMenuBar(new WorldQuestMenuBar(this));
+        menuBar = new WorldQuestMenuBar(this);
+        setJMenuBar(menuBar);
         WorldQuestKeyListener keyListener = new WorldQuestKeyListener(this);
         gameUI = new GameUI();
         WorldQuestMouseListener mouseListener = new WorldQuestMouseListener(this, gameUI);
@@ -230,7 +236,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    private void saveScenario() {
+    void saveScenario() {
         ScenarioData.Persistor.saveScenario(scenarioData, scenario);
         saveScenarioMap(mapName);
     }
@@ -253,6 +259,7 @@ public class WorldQuest extends JFrame {
         MapView mapView = new EditorMapView(this, this::processEditorTileClick);
         editorScreen = new EditorScreen(mapView, sidebar, messages);
         messageHistory = new ArrayList<>();
+        menuBar.showEditorScreenItems(this);
         appState = EDITOR_RUNNING;
     }
 
@@ -315,7 +322,8 @@ public class WorldQuest extends JFrame {
         visibleNpcs = npcs.stream().filter(npc -> isVisible(npc.x, npc.y)).collect(Collectors.toList());
         GameSidebar sidebar = new GameSidebar(this);
         MessageDisplay messages = new MessageDisplay();
-        gameScreen = new GameScreen(new GameMapView(this, this::processGameTileClick), sidebar, messages);
+        gameScreen = new GameScreen(
+                new GameMapView(this, this::processGameTileClick), sidebar, messages);
         appState = GAME_RUNNING;
     }
 
@@ -477,12 +485,33 @@ public class WorldQuest extends JFrame {
         resourceGathering.gather(this, player, tile);
     }
 
+    public void attemptStructureCreation(StructureCreation structureCreation, Tile tile, int item) {
+        structureCreation.create(this, player, tile, item);
+    }
+
     public boolean inShop() {
         return appState == GAME_SHOP;
     }
 
     public boolean isGameRunning() {
         return appState == GAME_SHOP || appState == GAME_RUNNING;
+    }
+
+    public void registerTileSelectionListener(TileSelectionListener listener) {
+        tileSelectionListeners.add(listener);
+    }
+
+    public void showItemManager() {
+        JFrame itemManager = new JFrame();
+        itemManager.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        Object[][] itemData = scenarioData.items.entrySet().stream().map(e -> new Object[]{
+                e.getKey(),
+                e.getClass().getSimpleName(),
+                e.getValue().print()
+        }).collect(Collectors.toList()).toArray(new Object[][]{});
+        String[] columns = new String[]{"Key", "Type", "Data"};
+        JTable itemTable = new JTable(itemData, columns);
+        itemManager.getContentPane().add(itemTable);
     }
 
     private class WorldQuestCanvas extends JPanel implements Runnable {
@@ -515,7 +544,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    class GameUI implements UI {
+    class GameUI extends ClickableUI {
 
         @Override
         public void render(Graphics2D g) {
@@ -542,7 +571,7 @@ public class WorldQuest extends JFrame {
         }
     }
 
-    class MessageDisplay extends Rectangle implements UI {
+    class MessageDisplay extends ClickableUI {
 
         @Override
         public void render(Graphics2D g) {
@@ -592,7 +621,7 @@ public class WorldQuest extends JFrame {
     }
 
     private void processEditorTileClick(Tile tile) {
-        tileSelected = tile;
+        tileSelectionListeners.forEach(l -> l.tileSelected(tile));
     }
 
     private void processGameTileClick(Tile tile) {

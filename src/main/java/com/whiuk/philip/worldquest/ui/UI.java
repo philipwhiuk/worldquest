@@ -5,5 +5,4 @@ import java.awt.event.MouseEvent;
 
 public interface UI {
     void render(Graphics2D g);
-    void onClick(MouseEvent e);
 }

@@ -1,5 +1,6 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ClickableUI;
 import com.whiuk.philip.worldquest.ui.UI;
 
 import java.awt.event.MouseEvent;
@@ -8,9 +9,9 @@ import java.awt.event.MouseListener;
 public class WorldQuestMouseListener implements MouseListener {
 
     private final WorldQuest game;
-    private final UI ui;
+    private final ClickableUI ui;
 
-    WorldQuestMouseListener(WorldQuest game, UI ui) {
+    WorldQuestMouseListener(WorldQuest game, ClickableUI ui) {
         this.game = game;
         this.ui = ui;
     }

@@ -2,7 +2,7 @@ package com.whiuk.philip.worldquest.ui;
 
 import java.awt.*;
 
-abstract public class ToggleButton extends Rectangle implements UI {
+abstract public class ToggleButton extends ClickableUI {
 
     private final Color primaryColor;
     private final Color secondaryColour;

@@ -1,13 +1,15 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.Component;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Map;
 
-class EquipmentTab extends SidebarTab {
+class EquipmentView extends Component {
     WorldQuest game;
 
-    EquipmentTab(WorldQuest game) {
+    EquipmentView(WorldQuest game) {
         this.game = game;
     }
 
@@ -18,10 +20,10 @@ class EquipmentTab extends SidebarTab {
         String mainHandWeaponName = game.player.mainHandWeapon != null ?
                 game.player.mainHandWeapon.name + " (+"+game.player.mainHandWeapon.damage+")" :
                 "";
-        g.drawString("Weapon: " + mainHandWeaponName, 425, offset);
+        g.drawString("Weapon: " + mainHandWeaponName, 5, offset);
         offset += 20;
 
-        g.drawString("Armour:", 425, offset);
+        g.drawString("Armour:", 5, offset);
         offset += 20;
 
         for (Map.Entry<Slot, Armour> piece : game.player.armour.entrySet()) {
@@ -30,7 +32,7 @@ class EquipmentTab extends SidebarTab {
             String armourDescription = armour != null ?
                     armour.name + " (+"+armour.protection+")" :
                     "";
-            g.drawString(slot.friendlyName+": " + armourDescription, 450, offset);
+            g.drawString(slot.friendlyName+": " + armourDescription, 30, offset);
             offset += 20;
         }
     }

@@ -125,7 +125,7 @@ public class Quest {
             }
             buffer.write(Integer.toString(quest.stepIndex));
             buffer.newLine();
-            buffer.write(Boolean.toString(quest.isFinished()));
+            buffer.write(quest.status.name());
             buffer.newLine();
         }
     }

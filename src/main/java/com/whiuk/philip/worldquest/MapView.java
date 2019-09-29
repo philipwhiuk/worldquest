@@ -1,5 +1,6 @@
 package com.whiuk.philip.worldquest;
 
+import com.whiuk.philip.worldquest.ui.ClickableUI;
 import com.whiuk.philip.worldquest.ui.UI;
 
 import java.awt.*;
@@ -10,7 +11,7 @@ import static com.whiuk.philip.worldquest.MapConstants.*;
 import static com.whiuk.philip.worldquest.MapConstants.MAP_SPACING;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_HEIGHT;
 
-public abstract class MapView implements UI {
+public abstract class MapView extends ClickableUI {
 
     protected WorldQuest game;
     private Consumer<Tile> tileClickHandler;

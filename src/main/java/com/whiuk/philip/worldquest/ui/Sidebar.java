@@ -1,8 +1,6 @@
 package com.whiuk.philip.worldquest.ui;
 
-import java.awt.*;
-
-public abstract class Sidebar extends Rectangle implements UI {
+public abstract class Sidebar extends ClickableUI {
     protected Sidebar() {
         super(400, 0, 240, 480);
     }

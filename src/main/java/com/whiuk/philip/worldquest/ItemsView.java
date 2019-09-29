@@ -1,14 +1,15 @@
 package com.whiuk.philip.worldquest;
 
 import com.whiuk.philip.worldquest.ui.ButtonPainter;
+import com.whiuk.philip.worldquest.ui.Component;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-class ItemsTab extends SidebarTab {
+class ItemsView extends Component {
     WorldQuest game;
 
-    ItemsTab(WorldQuest game) {
+    ItemsView(WorldQuest game) {
         this.game = game;
     }
 
@@ -27,7 +28,7 @@ class ItemsTab extends SidebarTab {
             ButtonPainter.paintButton(g,
                     player.itemBeingUsed != index ? Color.BLUE : Color.DARK_GRAY,
                     player.itemBeingUsed != index ? Color.DARK_GRAY : Color.BLUE,
-                    433,
+                    13,
                     offset - 13,
                     "o"
             );
@@ -37,7 +38,7 @@ class ItemsTab extends SidebarTab {
             ButtonPainter.paintButton(g,
                     Color.GREEN,
                     Color.DARK_GRAY,
-                    450,
+                    30,
                     offset - 13,
                     "+"
             );
@@ -46,18 +47,19 @@ class ItemsTab extends SidebarTab {
         ButtonPainter.paintButton(g,
                 Color.RED,
                 Color.DARK_GRAY,
-                467,
+                47,
                 offset - 13,
                 "-"
         );
 
         g.setColor(Color.WHITE);
-        g.drawString(item.name, 500, offset);
+        g.drawString(item.name, 80, offset);
     }
 
     @Override
     public void onClick(MouseEvent e) {
         for (int i = 0; i < game.player.inventory.size(); i++) {
+            System.out.println(e.getPoint());
             if (inventoryButtonLocation(i, 0).contains(e.getPoint())) {
                 game.useItem(i);
                 return;
@@ -77,7 +79,7 @@ class ItemsTab extends SidebarTab {
 
     private Rectangle inventoryButtonLocation(int index, int button) {
         int xOffset = button*17;
-        int offset = y+(20*index);
+        int offset = 170+(20*index);
         return new Rectangle(433+xOffset, offset, 15, 15);
     }
 }

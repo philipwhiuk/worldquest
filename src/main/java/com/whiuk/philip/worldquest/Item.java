@@ -107,6 +107,7 @@ public class Item {
     static List<ItemAction> parseActions(String actionData) {
         return Arrays
                 .stream(actionData.split("\\|"))
+                .filter(a -> a.length() > 0)
                 .map(ItemAction::valueOf)
                 .collect(Collectors.toList());
     }
@@ -125,10 +126,6 @@ public class Item {
 
     public boolean canUse() {
         return actions.contains(USE);
-    }
-
-    public boolean canEquip() {
-        return actions.contains(EQUIP);
     }
 
     public String print() {
@@ -185,11 +182,6 @@ class Armour extends Item {
     }
 
     @Override
-    public boolean canEquip() {
-        return true;
-    }
-
-    @Override
     public String print() {
         return super.print()+","+slot+","+protection;
     }
@@ -217,11 +209,6 @@ class Weapon extends Item {
     @Override
     public Weapon copy() {
         return new Weapon(this.name, this.actions, this.type, damage);
-    }
-
-    @Override
-    public boolean canEquip() {
-        return true;
     }
 
     @Override
@@ -265,11 +252,6 @@ class Consumable extends Item {
     @Override
     public Consumable copy() {
         return new Consumable(name, actions, statChanges);
-    }
-
-    @Override
-    public boolean canEquip() {
-        return true;
     }
 
     @Override

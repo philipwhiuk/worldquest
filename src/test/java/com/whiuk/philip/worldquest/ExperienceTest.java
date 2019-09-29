@@ -23,4 +23,11 @@ public class ExperienceTest {
         Experience test = new Experience(ExperienceTable.experienceTable[1]);
         assertEquals(test.level, 1);
     }
+
+    @Test
+    public void NoExperience_provides_Experience_with_level_and_xp_0() {
+        Experience test = Experience.NoExperience();
+        assertEquals(test.level, 0);
+        assertEquals(test.experience,0);
+    }
 }

@@ -77,10 +77,11 @@ class ResourceGathering {
                     if (object instanceof GObjects.ResourceProvider) {
                         GObjects.ResourceProvider resourceProvider = (GObjects.ResourceProvider) object;
                         if (extractableResourceProviders.contains(resourceProvider.name)) {
-                            if (player.inventory.hasSpaceForItem(resourceProvider.resource)) {
-                                player.inventory.add(resourceProvider.extract());
+                            Item item = game.scenarioData.item(resourceProvider.resource);
+                            if (player.inventory.hasSpaceForItem(item)) {
+                                player.inventory.add(resourceProvider.extract(game));
                             } else {
-                                game.eventMessage("No space to take the " + resourceProvider.resource.name);
+                                game.eventMessage("No space to take the " + item.name);
                             }
                         }
                     }
