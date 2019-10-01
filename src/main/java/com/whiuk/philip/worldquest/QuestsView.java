@@ -1,11 +1,9 @@
 package com.whiuk.philip.worldquest;
 
 import com.whiuk.philip.worldquest.ui.Component;
-import com.whiuk.philip.worldquest.ui.Tab;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -22,11 +20,11 @@ class QuestsView extends Component {
     public void render(Graphics2D g) {
         int offset = y + 13;
         g.setColor(Color.WHITE);
-        Set<Map.Entry<String, Quest>> questList = game.player.quests.entrySet();
-        Iterator<Map.Entry<String, Quest>> questIterator = questList.iterator();
+        Set<Map.Entry<String, QuestProgress>> questList = game.player.quests.entrySet();
+        Iterator<Map.Entry<String, QuestProgress>> questIterator = questList.iterator();
         for (int i = 0; i < questList.size(); i++) {
-            Quest quest = questIterator.next().getValue();
-            listQuest(g, game.player, quest, offset, i);
+            QuestProgress questProgress = questIterator.next().getValue();
+            listQuest(g, game.player, questProgress, offset, i);
             offset += 20;
         }
     }
@@ -34,22 +32,25 @@ class QuestsView extends Component {
     @Override
     public void onClick(MouseEvent e) {
         System.out.println(e.getPoint());
-        Quest[] questList = game.player.quests.values().toArray(new Quest[]{});
-        for (Quest quest : questList) {
+
+        Set<Map.Entry<String, QuestProgress>> questList = game.player.quests.entrySet();
+        Iterator<Map.Entry<String, QuestProgress>> questIterator = questList.iterator();
+        for (int i = 0; i < questList.size(); i++) {
+            QuestProgress questProgress = questIterator.next().getValue();
             Rectangle questName = new Rectangle(440, 175, 100, 15);
             if (questName.contains(e.getPoint())) {
-                if (quest.isFinished()) {
-                    game.eventMessage(quest.name + ": COMPLETE");
+                if (questProgress.isFinished()) {
+                    game.eventMessage(questProgress.quest.name + ": COMPLETE");
                 } else {
-                    QuestStep step = quest.steps.get(quest.stepIndex);
+                    QuestStepProgress step = questProgress.currentQuestStepProgress;
                     if (step.isFinished()) {
-                        game.eventMessage(quest.name + ": Step complete");
+                        game.eventMessage(questProgress.quest.name + ": Step complete");
                     } else {
-                        step.killsRequired.forEach((key, value) -> {
+                        questProgress.currentQuestStepProgress.killsRemaining.forEach((key, value) -> {
                             String killsText = value > 1 ?
                                 "Kill "+value+" "+key+"s" :
                                 "Kill "+value;
-                            game.eventMessage(quest.name + ": "+killsText);
+                            game.eventMessage(questProgress.quest.name + ": "+killsText);
                         });
                     }
                 }
@@ -58,8 +59,8 @@ class QuestsView extends Component {
         }
     }
 
-    private void listQuest(Graphics2D g, Player player, Quest quest, int offset, int index) {
-        g.setColor(quest.isFinished() ? Color.GREEN : Color.YELLOW);
-        g.drawString(quest.name, 20, offset);
+    private void listQuest(Graphics2D g, Player player, QuestProgress questProgress, int offset, int index) {
+        g.setColor(questProgress.isFinished() ? Color.GREEN : Color.YELLOW);
+        g.drawString(questProgress.quest.name, 20, offset);
     }
 }

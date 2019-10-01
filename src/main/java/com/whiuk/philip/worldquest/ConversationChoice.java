@@ -1,8 +1,8 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,57 +20,56 @@ class Conversation {
 
 class ConversationChoice {
     static class Persistor {
-        public static void saveConversationChoicesToBuffer(Map<String, ConversationChoice> conversationChoices, BufferedWriter buffer) throws IOException {
-            buffer.write(Integer.toString(conversationChoices.size()));
-            buffer.newLine();
+        public static JSONArray saveConversationChoicesToJson(Map<String, ConversationChoice> conversationChoices) {
+            //TODO:
+            return new JSONArray();
         }
     }
     static class Provider {
-        static Map<String, ConversationChoice> loadConversationChoicesFromBuffer(BufferedReader buffer) throws IOException {
-            int choicesCount = Integer.parseInt(buffer.readLine());
+        static Map<String, ConversationChoice> loadConversationChoicesFromJson(JSONArray conversationChoicesData) {
             Map<String, ConversationChoice> conversationChoices = new HashMap<>();
-            for (int c = 0; c < choicesCount; c++) {
-                String[] choiceData = buffer.readLine().split(",");
-                String id = choiceData[0];
-                String playerText = choiceData[1];
-                String npcText = choiceData[2];
-                boolean hasNpcAction = Boolean.parseBoolean(choiceData[3]);
-                boolean hasCanSee = Boolean.parseBoolean(choiceData[4]);
+            for (Object cCO: conversationChoicesData) {
+                JSONObject choiceData = (JSONObject) cCO;
+                String id = (String) choiceData.get("id");
+                String playerText = (String) choiceData.get("playerText");
+                String npcText = (String) choiceData.get("npcText");
+                boolean hasNpcAction = (Boolean) choiceData.get("hasNpcAction");
+                boolean hasCanSee = (Boolean) choiceData.get("hasCanSee");
                 NPCAction npcAction = null;
                 Predicate<QuestState> canSee = null;
                 if (hasNpcAction) {
-                    String[] npcActionData = buffer.readLine().split(",");
-                    switch (npcActionData[0]) {
+                    String npcActionType = (String) choiceData.get("npcAction");
+                    switch (npcActionType) {
                         case "ShopDisplay":
                             npcAction = new ShopDisplay();
                             break;
                         case "ConversationChoiceSelection":
-                            int qSCount = Integer.parseInt(npcActionData[1]);
+                            JSONArray selectionData = (JSONArray) choiceData.get("conversationChoices");
                             List<String> choices = new ArrayList<>();
-                            for (int q = 0; q < qSCount ; q++) {
-                                choices.add(buffer.readLine());
+                            for (Object option : selectionData) {
+                                choices.add((String) option);
                             }
                             npcAction = new ConversationChoiceSelection(choices);
                             break;
                         case "QuestStartAction":
-                            npcAction = new QuestStartAction(npcActionData[1]);
+                            npcAction = new QuestStartAction((String) choiceData.get("quest"));
                             break;
                         case "QuestFinishAction":
-                            npcAction = new QuestFinishAction(npcActionData[1]);
+                            npcAction = new QuestFinishAction((String) choiceData.get("quest"));
                     }
                 }
                 if (hasCanSee) {
-                    String[] canSeeData = buffer.readLine().split(",");
-                    switch (canSeeData[0]) {
+                    String canSeeType = (String) choiceData.get("canSee");
+                    switch (canSeeType) {
                         case "Always":
                             canSee = (state) -> true;
                             break;
                         case "QuestState":
-                            int qSCount = Integer.parseInt(canSeeData[1]);
+                            JSONArray questStatusData = (JSONArray) choiceData.get("questStatus");
                             HashMap<String, QuestStatus> questState = new HashMap<>();
-                            for (int q = 0; q < qSCount ; q++) {
-                                String[] qsData = buffer.readLine().split(",");
-                                questState.put(qsData[0], QuestStatus.valueOf(qsData[1]));
+                            for (Object sO : questStatusData) {
+                                JSONObject status = (JSONObject) sO;
+                                questState.put((String) status.get("quest"), QuestStatus.valueOf((String) status.get("state")));
                             }
                             canSee = new QuestStatePredicate(questState);
                             break;

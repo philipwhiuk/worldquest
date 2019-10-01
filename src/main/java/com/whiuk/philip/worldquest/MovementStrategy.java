@@ -1,18 +1,21 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONObject;
+
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
+
 public interface MovementStrategy {
-    static MovementStrategy parseStrategy(String data) {
-        String movementStrategyData[] = data.split(",");
-        switch(movementStrategyData[0]) {
+    static MovementStrategy parseStrategy(JSONObject strategyData) {
+        switch((String) strategyData.get("type")) {
             case "Zonal": return new ZonalMovementStrategy(
-                    Integer.parseInt(movementStrategyData[1]),
-                    Integer.parseInt(movementStrategyData[2]),
-                    Integer.parseInt(movementStrategyData[3]),
-                    Integer.parseInt(movementStrategyData[4]));
+                    intFromObj(strategyData.get("x")),
+                    intFromObj(strategyData.get("y")),
+                    intFromObj(strategyData.get("width")),
+                    intFromObj(strategyData.get("height")));
             case "Random": return new RandomMovementStrategy();
             case "Fixed": return new FixedMovementStrategy();
+            default: throw new IllegalArgumentException("Unknown strategy:" + strategyData.get("type"));
         }
-        throw new IllegalArgumentException("Unknown strategy:" + movementStrategyData[0]);
     }
 
     Direction nextDirection(NPC npc);

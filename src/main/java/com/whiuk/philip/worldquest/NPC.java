@@ -1,12 +1,14 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
 
 public class NPC extends GameCharacter {
     final NPCType type;
@@ -18,7 +20,7 @@ public class NPC extends GameCharacter {
     NPC(NPCType type, int x, int y, MovementStrategy movementStrategy) {
         super(type.color, x, y, type.health, type.health);
         this.type = type;
-        this.shop = type.shop != null ? type.shop.copy() : null;
+        this.shop = type.shop;
         this.movementStrategy = movementStrategy;
     }
 
@@ -49,7 +51,7 @@ public class NPC extends GameCharacter {
     }
 
     public GObjects.ItemDrop dropItem() {
-        return type.dropTable[RandomSource.getRandom().nextInt(type.dropTable.length)].copy();
+        return type.dropTable[RandomSource.getRandom().nextInt(type.dropTable.length)].spawn();
     }
 
     public boolean isAggressive() {
@@ -70,30 +72,22 @@ class Shop {
         this.items = items;
     }
 
-    public Shop copy() {
-        ArrayList<ShopListing> items = new ArrayList<>();
-        this.items.stream().forEach(item -> items.add(item.copy()));
-        return new Shop(name, items);
-    }
-
     static class Provider {
-        static Map<String, Shop> loadShopsFromBuffer(ScenarioData data, BufferedReader buffer) throws IOException {
-            int shopsCount = Integer.parseInt(buffer.readLine());
+        static Map<String, Shop> loadShopsFromJson(ScenarioData data, JSONArray shopsData) {
             Map<String, Shop> shops = new HashMap<>();
-            for (int s = 0; s < shopsCount; s++) {
-                String[] shopData = buffer.readLine().split(",");
-                String id = shopData[0];
-                String name = shopData[1];
-                int itemCount = Integer.parseInt(shopData[2]);
+            for (Object sO : shopsData) {
+                JSONObject shopData = (JSONObject) sO;
+                String id = (String) shopData.get("id");
+                String name = (String) shopData.get("name");
                 List<ShopListing> shopListings = new ArrayList<>();
-                for (int i = 0; i < itemCount; i++) {
-                    String[] shopListingData = buffer.readLine().split(",");
-
+                JSONArray shopListingsData = (JSONArray) shopData.get("items");
+                for (Object sLO : shopListingsData) {
+                    JSONObject shopListingData = (JSONObject) sLO;
                     shopListings.add(new ShopListing(
-                            data.item(shopListingData[0]).copy(),
-                            Integer.parseInt(shopListingData[1]),
-                            Integer.parseInt(shopListingData[2]),
-                            Integer.parseInt(shopListingData[3])
+                            data.itemType((String) shopListingData.get("item")),
+                            intFromObj(shopListingData.get("maxQuantity")),
+                            intFromObj(shopListingData.get("quantity")),
+                            intFromObj(shopListingData.get("basePrice"))
                     ));
                 }
                 shops.put(id, new Shop(name, shopListings));
@@ -103,28 +97,28 @@ class Shop {
     }
 
     public static class Persistor {
-        public static void saveShopsToBuffer(Map<String, Shop> shops, BufferedWriter buffer) throws IOException {
+        public static JSONArray saveShopsToJson(Map<String, Shop> shops) {
+            return new JSONArray();
+            //TOOD:
+            /**
             buffer.write(Integer.toString(shops.size()));
             buffer.newLine();
+             **/
         }
     }
 }
 
 class ShopListing {
-    Item item;
+    ItemType item;
     int maxQuantity;
     int quantity;
     int basePrice;
 
-    public ShopListing(Item item, int maxQuantity, int quantity, int basePrice) {
+    public ShopListing(ItemType item, int maxQuantity, int quantity, int basePrice) {
         this.item = item;
         this.maxQuantity = maxQuantity;
         this.quantity = quantity;
         this.basePrice = basePrice;
-    }
-
-    public ShopListing copy() {
-        return new ShopListing(item.copy(), maxQuantity, quantity, basePrice);
     }
 
     public int getPrice() {

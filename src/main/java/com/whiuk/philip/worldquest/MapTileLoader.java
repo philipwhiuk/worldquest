@@ -1,10 +1,13 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
 import static com.whiuk.philip.worldquest.MapConstants.MAP_TILES_HEIGHT;
 import static com.whiuk.philip.worldquest.MapConstants.MAP_TILES_WIDTH;
 
@@ -12,15 +15,14 @@ public class MapTileLoader {
 
     static final int DEFAULT_TILE_ID = 1;
 
-    static Tile[][] loadMapTiles(Map<Integer, TileType> tileTypes, BufferedReader buffer) throws IOException {
+    static Tile[][] loadMapTiles(Map<Integer, TileType> tileTypes, JSONArray mapTileData) throws IOException {
         Tile[][] newMap = new Tile[MAP_TILES_WIDTH][MAP_TILES_HEIGHT];
-        int mapLines = Integer.parseInt(buffer.readLine());
-        if (mapLines != MAP_TILES_HEIGHT) {
-            throw new RuntimeException("Invalid map.dat size");
+        if (mapTileData.size() != MAP_TILES_HEIGHT) {
+            throw new RuntimeException("Invalid map.json size");
         }
 
         TileFromDataFunction createTileFunction = (data, x, y) -> {
-            int tileTypeId = Integer.parseInt(data);
+            int tileTypeId = data;
             TileType tileType = tileTypes.get(tileTypeId);
             if (tileType == null) {
                 throw new RuntimeException("Invalid tile type: " + tileTypeId);
@@ -28,26 +30,24 @@ public class MapTileLoader {
             newMap[x][y] = new Tile(tileType, x, y);
         };
 
-        processMapData(buffer, createTileFunction);
+        processMapData(mapTileData, createTileFunction);
 
         return newMap;
     }
 
-    static void markExploration(final Tile[][] map, BufferedReader buffer) throws IOException {
-        int mapLines = Integer.parseInt(buffer.readLine());
-        if (mapLines != MAP_TILES_HEIGHT) {
-            throw new RuntimeException("Invalid map.dat size");
+    static void markExploration(final Tile[][] map, JSONArray mapExplorationData) throws IOException {
+        if (mapExplorationData.size() != MAP_TILES_HEIGHT) {
+            throw new RuntimeException("Invalid map.json exploration size");
         }
-        processMapData(buffer, (data, x, y) -> map[x][y].hasSeen = data.equals("1"));
+        processMapData(mapExplorationData, (data, x, y) -> map[x][y].hasSeen = data == 1);
     }
 
-    private static void processMapData(BufferedReader buffer, TileFromDataFunction mapFunction) throws IOException {
+    private static void processMapData(JSONArray mapData, TileFromDataFunction mapFunction) throws IOException {
         for (int y = 0; y < MAP_TILES_HEIGHT; y++) {
-            String mapLine = buffer.readLine();
+            JSONArray mapLine = (JSONArray) mapData.get(y);
             if (mapLine != null) {
-                String[] tileData = mapLine.split(",");
-                for (int x = 0; x < tileData.length; x++) {
-                    mapFunction.apply(tileData[x], x, y);
+                for (int x = 0; x < mapLine.size(); x++) {
+                    mapFunction.apply(intFromObj(mapLine.get(x)), x, y);
                 }
             }
         }
@@ -74,7 +74,7 @@ public class MapTileLoader {
 
     @FunctionalInterface
     interface TileFromDataFunction {
-        void apply(String data, Integer x, Integer y);
+        void apply(Integer data, Integer x, Integer y);
     }
 
     @FunctionalInterface
@@ -82,7 +82,9 @@ public class MapTileLoader {
         void apply(Integer x, Integer y);
     }
 
-    public static void saveMapTiles(Tile[][] map, BufferedWriter buffer) throws IOException {
+    public static void saveMapTiles(Tile[][] map) throws IOException {
+        //TODO:
+        /**
         buffer.append(Integer.toString(map[0].length));
         buffer.newLine();
         for (int y = 0; y < map[0].length; y++) {
@@ -94,9 +96,12 @@ public class MapTileLoader {
             buffer.append(mapLine);
             buffer.newLine();
         }
+         **/
     }
 
-    public static void saveMapExploration(Tile[][] map, BufferedWriter buffer) throws IOException {
+    public static void saveMapExploration(Tile[][] map) throws IOException {
+        //TODO:
+        /**
         buffer.append(Integer.toString(map[0].length));
         buffer.newLine();
         for (int y = 0; y < map[0].length; y++) {
@@ -108,5 +113,6 @@ public class MapTileLoader {
             buffer.append(mapLine);
             buffer.newLine();
         }
+         **/
     }
 }

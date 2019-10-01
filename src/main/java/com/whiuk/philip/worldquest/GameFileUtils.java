@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GameFileUtils {
-    static final String FILE_EXTENSION = ".dat";
+    static final String FILE_EXTENSION = ".json";
     static final String PLAYER_SAVE_FILE = "player";
     static final String SCENARIOS_FOLDER = "scenario";
     static final String BASE_FOLDER = "base";

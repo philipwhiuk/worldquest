@@ -1,7 +1,7 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import org.json.simple.JSONArray;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -11,7 +11,7 @@ class ResourceGathering {
 
         @SuppressWarnings("unused")
         static //TODO: Load Resource Gathering Methods from buffer
-        Map<String, ResourceGathering> loadResourceGatheringFromBuffer(BufferedReader buffer) {
+        Map<String, ResourceGathering> loadResourceGatheringFromJson(JSONArray resourceGatheringData) {
             Map<String, ResourceGathering> resourceGathering = new HashMap<>();
             resourceGathering.put("Mine", new ResourceGathering(
                     "Rock",
@@ -46,8 +46,9 @@ class ResourceGathering {
     }
 
     public static class Persistor {
-        public static void saveResourceGatheringToBuffer(Map<String, ResourceGathering> resourceGathering, BufferedWriter buffer) throws IOException {
+        public static JSONArray saveResourceGatheringToJson(Map<String, ResourceGathering> resourceGathering) throws IOException {
             //TODO: Save Resource Gathering Methods from buffer
+            return new JSONArray();
         }
     }
 
@@ -70,18 +71,19 @@ class ResourceGathering {
 
     void gather(WorldQuest game, Player player, Tile tile) {
         if (tile.type == game.scenarioData.tileTypeByName(tileType)) {
-            if (player.inventory.hasSpaceForItem(game.scenarioData.item(baseProduct))) {
+            if (player.inventory.hasSpaceForItemOfType(game.scenarioData.itemType(baseProduct))) {
                 player.gainExperience(skill, experience);
-                player.inventory.add(game.scenarioData.item(baseProduct).copy());
+                //TODO: Quality
+                player.inventory.add(game.scenarioData.itemType(baseProduct).create());
                 for (GObjects.GameObject object : tile.objects) {
                     if (object instanceof GObjects.ResourceProvider) {
                         GObjects.ResourceProvider resourceProvider = (GObjects.ResourceProvider) object;
                         if (extractableResourceProviders.contains(resourceProvider.name)) {
-                            Item item = game.scenarioData.item(resourceProvider.resource);
-                            if (player.inventory.hasSpaceForItem(item)) {
+                            ItemType itemType = game.scenarioData.itemType(resourceProvider.resource);
+                            if (player.inventory.hasSpaceForItemOfType(itemType)) {
                                 player.inventory.add(resourceProvider.extract(game));
                             } else {
-                                game.eventMessage("No space to take the " + item.name);
+                                game.eventMessage("No space to take the " + itemType.name);
                             }
                         }
                     }

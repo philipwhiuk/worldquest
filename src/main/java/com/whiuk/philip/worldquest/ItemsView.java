@@ -24,7 +24,7 @@ class ItemsView extends Component {
     }
 
     private void listItem(Graphics2D g, Player player, Item item, int offset, int index) {
-        if (item.canUse()) {
+        if (item.getType().canUse()) {
             ButtonPainter.paintButton(g,
                     player.itemBeingUsed != index ? Color.BLUE : Color.DARK_GRAY,
                     player.itemBeingUsed != index ? Color.DARK_GRAY : Color.BLUE,
@@ -34,7 +34,7 @@ class ItemsView extends Component {
             );
         }
 
-        if (item.hasAction()) {
+        if (item.getType().hasAction()) {
             ButtonPainter.paintButton(g,
                     Color.GREEN,
                     Color.DARK_GRAY,
@@ -53,7 +53,7 @@ class ItemsView extends Component {
         );
 
         g.setColor(Color.WHITE);
-        g.drawString(item.name, 80, offset);
+        g.drawString(item.getType().name, 80, offset);
     }
 
     @Override

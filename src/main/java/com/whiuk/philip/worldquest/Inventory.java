@@ -31,6 +31,10 @@ public class Inventory implements Iterable<Item> {
         return hasSpaceForItems(Collections.singletonList(item));
     }
 
+    boolean hasSpaceForItemOfType(ItemType item) {
+        return this.items.size() + 1 <= MAX_INVENTORY_SIZE;
+    }
+
     public Item get(int index) {
         return items.get(index);
     }
@@ -50,12 +54,23 @@ public class Inventory implements Iterable<Item> {
         return items.remove(item);
     }
 
+    public boolean remove(ItemType itemType) {
+        for (Iterator<Item> it = items.iterator(); it.hasNext();) {
+            Item i = it.next();
+            if (i.getType().equals(itemType)) {
+                it.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int size() {
         return items.size();
     }
 
-    public boolean contains(Item i) {
-        return items.contains(i);
+    public boolean contains(ItemType i) {
+        return items.stream().anyMatch(item -> item.getType().equals(i));
     }
 
     @Override
@@ -63,11 +78,7 @@ public class Inventory implements Iterable<Item> {
         return items.iterator();
     }
 
-    public boolean containsItem(String itemName) {
-        return items.stream().anyMatch(item -> item.name.equals(itemName));
-    }
-
-    public boolean contains(Item searchItem, int quantity) {
-        return items.stream().filter(item -> item.name.equals(searchItem.name)).count() >= quantity;
+    public boolean contains(ItemType searchItem, int quantity) {
+        return items.stream().filter(item -> item.getType().equals(searchItem)).count() >= quantity;
     }
 }

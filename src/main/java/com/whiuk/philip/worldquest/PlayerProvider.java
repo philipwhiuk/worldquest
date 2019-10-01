@@ -1,12 +1,15 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
 
 public class PlayerProvider {
 
@@ -14,129 +17,91 @@ public class PlayerProvider {
         return scenarioData.newPlayer();
     }
 
-    public static Player loadPlayer(BufferedReader buffer) throws IOException {
-        String playerStatus[] = buffer.readLine().split(",");
+    public static Player loadPlayer(JSONObject playerData, Map<String, ItemType> itemTypes, Map<String, Quest> quests) {
 
-        int statsCount = Integer.parseInt(buffer.readLine());
+        JSONArray statsData = (JSONArray) playerData.get("stats");
         Map<String, Experience> stats = new HashMap<>();
-        for (int i = 0; i < statsCount; i++) {
-            String[] statData = buffer.readLine().split(":");
+        for (Object sO : statsData) {
+            JSONObject statData = (JSONObject) sO;
             try {
-                stats.put(statData[0], new Experience(Integer.parseInt(statData[1])));
+                stats.put((String) statData.get("stat"), new Experience(intFromObj(statData.get("exp"))));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to parse stat: " + statData[0], e);
+                throw new IllegalArgumentException("Unable to parse stat: " + statData, e);
             }
         }
 
-        int skillsCount = Integer.parseInt(buffer.readLine());
+        JSONArray skillsData = (JSONArray) playerData.get("skills");
         Map<String, Experience> skills = new HashMap<>();
-        for (int i = 0; i < skillsCount; i++) {
-            String[] skillData = buffer.readLine().split(":");
+        for (Object sO : skillsData) {
+            JSONObject skillData = (JSONObject) sO;
             try {
-                skills.put(skillData[0], new Experience(Integer.parseInt(skillData[1])));
+                stats.put((String) skillData.get("skill"), new Experience(intFromObj(skillData.get("exp"))));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to parse skill: " + skillData[0], e);
+                throw new IllegalArgumentException("Unable to parse skill: " + skillData, e);
             }
         }
-        String mainHandWeaponString = buffer.readLine();
-        Weapon weapon = null;
+
+        Weapon<WeaponType> weapon = null;
         try {
+            String mainHandWeaponString = (String) playerData.getOrDefault("mainHandWeapon", "");
             if (!mainHandWeaponString.isEmpty()) {
-                weapon = (Weapon) Item.Provider.parseItem(mainHandWeaponString);
+                //TODO: Don't create new
+                weapon = (Weapon<WeaponType>) ((WeaponType) itemTypes.get(mainHandWeaponString)).create();
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse weapon", e);
         }
-        int armourCount = Integer.parseInt(buffer.readLine());
+        JSONArray armourData = (JSONArray) playerData.get("armour");
         Map<Slot, Armour> armour = new HashMap<>();
-            for (int i = 0; i < armourCount; i++) {
-                String[] armourData = buffer.readLine().split(":");
+            for (Object aO : armourData) {
+                JSONObject armourSlotData = (JSONObject) aO;
                 try {
-                    armour.put(Slot.valueOf(armourData[0]), (Armour) Item.Provider.parseItem(armourData[1]));
+                    //TODO: Don't create new
+                    armour.put(Slot.valueOf((String) armourSlotData.get("slot")),
+                            (Armour) itemTypes.get((String) armourSlotData.get("item")).create());
                 } catch (Exception e) {
-                    throw new IllegalArgumentException("Unable to parse armour in slot: " + armourData[0], e);
+                    throw new IllegalArgumentException("Unable to parse armour in slot: " + armourData, e);
                 }
             }
-        int inventoryCount = Integer.parseInt(buffer.readLine());
+        JSONArray inventoryData = (JSONArray) playerData.get("armour");
         List<Item> inventory = new ArrayList<>();
-        for (int i = 0; i < inventoryCount; i++) {
+        for (Object iO : inventoryData) {
             try {
-                inventory.add(Item.Provider.parseItem(buffer.readLine()));
+                //TODO: Don't create new
+                inventory.add(itemTypes.get((String) iO).create());
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to parse inventory item: " + i, e);
+                throw new IllegalArgumentException("Unable to parse inventory item: " + iO, e);
             }
         }
 
-
-        int questCount = Integer.parseInt(buffer.readLine());
-        Map<String, Quest> quests = new HashMap<>();
-        for (int i = 0; i < questCount; i++) {
+        JSONArray questsData = (JSONArray) playerData.get("quests");
+        Map<String, QuestProgress> questsProgress = new HashMap<>();
+        for (Object qO : questsData) {
             try {
-                Quest quest = Quest.Provider.parseQuest(buffer);
-                quests.put(quest.name, quest);
+                QuestProgress questProgress = QuestProgress.Provider.parseQuestProgress((JSONObject) qO, quests);
+                questsProgress.put(questProgress.quest.name, questProgress);
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to parse quest: " + i, e);
+                throw new IllegalArgumentException("Unable to parse quest: " + qO, e);
             }
         }
 
         try {
             return new Player(
-                    Integer.parseInt(playerStatus[0]),
-                    Integer.parseInt(playerStatus[1]),
-                    Integer.parseInt(playerStatus[2]),
-                    Integer.parseInt(playerStatus[3]),
-                    Integer.parseInt(playerStatus[4]),
-                    stats, skills, weapon, armour, inventory, quests,
-                    Integer.parseInt(playerStatus[5]),
-                    Integer.parseInt(playerStatus[6])
+                    intFromObj(playerData.get("maxHealth")),
+                    intFromObj(playerData.get("health")),
+                    intFromObj(playerData.get("maxFood")),
+                    intFromObj(playerData.get("food")),
+                    intFromObj(playerData.get("money")),
+                    stats, skills, weapon, armour, inventory, questsProgress,
+                    intFromObj(playerData.get("x")),
+                    intFromObj(playerData.get("y"))
             );
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to parse player", e);
         }
     }
 
-    public static void savePlayer(BufferedWriter buffer, Player player) throws IOException {
-        buffer.write(String.join(",",
-                ""+player.maxHealth, ""+player.health,
-                ""+player.maxFood, ""+player.food,
-                ""+player.money,
-                ""+player.x, ""+player.y));
-        buffer.newLine();
-        buffer.write(""+player.stats.size());
-        buffer.newLine();
-        for (Map.Entry<String, Experience> entry : player.stats.entrySet()) {
-            buffer.write(entry.getKey()+":"+entry.getValue().experience);
-            buffer.newLine();
-        }
-        buffer.write(""+player.skills.size());
-        buffer.newLine();
-        for (Map.Entry<String, Experience> entry : player.skills.entrySet()) {
-            buffer.write(entry.getKey()+":"+entry.getValue().experience);
-            buffer.newLine();
-        }
-        buffer.write(player.mainHandWeapon != null ? printItem(player.mainHandWeapon) : "");
-        buffer.newLine();
-        buffer.write(""+player.armour.size());
-        buffer.newLine();
-        for (Map.Entry<Slot, Armour> entry : player.armour.entrySet()) {
-            buffer.write(entry.getKey().name()+":"+printItem(entry.getValue()));
-            buffer.newLine();
-        }
-        buffer.write(""+player.inventory.size());
-        buffer.newLine();
-        for (Item item : player.inventory) {
-            buffer.write(printItem(item));
-            buffer.newLine();
-        }
-        buffer.write(""+player.quests.size());
-        buffer.newLine();
-        for (Quest quest : player.quests.values()) {
-            Quest.Provider.writeQuest(buffer, quest);
-        }
-
-    }
-
-    private static String printItem(Item item) {
-        return item.getClass().getSimpleName()+","+item.print();
+    public static void savePlayer(BufferedWriter buffer, Player player) {
+        //TODO:
     }
 }

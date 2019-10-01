@@ -1,135 +1,131 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static com.whiuk.philip.worldquest.Item.ItemAction.EQUIP;
-import static com.whiuk.philip.worldquest.Item.ItemAction.USE;
+import static com.whiuk.philip.worldquest.ItemAction.USE;
 
-public class Item {
-
+class ItemTypeDao {
     static class Provider {
-        static Map<String, Item> loadItemsFromBuffer(BufferedReader buffer) throws IOException {
-            Map<String, Item> items = new HashMap<>();
-            int itemCount = Integer.parseInt(buffer.readLine());
-            for (int i = 0; i < itemCount; i++) {
-                String[] itemData = buffer.readLine().split(",");
-                String itemID = itemData[0];
-                String itemClass = itemData[1];
+        static Map<String, ItemType> loadItemTypesFromJson(JSONArray itemTypesData) throws IOException {
+            Map<String, ItemType> itemTypes = new HashMap<>();
+            for (Object itemTypeObj: itemTypesData) {
+                JSONObject itemTypeData = (JSONObject) itemTypeObj;
+                String itemID = (String) itemTypeData.get("id");
+                String itemClass = (String) itemTypeData.get("class");
                 switch(itemClass) {
                     case "Item":
-                        items.put(itemID, new Item(itemData[2], Item.parseActions(itemData[3])));
+                        itemTypes.put(itemID, new StandardItemType((String) itemTypeData.get("name"),
+                                parseActions((JSONArray) itemTypeData.get("actions"))));
                         break;
                     case "Weapon":
-                        items.put(itemID, new Weapon(itemData[2],
-                                Item.parseActions(itemData[3]), itemData[4], Integer.parseInt(itemData[5])));
+                        itemTypes.put(itemID, new WeaponType((String) itemTypeData.get("name"),
+                                parseActions((JSONArray) itemTypeData.get("actions")),
+                                (String) itemTypeData.get("type"), ((Long) itemTypeData.get("damage")).intValue()));
                         break;
                     case "Hatchet":
-                        items.put(itemID, new Hatchet(itemData[2],
-                                Item.parseActions(itemData[3]), Integer.parseInt(itemData[4])));
+                        itemTypes.put(itemID, new HatchetType((String) itemTypeData.get("name"),
+                                parseActions((JSONArray) itemTypeData.get("actions")),
+                                ((Long) itemTypeData.get("damage")).intValue()));
                         break;
                     case "Armour":
-                        items.put(itemID, new Armour(itemData[2], Item.parseActions(itemData[3]),
-                                Slot.valueOf(itemData[4]), Integer.parseInt(itemData[5])));
+                        itemTypes.put(itemID, new ArmourType((String) itemTypeData.get("name"),
+                                parseActions((JSONArray) itemTypeData.get("actions")),
+                                Slot.valueOf((String) itemTypeData.get("slot")), ((Long) itemTypeData.get("protection")).intValue()));
                         break;
                     case "Consumable":
-                        items.put(itemID, new Consumable(itemData[2], Item.parseActions(itemData[3]),
-                                Consumable.parseStatChanges(itemData[4])));
+                        itemTypes.put(itemID, new ConsumableType((String) itemTypeData.get("name"),
+                                parseActions((JSONArray) itemTypeData.get("actions")),
+                                ConsumableType.parseStatChanges((JSONArray) itemTypeData.get("statChanges"))));
                         break;
                     default:
                         throw new IllegalArgumentException(itemClass);
                 }
 
             }
-            return items;
+            return itemTypes;
         }
 
-        static Item parseItem(String itemData) {
-            String[] itemClassData = itemData.split(",", 2);
-            switch (itemClassData[0]) {
-                case "Item":
-                    return Item.parseItem(itemClassData[1]);
-                case "Weapon":
-                    return Weapon.parseItem(itemClassData[1]);
-                case "Armour":
-                    return Armour.parseItem(itemClassData[1]);
-                case "Hatchet":
-                    return Hatchet.parseItem(itemClassData[1]);
-                case "Consumable":
-                    return Consumable.parseItem(itemClassData[1]);
+        static List<ItemAction> parseActions(JSONArray actionData) {
+            List<ItemAction> actions = new ArrayList<>();
+            for (Object action : actionData) {
+                actions.add(ItemAction.valueOf((String) action));
             }
-            throw new IllegalArgumentException(itemClassData[0]);
-        }
-
-        public static String printItem(Item resource) {
-            if (resource instanceof Hatchet) {
-                return "Hatchet,"+resource.print();
-            } else if (resource instanceof Armour) {
-                return "Armour,"+resource.print();
-            } else if (resource instanceof Weapon) {
-                return "Weapon,"+resource.print();
-            } else if (resource instanceof Consumable) {
-                return "Consumable,"+resource.print();
-            } else if (resource.getClass().equals(Item.class)) {
-                return "Item,"+resource.print();
-            } else {
-                throw new IllegalArgumentException("Unhandled class");
-            }
+            return actions;
         }
     }
 
     static class Persistor {
-        static void saveItemsToBuffer(Map<String, Item> items, BufferedWriter buffer) throws IOException {
-            buffer.write(Integer.toString(items.size()));
-            buffer.newLine();
-            for (Map.Entry<String, Item> item: items.entrySet()) {
-                buffer.write(item.getKey());
-                buffer.write(",");
-                buffer.write(item.getValue().getClass().getSimpleName());
-                buffer.write(",");
-                buffer.write(item.getValue().print());
+        static JSONArray saveItemTypesToJson(Map<String, ItemType> itemTypes) {
+            JSONArray data = new JSONArray();
+            for (Map.Entry<String, ItemType> itemType: itemTypes.entrySet()) {
+                JSONObject itemTypeData = new JSONObject();
+                itemTypeData.put("id", itemType.getKey());
+                itemTypeData.putAll(itemType.getValue().toJson());
+                data.add(itemTypeData);
             }
+            return data;
         }
     }
+}
 
-    enum ItemAction {
-        EQUIP, USE, EAT
+abstract class Item<T extends ItemType> {
+    private final T type;
+    private float quality;
+    private int damage;
+
+    Item(T itemType) {
+        this.type = itemType;
     }
 
-    static Item parseItem(String itemData) {
-        String[] data = itemData.split(",");
-        return new Item(data[0], parseActions(data[1]));
+    T getType() {
+        return this.type;
     }
+}
 
-    static List<ItemAction> parseActions(String actionData) {
-        return Arrays
-                .stream(actionData.split("\\|"))
-                .filter(a -> a.length() > 0)
-                .map(ItemAction::valueOf)
-                .collect(Collectors.toList());
+class StandardItem extends Item<ItemType> {
+    StandardItem(ItemType itemType) {
+        super(itemType);
     }
+}
 
+class Weapon<S extends WeaponType> extends Item<S> {
+    Weapon(S itemType) {
+        super(itemType);
+    }
+}
+class Armour extends Item<ArmourType> {
+    Armour(ArmourType armourType) {
+        super(armourType);
+    }
+}
+class Consumable extends Item<ConsumableType> {
+    Consumable(ConsumableType itemType) {
+        super(itemType);
+    }
+}
+class Hatchet extends Weapon<HatchetType> {
+    Hatchet(HatchetType itemType) {
+        super(itemType);
+    }
+}
+
+abstract class ItemType<T extends Item> {
     final String name;
     final List<ItemAction> actions;
 
-    Item(String name, List<ItemAction> actions) {
+    ItemType(String name, List<ItemAction> actions) {
         this.name = name;
         this.actions = actions;
     }
 
-    public Item copy() {
-        return new Item(this.name, this.actions);
-    }
+    abstract T create();
 
     public boolean canUse() {
         return actions.contains(USE);
-    }
-
-    public String print() {
-        return this.name+","+actions.stream().map(Enum::name).collect(Collectors.joining("|"));
     }
 
     public ItemAction getPrimaryAction() {
@@ -138,7 +134,7 @@ public class Item {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Item && name.equals(((Item) o).name);
+        return o instanceof ItemType && name.equals(((ItemType) o).name);
     }
 
     @Override
@@ -149,6 +145,24 @@ public class Item {
     public boolean hasAction() {
         return !actions.isEmpty();
     }
+
+    public JSONObject toJson() {
+        JSONObject data = new JSONObject();
+        data.put("name", name);
+        data.put("actions", new JSONArray());
+        return data;
+    }
+}
+
+class StandardItemType extends ItemType<Item> {
+
+    public StandardItem create() {
+        return new StandardItem(this);
+    }
+
+    StandardItemType(String name, List<ItemAction> actions) {
+        super(name, actions);
+    }
 }
 
 enum Slot {OFF_HAND("Off-hand"), CHEST("Chest"), LEGS("Legs"), ARMS("Arms"), HANDS("Hands"), FEET("Feet"), HEAD("Head");
@@ -158,105 +172,61 @@ enum Slot {OFF_HAND("Off-hand"), CHEST("Chest"), LEGS("Legs"), ARMS("Arms"), HAN
     }
 }
 
-class Armour extends Item {
+class ArmourType extends ItemType<Armour> {
     final Slot slot;
     final int protection;
 
-    static Armour parseItem(String itemData) {
-        String[] itemDataFields = itemData.split(",");
-        return new Armour(itemDataFields[0],
-                parseActions(itemDataFields[1]),
-                Slot.valueOf(itemDataFields[2]),
-                Integer.parseInt(itemDataFields[3]));
-    }
-
-    Armour(String name, List<ItemAction> actions, Slot slot, int protection) {
+    ArmourType(String name, List<ItemAction> actions, Slot slot, int protection) {
         super(name, actions);
         this.slot = slot;
         this.protection = protection;
     }
 
     @Override
-    public Armour copy() {
-        return new Armour(name, actions, slot, protection);
-    }
-
-    @Override
-    public String print() {
-        return super.print()+","+slot+","+protection;
+    public Armour create() {
+        return new Armour(this);
     }
 }
 
-class Weapon extends Item {
-    public final String type;
-    public final int damage;
+class WeaponType extends ItemType<Weapon> {
+    final String weaponSkill;
+    final int damage;
 
-    static Weapon parseItem(String itemData) {
-        String[] itemDataFields = itemData.split(",");
-        return new Weapon(
-                itemDataFields[0],
-                parseActions(itemDataFields[1]),
-                itemDataFields[2],
-                Integer.parseInt(itemDataFields[3]));
-    }
-
-        Weapon(String name, List<ItemAction> actions, String type, int damage) {
+    WeaponType(String name, List<ItemAction> actions, String weaponSkill, int damage) {
         super(name, actions);
-        this.type = type;
+        this.weaponSkill = weaponSkill;
         this.damage = damage;
     }
 
     @Override
-    public Weapon copy() {
-        return new Weapon(this.name, this.actions, this.type, damage);
-    }
-
-    @Override
-    public String print() {
-        return super.print()+","+type+","+damage;
+    public Weapon create() {
+        return new Weapon<>(this);
     }
 }
 
-class Consumable extends Item {
+class ConsumableType extends ItemType<Consumable> {
 
-    public List<StatChange> statChanges;
+    List<StatChange> statChanges;
 
-    static Consumable parseItem(String itemData) {
-        String[] itemDataFields = itemData.split(",");
-        return new Consumable(itemDataFields[0],
-                parseActions(itemDataFields[1]),
-                parseStatChanges(itemDataFields[2]));
-    }
-
-    static List<StatChange> parseStatChanges(String statData) {
-        String[] data = statData.split("\\|");
+    static List<StatChange> parseStatChanges(JSONArray statData) {
         List<StatChange> statChanges = new ArrayList<>();
-        for (int i = 0; i < data.length; i += 2) {
-            statChanges.add(new StatChange(data[i], Integer.parseInt(data[i+1])));
+        for (Object sCO : statData) {
+            JSONObject statChangeData = (JSONObject) sCO;
+            statChanges.add(new StatChange(
+                    (String) statChangeData.get("stat"),
+                    ((Long) statChangeData.get("value")).intValue()));
         }
         return statChanges;
     }
 
-    static String printStatChanges(List<StatChange> statChanges) {
-        return statChanges
-                .stream()
-                .map(s -> s.stat+"|" + s.change)
-                .collect(Collectors.joining("|"));
-    }
-
-    Consumable(String name, List<ItemAction> actions, List<StatChange> statChanges) {
+    ConsumableType(String name, List<ItemAction> actions, List<StatChange> statChanges) {
         super(name, actions);
         this.statChanges = statChanges;
     }
 
     @Override
-    public Consumable copy() {
-        return new Consumable(name, actions, statChanges);
-    }
-
-    @Override
-    public String print() {
-        return super.print()+","+printStatChanges(statChanges);
+    Consumable create() {
+        return new Consumable(this);
     }
 }
 
@@ -270,24 +240,14 @@ class StatChange {
     }
 }
 
-class Hatchet extends Weapon {
+class HatchetType extends WeaponType {
 
-    static Hatchet parseItem(String itemData) {
-        String[] itemDataFields = itemData.split(",");
-        return new Hatchet(itemDataFields[0], parseActions(itemDataFields[1]), Integer.parseInt(itemDataFields[3]));
-    }
-
-    Hatchet(String name, List<ItemAction> actions, int damage) {
+    HatchetType(String name, List<ItemAction> actions, int damage) {
         super(name, actions, "Hatchet", damage);
     }
 
     @Override
-    public Hatchet copy() {
-        return new Hatchet(this.name, this.actions, damage);
-    }
-
-    @Override
-    public String print() {
-        return super.print();
+    public Hatchet create() {
+        return new Hatchet(this);
     }
 }

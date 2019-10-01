@@ -1,34 +1,38 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
+
 public class GameObjectLoader {
 
-    static void loadGameObjects(Map<String, GObjects.GameObjectBuilder> gameObjectBuilders, BufferedReader buffer, Tile[][] newMap) throws IOException {
-        int gameObjectsCount = Integer.parseInt(buffer.readLine());
-        for (int i = 0; i < gameObjectsCount; i++) {
+    static void loadGameObjects(Map<String, GObjects.GameObjectBuilder> gameObjectBuilders, JSONArray gameObjectsData, Tile[][] newMap) {
+        for (Object gO : gameObjectsData) {
             try {
-                String[] gameObjectData = buffer.readLine().split(",");
+                JSONObject gameObjectData = (JSONObject) gO;
 
-                int x = Integer.parseInt(gameObjectData[0]);
-                int y = Integer.parseInt(gameObjectData[1]);
-                String[] args = (gameObjectData.length > 3) ? gameObjectData[3].split(":") : new String[]{};
-                String objectType = gameObjectData[2];
+                int x = intFromObj(gameObjectData.get("x"));
+                int y = intFromObj(gameObjectData.get("y"));
+                String objectType = (String) gameObjectData.get("type");
                 GObjects.GameObjectBuilder builder = gameObjectBuilders.get(objectType);
                 if (builder == null) {
                     throw new IllegalArgumentException("Unknown object type: " + objectType);
                 }
-                newMap[x][y].objects.add(builder.build(args));
+                newMap[x][y].objects.add(builder.build(gameObjectData));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid object format for game object: "+i, e);
+                throw new IllegalArgumentException("Invalid object format for game object: "+gO, e);
             }
         }
     }
 
-    public static void saveGameObjects(BufferedWriter buffer, Tile[][] map) throws IOException {
+    public static void saveGameObjects(Tile[][] map) throws IOException {
+        //TODO:
+        /**
         int count = 0;
         for (Tile[] tileColumn : map) {
             for(Tile tile: tileColumn) {
@@ -46,6 +50,6 @@ public class GameObjectLoader {
                 }
             }
         }
-
+         **/
     }
 }

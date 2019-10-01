@@ -1,5 +1,6 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import java.io.*;
@@ -22,7 +23,7 @@ public class PlayerProviderTest {
 
     private Player loadPlayerFromString(String data) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(data));
-        return PlayerProvider.loadPlayer(bufferedReader);
+        return PlayerProvider.loadPlayer(new JSONObject(), new HashMap<>(), new HashMap<>());
     }
 
     @Test
@@ -60,8 +61,8 @@ public class PlayerProviderTest {
     @Test
     public void stores_and_retrieves_armour() throws IOException {
         Player player = new Player(0, 0);
-        player.armour.put(Slot.CHEST, new Armour("Chestplate",
-                Collections.emptyList(), Slot.CHEST, 1));
+        player.armour.put(Slot.CHEST, new Armour(new ArmourType("Chestplate",
+                Collections.emptyList(), Slot.CHEST, 1)));
 
         String data = savePlayerToString(player);
         Player loadedPlayer = loadPlayerFromString(data);
@@ -72,8 +73,8 @@ public class PlayerProviderTest {
     @Test
     public void stores_and_retrieves_inventory_items() throws IOException {
         Player player = new Player(0, 0);
-        player.inventory.add(new Armour("Chestplate",
-                Collections.emptyList(), Slot.CHEST, 1));
+        player.inventory.add(new Armour(new ArmourType("Chestplate",
+                Collections.emptyList(), Slot.CHEST, 1)));
 
         String data = savePlayerToString(player);
         Player loadedPlayer = loadPlayerFromString(data);
@@ -84,9 +85,9 @@ public class PlayerProviderTest {
     @Test
     public void stores_and_retrieves_quest_status() throws IOException {
         Player player = new Player(0, 0);
-        player.quests.put("A", new Quest("A", Collections.singletonList(
-                new QuestStep(new HashMap<>())
-        ), 0, QuestStatus.STARTED));
+        Quest questA = new Quest("A", Collections.singletonList(
+                new QuestStep(new HashMap<>())));
+        player.quests.put("A", new QuestProgress(questA, QuestStatus.STARTED, 0, new QuestStepProgress(new HashMap<>())));
 
         String data = savePlayerToString(player);
         Player loadedPlayer = loadPlayerFromString(data);

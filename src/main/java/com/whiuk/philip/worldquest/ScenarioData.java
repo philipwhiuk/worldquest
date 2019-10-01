@@ -1,5 +1,9 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -10,95 +14,98 @@ public class ScenarioData {
         return tileTypesByName.get(tileType);
     }
 
-    public Item item(String item) {
-        return items.get(item);
+    ItemType itemType(String item) {
+        return itemTypes.get(item);
     }
 
     static class Provider {
 
         public static ScenarioData loadScenarioFromBase() {
-            try(
-                    InputStream mapDataStream = new FileInputStream(
-                            GameFileUtils.resourceInBaseFolder("scenario"));
-                    BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))){
-                return loadScenarioFromBuffer(buffer);
+            JSONParser jsonParser = new JSONParser();
+            try(FileReader reader = new FileReader(GameFileUtils.resourceInBaseFolder("scenario"))) {
+                return loadScenarioFromJson((JSONObject) jsonParser.parse(reader));
             } catch (Exception e) {
                 throw new RuntimeException("Unable to load scenario: " + e.getMessage(), e);
             }
         }
 
         static ScenarioData loadScenarioByName(String scenario) {
-            try(
-                    InputStream mapDataStream = new FileInputStream(
-                            GameFileUtils.resourceInScenarioFolder(scenario, "scenario"));
-                    BufferedReader buffer = new BufferedReader(new InputStreamReader(mapDataStream))){
-                return loadScenarioFromBuffer(buffer);
+            JSONParser jsonParser = new JSONParser();
+            try(FileReader reader = new FileReader(GameFileUtils.resourceInScenarioFolder(scenario, "scenario"))) {
+                return loadScenarioFromJson((JSONObject) jsonParser.parse(reader));
             } catch (Exception e) {
                 throw new RuntimeException("Unable to load scenario: " + e.getMessage(), e);
             }
         }
 
-        static ScenarioData loadScenarioFromBuffer(BufferedReader buffer) throws IOException {
+        static ScenarioData loadScenarioFromJson(JSONObject scenarioData) throws IOException {
             ScenarioData scenario = new ScenarioData();
-            scenario.items = Item.Provider.loadItemsFromBuffer(buffer);
-            scenario.questSteps = QuestStep.Provider.loadQuestStepsFromBuffer(buffer);
-            scenario.quests = Quest.Provider.loadQuestsFromBuffer(scenario, buffer);
-            scenario.tileTypes = TileType.Provider.loadTileTypesFromBuffer(buffer);
+            scenario.itemTypes = ItemTypeDao.Provider.loadItemTypesFromJson((JSONArray) scenarioData.get("itemTypes"));
+            scenario.questSteps = QuestStep.Provider.loadQuestStepsFromJson((JSONArray) scenarioData.get("questSteps"));
+            scenario.quests = Quest.Provider.loadQuestsFromJson(scenario, (JSONArray) scenarioData.get("quests"));
+            scenario.tileTypes = TileType.Provider.loadTileTypesFromJson((JSONArray) scenarioData.get("tileTypes"));
             scenario.tileTypesByName = scenario.tileTypes.values().stream().collect(Collectors.toMap(
                     t -> t.name, t -> t));
-            scenario.conversationChoices = ConversationChoice.Provider.loadConversationChoicesFromBuffer(buffer);
-            scenario.shops = Shop.Provider.loadShopsFromBuffer(scenario, buffer);
-            scenario.npcTypes = NPCType.Provider.loadNPCTypesFromBuffer(scenario, buffer);
-            scenario.itemActions = ItemAction.Provider.loadItemActionsFromBuffer(scenario, buffer);
-            scenario.recipeList = Recipe.Provider.loadRecipesFromBuffer(scenario, buffer);
-            scenario.resourceGathering = ResourceGathering.Provider.loadResourceGatheringFromBuffer(buffer);
-            scenario.structureCreation = StructureCreation.Provider.loadStructureCreationFromBuffer(buffer);
-            scenario.itemUses = Uses.Provider.loadItemUsesFromBuffer(scenario, buffer);
-            scenario.objectItemUses = Uses.Provider.loadObjectItemUsesFromBuffer(scenario, buffer);
-            scenario.tileItemUses = Uses.Provider.loadTileItemUsesFromBuffer(scenario, buffer);
-            scenario.initialItems = loadInitialItemsFromBuffer(buffer);
+            scenario.conversationChoices = ConversationChoice.Provider.loadConversationChoicesFromJson(
+                    (JSONArray) scenarioData.get("conversationChoices"));
+            scenario.shops = Shop.Provider.loadShopsFromJson(scenario, (JSONArray) scenarioData.get("shops"));
+            scenario.npcTypes = NPCType.Provider.loadNPCTypesFromJson(scenario,
+                    (JSONArray) scenarioData.get("npcTypes"));
+            scenario.itemActivities = ItemActivity.Provider.loadItemActivitiesFromJson(scenario,
+                    (JSONArray) scenarioData.get("itemActivities"));
+            scenario.recipeList = Recipe.Provider.loadRecipesFromJson(scenario,
+                    (JSONArray) scenarioData.get("recipes"),
+                    (JSONArray) scenarioData.get("recipeCollections"));
+            scenario.resourceGathering = ResourceGathering.Provider.loadResourceGatheringFromJson(
+                    (JSONArray) scenarioData.get("resourceGathering"));
+            scenario.structureCreation = StructureCreation.Provider.loadStructureCreationFromJson(
+                    (JSONArray) scenarioData.get("structureCreation"));
+            scenario.itemUses = Uses.Provider.loadItemUsesFromJson(scenario,
+                    (JSONArray) scenarioData.get("itemUses"));
+            scenario.objectItemUses = Uses.Provider.loadObjectItemUsesFromJson(scenario,
+                    (JSONArray) scenarioData.get("objectItemUses"));
+            scenario.tileItemUses = Uses.Provider.loadTileItemUsesFromJson(scenario, (JSONArray) scenarioData.get("tileItemUses"));
+            scenario.initialItems = loadInitialItemsFromJson((JSONArray) scenarioData.get("initialItems"));
             return scenario;
         }
 
-        private static List<String> loadInitialItemsFromBuffer(BufferedReader buffer) throws IOException {
-            int count = Integer.parseInt(buffer.readLine());
+        private static List<String> loadInitialItemsFromJson(JSONArray initialItems) throws IOException {
             ArrayList<String> items = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                items.add(buffer.readLine());
+            for (Object initialItem : initialItems) {
+                items.add((String) initialItem);
             }
             return items;
         }
     }
     static class Persistor {
         static void saveScenario(ScenarioData data, String scenario) {
-            try(
-                    OutputStream saveFileDataStream = new FileOutputStream(
-                            GameFileUtils.resourceInScenarioFolder(scenario, "scenario"));
-                    BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(saveFileDataStream))) {
-                saveScenarioToBuffer(data, buffer);
+            try(FileWriter writer = new FileWriter(GameFileUtils.resourceInScenarioFolder(scenario, "scenario"))) {
+                writer.write(saveScenarioToJson(data).toJSONString());
             } catch (Exception e) {
                 throw new RuntimeException("Unable to save scenario: " + e.getMessage(), e);
             }
         }
 
-        private static void saveScenarioToBuffer(ScenarioData scenario, BufferedWriter buffer) throws IOException {
-            Item.Persistor.saveItemsToBuffer(scenario.items, buffer);
-            QuestStep.Persistor.saveQuestStepsToBuffer(scenario.questSteps, buffer);
-            Quest.Persistor.saveQuestsToBuffer(scenario.quests, buffer);
-            TileType.Persistor.saveTileTypesToBuffer(scenario.tileTypes, buffer);
-            ConversationChoice.Persistor.saveConversationChoicesToBuffer(scenario.conversationChoices, buffer);
-            Shop.Persistor.saveShopsToBuffer(scenario.shops, buffer);
-            NPCType.Persistor.saveNPCTypesToBuffer(scenario.npcTypes, buffer);
-            ItemAction.Persistor.saveItemActionsToBuffer(scenario.itemActions, buffer);
-            Recipe.Persistor.saveRecipesToBuffer(scenario.recipeList, buffer);
-            ResourceGathering.Persistor.saveResourceGatheringToBuffer(scenario.resourceGathering, buffer);
-            Uses.Persistor.saveItemUsesToBuffer(scenario.itemUses, buffer);
-            Uses.Persistor.saveObjectItemUsesToBuffer(scenario.objectItemUses, buffer);
-            Uses.Persistor.saveTileItemUsesToBuffer(scenario.tileItemUses, buffer);
+        private static JSONObject saveScenarioToJson(ScenarioData scenario) throws IOException {
+            JSONObject scenarioData = new JSONObject();
+            scenarioData.put("itemTypes", ItemTypeDao.Persistor.saveItemTypesToJson(scenario.itemTypes));
+            scenarioData.put("questSteps", QuestStep.Persistor.saveQuestStepsToJson(scenario.questSteps));
+            scenarioData.put("quests", Quest.Persistor.saveQuestsToJson(scenario.quests));
+            scenarioData.put("tileTypes", TileType.Persistor.saveTileTypesToJson(scenario.tileTypes));
+            scenarioData.put("conversationChoices", ConversationChoice.Persistor.saveConversationChoicesToJson(scenario.conversationChoices));
+            scenarioData.put("shops", Shop.Persistor.saveShopsToJson(scenario.shops));
+            scenarioData.put("npcTypes", NPCType.Persistor.saveNPCTypesToJson(scenario.npcTypes));
+            scenarioData.put("itemActivities", ItemActivity.Persistor.saveItemActivitiesToJson(scenario.itemActivities));
+            scenarioData.put("recipes", Recipe.Persistor.saveRecipesToJson(scenario.recipeList));
+            scenarioData.put("resourceGathering", ResourceGathering.Persistor.saveResourceGatheringToJson(scenario.resourceGathering));
+            scenarioData.put("itemUses", Uses.Persistor.saveItemUsesToJson(scenario.itemUses));
+            scenarioData.put("objectItemUses", Uses.Persistor.saveObjectItemUsesToJson(scenario.objectItemUses));
+            scenarioData.put("tileItemUses", Uses.Persistor.saveTileItemUsesToJson(scenario.tileItemUses));
+            return scenarioData;
         }
     }
 
-    Map<String, Item> items = new HashMap<>();
+    Map<String, ItemType> itemTypes = new HashMap<>();
     Map<String, QuestStep> questSteps = new HashMap<>();
     Map<String, Quest> quests = new HashMap<>();
     Map<Integer, TileType> tileTypes = new HashMap<>();
@@ -106,31 +113,32 @@ public class ScenarioData {
     Map<String, Shop> shops = new HashMap<>();
     Map<String, NPCType> npcTypes = new HashMap<>();
     Map<String, ConversationChoice> conversationChoices = new HashMap<>();
-    Map<String, ItemAction> itemActions = new HashMap<>();
+    Map<String, ItemActivity> itemActivities = new HashMap<>();
     Map<String, List<Recipe>> recipeList = new HashMap<>();
     Map<String, ResourceGathering> resourceGathering = new HashMap<>();
     Map<String, StructureCreation> structureCreation = new HashMap<>();
     private int playerStartX;
     private int playerStartY;
-    HashMap<String, ItemAction> itemUses = new HashMap<>();
-    Map<String, ItemAction> tileItemUses = new HashMap<>();
-    Map<String, ItemAction> objectItemUses = new HashMap<>();
+    Map<String, Map<String, ItemActivity>> itemUses = new HashMap<>();
+    Map<String, Map<String, ItemActivity>> tileItemUses = new HashMap<>();
+    Map<String, Map<String, ItemActivity>> objectItemUses = new HashMap<>();
     List<String> initialItems = new ArrayList<>();
 
     ScenarioData() {}
 
     public Player newPlayer() {
+        //TODO: Initial items should be actual items not type list have quality etc.
         List<Item> playerItems = new ArrayList<>();
         for (String initialItem : initialItems) {
-            playerItems.add(item(initialItem).copy());
+            playerItems.add(itemType(initialItem).create());
         }
         Arrays.asList(
-                items.get("BronzeDagger").copy(),
-                items.get("BronzeHatchet").copy(),
-                items.get("SteelFlint").copy(),
-                items.get("Shovel").copy(),
-                items.get("Pickaxe").copy(),
-                items.get("Hammer").copy());
+                itemType("BronzeDagger").create(),
+                itemType("BronzeHatchet").create(),
+                itemType("SteelFlint").create(),
+                itemType("Shovel").create(),
+                itemType("Pickaxe").create(),
+                itemType("Hammer").create());
         return new Player(
                 10, 10,
                 100, 100,

@@ -1,19 +1,22 @@
 package com.whiuk.philip.worldquest;
 
-import java.io.BufferedReader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class StructureCreation {
 
     static class Provider {
-        static Map<String, StructureCreation> loadStructureCreationFromBuffer(BufferedReader buffer) {
+        static Map<String, StructureCreation> loadStructureCreationFromJson(JSONArray structureCreationData) {
+            //TODO: Load from JSON
             Map<String, StructureCreation> structureCreators = new HashMap<>();
             structureCreators.put(
                 "Firemaking",
                     new StructureCreation(
                     new GObjects.FireBuilder(),
-                    new String[]{},
+                    new JSONObject(),
                     true,
                     "You probably shouldn't make a fire here.",
                     "Fire-making",
@@ -22,14 +25,14 @@ public class StructureCreation {
         }
     }
 
-    GObjects.GameObjectBuilder gameObjectBuilder;
-    String[] buildArgs;
-    boolean requiresOutdoors;
-    String skill;
+    private GObjects.GameObjectBuilder gameObjectBuilder;
+    private JSONObject buildArgs;
+    private boolean requiresOutdoors;
+    private String skill;
     int experience;
-    String unableMessage;
+    private String unableMessage;
 
-    StructureCreation(GObjects.GameObjectBuilder gameObjectBuilder, String buildArgs[],
+    StructureCreation(GObjects.GameObjectBuilder gameObjectBuilder, JSONObject buildArgs,
                       boolean requiresOutdoors, String unableMessage, String skill, int experience) {
         this.gameObjectBuilder = gameObjectBuilder;
         this.buildArgs = buildArgs;
@@ -41,12 +44,11 @@ public class StructureCreation {
 
     void create(WorldQuest game, Player player, Tile tile, int item) {
         if (!requiresOutdoors || tile.isOutdoors()) {
-
+            player.inventory.remove(item);
+            game.spawn(gameObjectBuilder.build(buildArgs), player.x, player.y);
+            player.gainExperience(skill, 10);
         } else {
             game.eventMessage(unableMessage);
         }
-        player.inventory.remove(item);
-        game.spawn(gameObjectBuilder.build(buildArgs), player.x, player.y);
-        player.gainExperience(skill, 10);
     }
 }

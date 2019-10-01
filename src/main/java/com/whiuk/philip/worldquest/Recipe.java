@@ -1,5 +1,8 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
 
 class Recipe {
     final String id;
@@ -55,6 +60,7 @@ class Recipe {
         if (canBeDone(player)) {
             for (RecipeItem recipeItem : input) {
                 for (int i = 0; i < recipeItem.quantity; i++) {
+                    //TODO: Use item to determine output quality
                     player.inventory.remove(recipeItem.item);
                 }
             }
@@ -69,7 +75,8 @@ class Recipe {
                 }
                 for (RecipeItem recipeItem: output) {
                     for (int i = 0; i < recipeItem.quantity; i++) {
-                        player.inventory.add(recipeItem.item.copy());
+                        //TODO: Provide quality
+                        player.inventory.add(recipeItem.item.create());
                     }
                 }
             }
@@ -77,80 +84,82 @@ class Recipe {
     }
 
     static class RecipeItem {
-        final Item item;
+        final ItemType item;
         final int quantity;
 
-        public RecipeItem(Item item, int quantity) {
+        public RecipeItem(ItemType item, int quantity) {
             this.item = item;
             this.quantity = quantity;
-        }
-
-        public static RecipeItem one(Item item) {
-            return new RecipeItem(item, 1);
         }
     }
 
     public static class Persistor {
-        public static void saveRecipesToBuffer(Map<String, List<Recipe>> recipeCollections, BufferedWriter buffer) throws IOException {
-            Map<String, Recipe> allRecipes = new HashMap<>();
-            recipeCollections.values().forEach(rL -> rL.forEach(r -> allRecipes.put(r.id, r)));
-
-            buffer.write(Integer.toString(allRecipes.size()));
-            buffer.newLine();
-
-            buffer.write(Integer.toString(recipeCollections.size()));
-            buffer.newLine();
+        public static JSONArray saveRecipesToJson(Map<String, List<Recipe>> recipeCollections) throws IOException {
+            //TODO:
+            return new JSONArray();
         }
     }
 
     static class Provider {
-        static Map<String, List<Recipe>> loadRecipesFromBuffer(ScenarioData data, BufferedReader buffer) throws IOException {
-            int recipesCount = Integer.parseInt(buffer.readLine());
+        static Map<String, List<Recipe>> loadRecipesFromJson(
+                ScenarioData data,
+                JSONArray recipesData,
+                JSONArray recipeCollectionsData) throws IOException {
             Map<String,Recipe> allRecipes = new HashMap<>();
-            for (int r = 0; r < recipesCount; r++) {
-                String[] recipeData = buffer.readLine().split(",");
-                String recipeId = recipeData[0];
-                int inputItemCount = Integer.parseInt(recipeData[1]);
-                int outputItemCount = Integer.parseInt(recipeData[2]);
-                String outputName = recipeData[3];
-                int successChance = Integer.parseInt(recipeData[4]);
-                int skillRequirementCount = Integer.parseInt(recipeData[5]);
-                int experienceGainedCount = Integer.parseInt(recipeData[6]);
-                ArrayList<RecipeItem> inputItems = new ArrayList<>(inputItemCount);
-                for (int i = 0; i < inputItemCount; i++) {
-                    String[] inputItemData = buffer.readLine().split(",");
-                    Recipe.RecipeItem recipeItem = new Recipe.RecipeItem(data.item(inputItemData[0]), Integer.parseInt(inputItemData[1]));
+            for (Object rO : recipesData) {
+                JSONObject recipeData = (JSONObject) rO;
+                String recipeId = (String) recipeData.get("id");
+                String outputName = (String) recipeData.get("outputName");
+                int successChance = intFromObj(recipeData.get("successChance"));
+                ArrayList<RecipeItem> inputItems = new ArrayList<>();
+
+                JSONArray inputItemsData = (JSONArray) recipeData.get("inputItems");
+                for (Object iIO : inputItemsData) {
+                    JSONObject inputItemData = (JSONObject) iIO;
+                    Recipe.RecipeItem recipeItem = new Recipe.RecipeItem(
+                            data.itemType((String) inputItemData.get("item")),
+                            intFromObj(inputItemData.get("quantity")));
                     inputItems.add(recipeItem);
                 }
-                ArrayList<Recipe.RecipeItem> outputItems = new ArrayList<>(outputItemCount);
-                for (int i = 0; i < outputItemCount; i++) {
-                    String[] outputItemData = buffer.readLine().split(",");
-                    Recipe.RecipeItem recipeItem = new Recipe.RecipeItem(data.item(outputItemData[0]), Integer.parseInt(outputItemData[1]));
+                JSONArray outputItemsData = (JSONArray) recipeData.get("outputItems");
+                ArrayList<Recipe.RecipeItem> outputItems = new ArrayList<>();
+                for (Object oIO : outputItemsData) {
+                    JSONObject outputItemData = (JSONObject) oIO;
+                    Recipe.RecipeItem recipeItem = new Recipe.RecipeItem(
+                            data.itemType((String) outputItemData.get("item")),
+                            intFromObj(outputItemData.get("quantity")));
                     outputItems.add(recipeItem);
                 }
-                Map<String, Integer> skillRequirements = new HashMap<>(skillRequirementCount);
-                for (int i = 0; i < skillRequirementCount; i++) {
-                    String[] skillRequirementData = buffer.readLine().split(",");
-                    skillRequirements.put(skillRequirementData[0], Integer.parseInt(skillRequirementData[1]));
+                JSONArray skillRequirementsData = (JSONArray) recipeData.getOrDefault("skillRequirements", new JSONArray());
+                Map<String, Integer> skillRequirements = new HashMap<>();
+                for (Object sRO : skillRequirementsData) {
+                    JSONObject skillRequirementData = (JSONObject) sRO;
+                    skillRequirements.put((String) skillRequirementData.get("skill"),
+                            intFromObj(skillRequirementData.get("level")));
                 }
-                Map<String, Integer> experienceGained = new HashMap<>(experienceGainedCount);
-                for (int i = 0; i < experienceGainedCount; i++) {
-                    String[] experienceGainData = buffer.readLine().split(",");
-                    experienceGained.put(experienceGainData[0], Integer.parseInt(experienceGainData[1]));
+
+                JSONArray experienceGainedData = (JSONArray) recipeData.get("experienceGained");
+                Map<String, Integer> experienceGained = new HashMap<>();
+                for (Object eGO : experienceGainedData) {
+                    JSONObject experienceGainData = (JSONObject) eGO;
+                    skillRequirements.put((String) experienceGainData.get("skill"),
+                            intFromObj(experienceGainData.get("exp")));
                 }
                 Recipe recipe = new Recipe(recipeId, inputItems, outputItems, outputName, successChance, skillRequirements, experienceGained);
                 allRecipes.put(recipeId, recipe);
             }
-            int recipeCollectionsCount = Integer.parseInt(buffer.readLine());
+
             Map<String, List<Recipe>> recipeList = new HashMap<>();
-            for (int rc = 0; rc < recipeCollectionsCount; rc++) {
-                String[] recipeCollectionData = buffer.readLine().split(",");
-                int collectionRecipesCount = Integer.parseInt(recipeCollectionData[1]);
+            for (Object rcO : recipeCollectionsData) {
+                JSONObject recipeCollectionData = (JSONObject) rcO;
+
+                JSONArray colRecipesData = (JSONArray) recipeCollectionData.get("recipes");
                 List<Recipe> recipes = new ArrayList<>();
-                for (int r = 0; r < collectionRecipesCount; r++) {
-                    recipes.add(allRecipes.get(buffer.readLine()));
+                for (Object rO : colRecipesData) {
+                    String recipe = (String) rO;
+                    recipes.add(allRecipes.get(recipe));
                 }
-                recipeList.put(recipeCollectionData[0], recipes);
+                recipeList.put((String) recipeCollectionData.get("name"), recipes);
             }
             return recipeList;
         }

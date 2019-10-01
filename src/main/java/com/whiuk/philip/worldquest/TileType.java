@@ -1,5 +1,8 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,21 +10,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
+import static com.whiuk.philip.worldquest.JsonUtils.parseColor;
+
 public class TileType {
     public static class Provider {
-        static Map<Integer, TileType> loadTileTypesFromBuffer(BufferedReader buffer) throws IOException {
-            int tileTypesCount = Integer.parseInt(buffer.readLine());
+
+        static Map<Integer, TileType> loadTileTypesFromJson(JSONArray tileTypesData) {
             Map<Integer, TileType> tileTypes = new HashMap<>();
-            for (int t = 0; t < tileTypesCount; t++) {
-                String[] tileTypeData = buffer.readLine().split(",");
-                String tileRefId =  tileTypeData[0];
-                int id =  Integer.parseInt(tileTypeData[1]);
-                String name = tileTypeData[2];
-                Color color = new Color(Integer.parseInt(tileTypeData[3]),Integer.parseInt(tileTypeData[4]),Integer.parseInt(tileTypeData[5]));
-                Color fowColor = new Color(Integer.parseInt(tileTypeData[6]),Integer.parseInt(tileTypeData[7]),Integer.parseInt(tileTypeData[8]));
-                boolean canMoveTo = Boolean.parseBoolean(tileTypeData[9]);
-                boolean isOutdoors = Boolean.parseBoolean(tileTypeData[10]);
-                boolean blocksView = Boolean.parseBoolean(tileTypeData[11]);
+            for (Object tTO : tileTypesData) {
+                JSONObject tileTypeData = (JSONObject) tTO;
+                String tileRefId = (String) tileTypeData.get("id");
+                int id =  intFromObj(tileTypeData.get("uid"));
+                String name = (String) tileTypeData.get("name");
+                Color color = parseColor((JSONObject) tileTypeData.get("color"));
+                Color fowColor = parseColor((JSONObject) tileTypeData.get("fowColor"));
+                boolean canMoveTo = (Boolean) tileTypeData.get("canMoveTo");
+                boolean isOutdoors = (Boolean) tileTypeData.get("isOutdoors");
+                boolean blocksView = (Boolean) tileTypeData.get("blocksView");
                 TileType tileType = new TileType(
                         id,
                         name,
@@ -37,7 +43,10 @@ public class TileType {
     }
 
     public static class Persistor {
-        public static void saveTileTypesToBuffer(Map<Integer, TileType> tileTypes, BufferedWriter buffer) throws IOException {
+        public static JSONArray saveTileTypesToJson(Map<Integer, TileType> tileTypes) throws IOException {
+            //TODO:
+            return new JSONArray();
+            /**
             buffer.write(Integer.toString(tileTypes.size()));
             buffer.newLine();
             for (Map.Entry<Integer, TileType> tileTypeEntry : tileTypes.entrySet()) {
@@ -58,6 +67,7 @@ public class TileType {
                 }));
                 buffer.newLine();
             }
+             **/
         }
     }
 

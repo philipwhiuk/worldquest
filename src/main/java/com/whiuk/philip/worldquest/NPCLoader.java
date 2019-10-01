@@ -1,5 +1,8 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,33 +11,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
+
 public class NPCLoader {
 
-    static List<NPC> loadNPCs(Map<String, NPCType> npcTypes, BufferedReader buffer) throws IOException {
-        int npcCount = Integer.parseInt(buffer.readLine());
-        List<NPC> npcs = new ArrayList<>(npcCount);
-        for (int i = 0; i < npcCount; i++) {
-            String[] npcData = buffer.readLine().split(",");
-            if (npcData.length != 4) {
-                throw new RuntimeException("Bad NPC data format: " + Arrays.toString(npcData));
-            }
-            NPCType npcType = npcTypes.get(npcData[0]);
+    static List<NPC> loadNPCs(Map<String, NPCType> npcTypes, JSONArray data) throws IOException {
+        List<NPC> npcs = new ArrayList<>(data.size());
+        for (Object nO : data) {
+            JSONObject npcData = (JSONObject) nO;
+            String type = (String) npcData.get("type");
+            NPCType npcType = npcTypes.get(type);
             if (npcType == null) {
-                throw new IllegalArgumentException("Unknown NPC type: " + npcData[0]);
+                throw new IllegalArgumentException("Unknown NPC type: " + type);
             }
-            npcs.add(new NPC(npcType, Integer.parseInt(npcData[1]), Integer.parseInt(npcData[2]),
-                    MovementStrategy.parseStrategy(npcData[3].replaceAll("\\|",","))));
+            npcs.add(new NPC(npcType, intFromObj(npcData.get("x")), intFromObj(npcData.get("y")),
+                    MovementStrategy.parseStrategy((JSONObject) npcData.get("movementStrategy"))));
         }
         return npcs;
     }
 
-    public static void saveNPCs(Map<String, NPCType> npcTypes, List<NPC> npcs, BufferedWriter buffer) throws IOException {
-        buffer.write(Integer.toString(npcs.size()));
-        buffer.newLine();
-        for (NPC npc: npcs) {
-            String npcData = npc.type.id+","+npc.x+","+npc.y+","+npc.movementStrategy.asString().replaceAll(",","\\|");
-            buffer.write(npcData);
-            buffer.newLine();
-        }
+    public static void saveNPCs(Map<String, NPCType> npcTypes, List<NPC> npcs) throws IOException {
+        //TODO:
     }
 }

@@ -18,7 +18,7 @@ class EquipmentView extends Component {
         int offset = y;
         g.setColor(Color.WHITE);
         String mainHandWeaponName = game.player.mainHandWeapon != null ?
-                game.player.mainHandWeapon.name + " (+"+game.player.mainHandWeapon.damage+")" :
+                game.player.mainHandWeapon.getType().name + " (+"+game.player.mainHandWeapon.getType().damage+")" :
                 "";
         g.drawString("Weapon: " + mainHandWeaponName, 5, offset);
         offset += 20;
@@ -30,7 +30,7 @@ class EquipmentView extends Component {
             Slot slot = piece.getKey();
             Armour armour = piece.getValue();
             String armourDescription = armour != null ?
-                    armour.name + " (+"+armour.protection+")" :
+                    armour.getType().name + " (+"+armour.getType().protection+")" :
                     "";
             g.drawString(slot.friendlyName+": " + armourDescription, 30, offset);
             offset += 20;

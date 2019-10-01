@@ -1,17 +1,16 @@
 package com.whiuk.philip.worldquest;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class Player extends GameCharacter {
     Map<String,Experience> stats;
     Map<String,Experience> skills;
-    Weapon mainHandWeapon;
+    Weapon<? extends WeaponType> mainHandWeapon;
     HashMap<Slot, Armour> armour;
     Inventory inventory;
-    Map<String, Quest> quests;
+    SortedMap<String, QuestProgress> quests;
     int money;
     int itemBeingUsed = -1;
     int maxFood;
@@ -26,7 +25,7 @@ public class Player extends GameCharacter {
         this.inventory = new Inventory();
         this.stats = new HashMap<>();
         this.skills = new HashMap<>();
-        this.quests = new HashMap<>();
+        this.quests = new TreeMap<>();
     }
 
     Player(
@@ -35,8 +34,8 @@ public class Player extends GameCharacter {
             int money,
             Map<String,Experience> stats,
             Map<String,Experience> skills,
-            Weapon mainHandWeapon, Map<Slot, Armour> armour,
-            List<Item> items, Map<String, Quest> quests,
+            Weapon<WeaponType> mainHandWeapon, Map<Slot, Armour> armour,
+            List<Item> items, Map<String, QuestProgress> quests,
             int x, int y) {
         this(x, y);
         this.maxHealth = maxHealth;
@@ -53,7 +52,7 @@ public class Player extends GameCharacter {
         this.skills.putAll(skills);
         this.stats = new HashMap<>();
         this.stats.putAll(stats);
-        this.quests = new HashMap<>();
+        this.quests = new TreeMap<>();
         this.quests.putAll(quests);
     }
 
@@ -73,7 +72,7 @@ public class Player extends GameCharacter {
     @Override
     void attackSuccessful(int damageCaused){
         gainStatExperience("Strength", (int) (damageCaused*1.5));
-        gainExperience(mainHandWeapon == null ? "Unarmed" : mainHandWeapon.type, damageCaused*4);
+        gainExperience(mainHandWeapon == null ? "Unarmed" : mainHandWeapon.getType().weaponSkill, damageCaused*4);
     }
 
     void gainStatExperience(String stat, int newExp) {
@@ -123,7 +122,7 @@ public class Player extends GameCharacter {
     void takeHit(int damage) {
         Slot location = calculateSlot();
         if (armour.get(location) != null) {
-            damage -= armour.get(Slot.CHEST).protection;
+            damage -= armour.get(Slot.CHEST).getType().protection;
         }
         if (damage < 0) {
             damage = 0;
@@ -163,7 +162,7 @@ public class Player extends GameCharacter {
     @Override
     int calculateDamage() {
         int strBonus = stats.getOrDefault("Strength", Experience.NoExperience()).level;
-        int baseDamage = strBonus + 2 + (mainHandWeapon != null ? mainHandWeapon.damage : 0);
+        int baseDamage = strBonus + 2 + (mainHandWeapon != null ? mainHandWeapon.getType().damage : 0);
         boolean criticalHit = RandomSource.getRandom().nextInt(11) == 10;
         if (criticalHit) {
             return baseDamage * 3;
@@ -187,7 +186,7 @@ public class Player extends GameCharacter {
         return QuestStatus.NOT_STARTED;
     }
 
-    public Quest getQuest(String name) {
+    public QuestProgress getQuest(String name) {
         return quests.get(name);
     }
 

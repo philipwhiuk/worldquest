@@ -1,0 +1,1063 @@
+{
+  "itemTypes": [
+    {
+      "id": "BronzeDagger",
+      "class": "Weapon",
+      "name": "Bronze dagger",
+      "actions": ["EQUIP"],
+      "type": "Dagger",
+      "damage": 2
+    },
+    {
+      "id": "BronzeSword",
+      "class": "Weapon",
+      "name": "Bronze sword",
+      "actions": ["EQUIP"],
+      "type": "Sword",
+      "damage": 4
+    },
+    {
+      "id": "BronzeHatchet",
+      "class": "Hatchet",
+      "name": "Bronze hatchet",
+      "actions": ["EQUIP","USE"],
+      "damage": 3
+    },
+    {
+      "id": "LeatherTunic",
+      "class": "Armour",
+      "name": "Leather tunic",
+      "actions": ["EQUIP"],
+      "slot": "CHEST",
+      "protection": 2
+    },
+    {
+      "id": "SteelFlint",
+      "class": "Item",
+      "name": "Steel & flint",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Shovel",
+      "class": "Item",
+      "name": "Shovel",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Hammer",
+      "class": "Item",
+      "name": "Hammer",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Pickaxe",
+      "class": "Item",
+      "name": "Pickaxe",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "PileOfDirt",
+      "class": "Item",
+      "name": "Pile of dirt",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "RockShards",
+      "class": "Item",
+      "name": "Rock shards",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "CopperOre",
+      "class": "Item",
+      "name": "Copper ore",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "TinOre",
+      "class": "Item",
+      "name": "Tin ore",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "BronzeBar",
+      "class": "Item",
+      "name": "Bronze bar",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "IronOre",
+      "class": "Item",
+      "name": "Iron ore",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "IronBar",
+      "class": "Item",
+      "name": "Iron bar",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "FelledTree",
+      "class": "Item",
+      "name": "Felled tree",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Feathers",
+      "class": "Item",
+      "name": "Feathers",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Bones",
+      "class": "Item",
+      "name": "Bones",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "RawChicken",
+      "class": "Item",
+      "name": "Raw chicken",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "FishingRod",
+      "class": "Item",
+      "name": "Fishing rod",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "RawCatfish",
+      "class": "Item",
+      "name": "Raw catfish",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Catfish",
+      "class": "Consumable",
+      "name": "Catfish",
+      "actions": ["EAT", "USE"],
+      "statChanges": [
+        {"stat": "Food", "value": 5}
+      ]
+    },
+    {
+      "id": "BronzeChainbody",
+      "class": "Armour",
+      "name": "Bronze chainbody",
+      "actions": ["EQUIP"],
+      "slot": "CHEST",
+      "protection": 3
+    },
+    {
+      "id": "BronzePlatebody",
+      "class": "Armour",
+      "name": "Bronze platebody",
+      "actions": ["EQUIP"],
+      "slot": "CHEST",
+      "protection": 4
+    },
+    {
+      "id": "BronzePlatelegs",
+      "class": "Armour",
+      "name": "Bronze platelegs",
+      "actions": ["EQUIP"],
+      "slot": "LEGS",
+      "protection": 3
+    },
+    {
+      "id": "BronzeNasalHelm",
+      "class": "Armour",
+      "name": "Bronze nasalhelm",
+      "actions": ["EQUIP"],
+      "slot": "HEAD",
+      "protection": 2
+    },
+    {
+      "id": "BronzeGreatHelm",
+      "class": "Armour",
+      "name": "Bronze greathelm",
+      "actions": ["EQUIP"],
+      "slot": "HEAD",
+      "protection": 3
+    },
+    {
+      "id": "BronzeBascinet",
+      "class": "Armour",
+      "name": "Bronze bascinet",
+      "actions": ["EQUIP"],
+      "slot": "HEAD",
+      "protection": 3
+    },
+    {
+      "id": "WoodScrap",
+      "class": "Item",
+      "name": "Wood scrap",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Log",
+      "class": "Item",
+      "name": "Log",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "WoodenPallisadeGate",
+      "class": "Item",
+      "name": "Wooden pallisade gate",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Pallisade",
+      "class": "Item",
+      "name": "Pallisade",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "KeelSection",
+      "class": "Item",
+      "name": "Keel section",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Mast",
+      "class": "Item",
+      "name": "Mast",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Kindling",
+      "class": "Item",
+      "name": "Kindling",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "IronSaw",
+      "class": "Item",
+      "name": "Iron saw",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Plank",
+      "class": "Item",
+      "name": "Plank",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Shaft",
+      "class": "Item",
+      "name": "Shaft",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "MalletHead",
+      "class": "Item",
+      "name": "Mallet head",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "Mallet",
+      "class": "Item",
+      "name": "Mallet",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "LargeNail",
+      "class": "Item",
+      "name": "Large nail",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "SmallNail",
+      "class": "Item",
+      "name": "Small nail",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "WoodShingle",
+      "class": "Item",
+      "name": "Wood shingle",
+      "actions": [ "USE" ]
+    },
+    {
+      "id": "SmallAnvil",
+      "class": "Item",
+      "name": "Small anvil",
+      "actions": [ "USE" ]
+    }
+  ],
+  "questSteps": [{
+    "id":"GoblinSlaying",
+    "killsRequired": [
+      {
+        "npc": "Goblin",
+        "quantity": 5
+      }
+    ]
+  }],
+  "quests": [
+    {
+      "id": "GoblinSlayer",
+      "name": "Goblin Slayer",
+      "stepIndex": 0,
+      "status": "NOT_STARTED",
+      "steps": [
+        "GoblinSlaying"
+      ]
+    }],
+  "tileTypes": [
+    {
+      "id": "Grass",
+      "uid": 1,
+      "name": "Grass",
+      "color": {
+        "r":0,
+        "g": 100,
+        "b":0
+      },
+      "fowColor": {
+        "r":0,
+        "g": 40,
+        "b":0
+      },
+      "canMoveTo": true,
+      "isOutdoors": true,
+      "blocksView": false
+    },
+    {
+      "id": "Dirt",
+      "uid": 4,
+      "name": "Dirt",
+      "color": {
+        "r":100,
+        "g": 68,
+        "b": 8
+      },
+        "fowColor": {
+          "r": 50,
+          "g": 34,
+          "b": 4
+        },
+
+      "canMoveTo": true,
+
+      "isOutdoors": false,
+      "blocksView": false
+    },
+    {
+      "id": "Rock",
+      "uid": 5,
+      "name": "Rock",
+      "color": {
+        "r": 50,
+        "g": 50,
+        "b": 50
+      },
+        "fowColor": {
+          "r": 25,
+          "g": 25,
+          "b": 25
+        },
+
+      "canMoveTo": true,
+      "isOutdoors": true,
+      "blocksView": false
+    },
+    {
+      "id": "Floor",
+      "uid": 3,
+      "name": "Floor",
+      "color": {
+        "r": 100,
+        "g": 11,
+        "b": 0
+      },
+        "fowColor": {
+          "r": 52,
+          "g": 6,
+          "b": 0
+        },
+
+      "canMoveTo": true,
+      "isOutdoors": false,
+      "blocksView": false
+    },
+    {
+      "id": "Wall",
+      "uid": 2,
+      "name": "Wall",
+      "color": {
+        "r": 100,
+        "g": 100,
+        "b": 100
+      },
+
+        "fowColor": {
+          "r": 75,
+          "g": 75,
+          "b": 75
+        },
+        "canMoveTo": false,
+        "isOutdoors": true,
+        "blocksView": true
+    },
+    {
+      "id": "Water",
+      "uid": 6,
+      "name": "Water",
+      "color": {
+        "r": 31,
+        "g": 83,
+        "b": 222
+      },
+        "fowColor": {
+          "r": 15,
+          "g": 40,
+          "b": 110
+        },
+
+      "canMoveTo": false,
+
+      "isOutdoors": true,
+      "blocksView": false
+    }
+  ],
+  "conversationChoices": [
+    {
+      "id": "ShopDialog",
+      "npcText": "Hello and welcome to my shop!",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "ShopDisplay",
+      "canSee": "Always"
+    },
+    {
+      "id": "King_StartGoblinSlayerDialog",
+      "playerText": "What can I do for you my King?",
+      "npcText": "The goblins are causing havoc - kill them!",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "ConversationChoiceSelection",
+      "conversationChoices": [
+        "King_AcceptGoblinSlayerDialog",
+        "King_RefuseGoblinSlayerDialog"
+      ],
+      "canSee": "QuestState",
+      "questStatus": [{
+        "quest": "GoblinSlayer",
+        "state": "NOT_STARTED"
+      }]
+    },
+    {
+      "id": "King_AcceptGoblinSlayerDialog",
+      "playerText":"Okay I'll take the job.",
+      "npcText": "Thank you!",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "QuestStartAction",
+      "quest": "GoblinSlayer",
+      "canSee": "Always"
+    },
+    {
+      "id": "King_RefuseGoblinSlayerDialog",
+      "playerText":"Sorry I like Goblins",
+      "npcText": "Bah! Off with you.",
+      "hasNpcAction": false,
+      "hasCanSee": true,
+      "canSee": "Always"
+    },
+    {
+      "id": "King_ShopQuestion",
+      "playerText":"Is there a shop nearby?",
+      "npcText": "Gerald runs a store just across the road from the castle",
+      "hasNpcAction": false,
+      "hasCanSee": true,
+      "canSee": "Always"
+    },
+    {
+      "id": "King_DefaultOpening",
+      "playerText":"Greetings Your Majesty",
+      "npcText": "Hello player!",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "ConversationChoiceSelection",
+      "conversationChoices": [
+        "King_StartGoblinSlayerDialog",
+        "King_ShopQuestion"
+        ],
+      "canSee": "Always"
+    },
+    {
+      "id": "King_NotFinishedYet",
+      "playerText": "Sorry - I'm not finished yet...",
+      "npcText": "Well do hurry please - they're a real menace",
+      "hasNpcAction": false,
+      "hasCanSee": true,
+      "canSee": "QuestState",
+      "questStatus": [
+        {
+          "quest": "GoblinSlayer",
+          "state": "STARTED"
+        }
+      ]
+    },
+    {
+      "id": "King_Finished",
+      "playerText": "I've finished!",
+      "npcText": "Congratulations. Thanks for helping!",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "QuestFinishAction",
+      "quest": "GoblinSlayer",
+      "canSee": "QuestState",
+      "questStatus": [{
+        "quest": "GoblinSlayer",
+        "state": "COMPLETE"
+      }]
+    },
+    {
+      "id": "King_SomethingElse",
+      "playerText":"Actually I'm here about something else",
+      "npcText": "Oh - well what is it?",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "ConversationChoiceSelection",
+      "conversationChoices": [
+        "King_ShopQuestion"
+      ],
+      "canSee": "Always"
+    },
+    {
+      "id": "King_GoblinSlayerProgressRequest",
+      "playerText": "Greetings Your Majesty",
+      "npcText": "Hello! How's the goblin hunting going?",
+      "hasNpcAction": true,
+      "hasCanSee": true,
+      "npcAction": "ConversationChoiceSelection",
+      "conversationChoices": [
+        "King_NotFinishedYetSorry",
+        "King_Finished",
+        "King_SomethingElse"
+      ],
+      "canSee": "Always"
+    }
+  ],
+  "shops": [
+    {
+      "id": "GeneralStore",
+      "name": "General Store",
+      "items": [
+        {
+          "item": "Hammer",
+          "maxQuantity": 1,
+          "quantity": 1,
+          "basePrice": 5
+        },
+        {
+          "item": "Shovel",
+          "maxQuantity": 1,
+          "quantity": 1,
+          "basePrice": 5
+        },
+        {
+          "item": "Pickaxe",
+          "maxQuantity": 1,
+          "quantity": 1,
+          "basePrice": 5
+        },
+        {
+          "item": "SteelFlint",
+          "maxQuantity": 1,
+          "quantity": 1,
+          "basePrice": 5
+        },
+        {
+          "item": "FishingRod",
+          "maxQuantity": 1,
+          "quantity": 1,
+          "basePrice": 5
+        }
+      ]
+    }
+  ],
+  "npcTypes": [
+    {
+      "id": "Chicken",
+      "name": "Chicken",
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "canMove": true,
+      "canFight": true,
+      "isAggressive": false,
+      "health": 2,
+      "damage": 1,
+      "canTalk": false,
+      "dropTable": [
+        {
+          "type": "Item",
+          "item": "Feathers"
+        },
+        {
+          "type": "Item",
+          "item": "Bones"
+        },
+        {
+          "type": "Item",
+          "item": "RawChicken"
+        }
+      ]
+    },
+    {
+      "id": "Rat",
+      "name": "Rat",
+      "color": {
+        "r": 192,
+        "g": 192,
+        "b": 192
+      },
+      "canMove": true,
+      "canFight": true,
+      "isAggressive": false,
+      "health": 2,
+      "damage": 1,
+      "canTalk": false
+    },
+    {
+      "id": "GiantRat",
+      "name": "Giant Rat",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128
+      },
+        "canMove": true,
+        "canFight": true,
+        "isAggressive": false,
+      "health": 5,
+      "damage": 1,
+      "canTalk": false
+    },
+    {
+      "id": "Goblin",
+      "name": "Goblin",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0
+      },
+        "canMove": true,
+        "canFight": true,
+        "isAggressive": true,
+      "health": 5,
+      "damage": 5,
+      "canTalk": false,
+      "dropTable": [
+        {
+          "type": "Item",
+          "item": "BronzeDagger"
+        },
+        {
+          "type": "Item",
+          "item": "BronzeSword"
+        },
+        {
+          "type": "Item",
+          "item": "BronzeHatchet"
+        },
+        {
+          "type": "Item",
+          "item": "LeatherTunic"
+        },
+        {
+          "type": "Item",
+          "item": "Shovel"
+        },
+        {
+          "type": "Money",
+          "quantity": 5
+        },
+        {
+          "type": "Money",
+          "quantity": 10
+        }
+      ]
+    },
+    {
+      "id": "GoblinKing",
+      "name": "Goblin King",
+      "color": {
+        "r": 255,
+        "g": 175,
+        "b": 175
+      },
+      "canMove": true,
+      "canFight": true,
+      "isAggressive": true,
+      "health": 50,
+      "damage": 10,
+      "canTalk": false,
+      "dropTable": [
+        {
+          "type": "Money",
+          "quantity": 100
+        }
+      ]
+    },
+    {
+      "id": "Shopkeeper",
+      "name": "Shopkeeper",
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "canMove": false,
+      "canFight": false,
+      "isAggressive": false,
+      "health": 10,
+      "damage": 0,
+      "canTalk": true,
+      "shop": "GeneralStore",
+      "conversationStarter": "ConversationChoice",
+      "conversationChoice": "ShopDialog"
+    },
+    {
+      "id": "King",
+      "name": "King Ronald",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 255
+      },
+        "canMove": false,
+        "canFight": false,
+        "isAggressive": false,
+      "health": 10,
+      "damage": 0,
+      "canTalk": true,
+      "conversationStarter": "QuestTreeSwitchConversation",
+      "quest": "GoblinSlayer",
+      "questStatusSwitch": [
+        {
+          "status": "NOT_STARTED",
+          "conversationStarter": "King_DefaultOpening"
+        },
+        {
+          "status": "FINISHED",
+          "conversationStarter": "King_DefaultOpening"
+        },
+        {
+          "status": "STARTED",
+          "conversationStarter": "King_GoblinSlayerProgressRequest"
+        },
+        {
+          "status": "COMPLETE",
+          "conversationStarter": "King_GoblinSlayerProgressRequest"
+        }
+      ]
+    }
+  ],
+  "itemActivities": [
+    {
+      "name": "Firemaking",
+      "type": "StructureCreation",
+      "structureCreationName": "Firemaking"
+    },
+    {
+      "name": "DigGrass",
+      "type": "ResourceGathering",
+      "resourceGatheringName": "DigGrass"
+    },
+    {
+      "name": "DigDirt",
+      "type": "ResourceGathering",
+      "resourceGatheringName": "DigDirt"
+    },
+    {
+      "name": "Mine",
+      "type": "ResourceGathering",
+      "resourceGatheringName": "Mine"
+    },
+    {
+      "name": "Smelt",
+      "type": "Crafting",
+      "optionName": "Smelting",
+      "recipeListName": "Smelt"
+    },
+    {
+      "name": "Smith",
+      "type": "Crafting",
+      "optionName": "Smithing",
+      "recipeListName": "Smith"
+    },
+    {
+      "name": "Fish",
+      "type": "ResourceGathering",
+      "resourceGatheringName": "Fish"
+    },
+    {
+      "name": "Cook",
+      "type": "Crafting",
+      "optionName": "Cooking",
+      "recipeListName": "Cook"
+    },
+    {
+      "name": "Woodcutting",
+      "type": "Crafting",
+      "optionName": "Woodcutting",
+      "recipeListName": "Woodcutting"
+    },
+    {
+      "name": "Carpentry",
+      "type": "Crafting",
+      "optionName": "Carpentry",
+      "recipeListName": "Carpentry"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "Bronze",
+      "outputName": "Bronze Bar",
+      "successChance": 100,
+      "inputItems": [{"item": "CopperOre", "quantity": 1},
+        {"item": "TinOre", "quantity": 1}],
+      "outputItems": [{"item": "BronzeBar",
+        "quantity": 1}],
+      "experienceGained": [{
+      "skill": "Smelting",
+        "exp": 10}]
+    },
+    {
+      "id": "BronzeSword",
+      "outputName": "Bronze Sword",
+    "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 2}],
+      "outputItems": [{"item": "BronzeSword",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 20}]
+    },
+    {
+      "id": "BronzeHatchet",
+      "outputName": "Bronze Hatchet",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 1}],
+      "outputItems": [{"item": "BronzeHatchet",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 10}]
+    },
+    {
+      "id": "BronzeChainbody",
+      "outputName": "Bronze Chainbody",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 3}],
+      "outputItems": [{"item": "BronzeChainbody",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 30}]
+    },
+    {
+      "id": "BronzePlatebody",
+      "outputName": "Bronze Platebody",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 4}],
+      "outputItems": [{"item": "BronzePlatebody",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 40}]
+    },
+    {
+      "id": "BronzePlatelegs",
+      "outputName": "Bronze Platelegs",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 3}],
+      "outputItems": [{"item": "BronzePlatelegs",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 30}]
+    },
+    {
+      "id": "BronzeNasalHelm",
+      "outputName": "Bronze Nasalhelm",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 1}],
+      "outputItems": [{"item": "BronzeNasalHelm",
+        "quantity": 1}],
+      "experienceGained": [{"skill": "Smithing",
+        "exp": 10}]
+    },
+    {
+      "id": "BronzeGreatHelm",
+      "outputName": "Bronze Greathelm",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 2}],
+      "outputItems": [{"item": "BronzeGreatHelm",
+        "quantity": 1}],
+      "experienceGained": [{ "skill": "Smithing",
+        "exp": 20}]
+    },
+    {
+      "id": "BronzeBascinet",
+      "outputName": "Bronze Bascinet",
+      "successChance": 100,
+      "inputItems": [{"item": "BronzeBar",
+        "quantity": 2}],
+      "outputItems": [{"item": "BronzeBascinet",
+        "quantity": 1}],
+      "experienceGained": [{ "skill": "Smithing",
+        "exp": 20}]
+    },
+    {
+      "id": "Catfish",
+      "outputName": "Catfish",
+      "successChance": 100,
+      "inputItems": [{"item": "RawCatfish",
+        "quantity": 1}],
+      "outputItems": [{"item": "Catfish",
+        "quantity": 1}],
+      "experienceGained": [{ "skill": "Cooking",
+        "exp": 10}]
+    },
+    {
+      "id": "Log",
+      "outputName": "Log",
+      "successChance": 100,
+      "inputItems": [{"item": "FelledTree",
+        "quantity": 1}],
+      "outputItems": [{"item": "Log",
+        "quantity": 4}],
+      "experienceGained": [{ "skill": "Woodcutting",
+        "exp": 10}]
+    },
+    {
+      "id": "Plank",
+      "outputName": "Plank",
+      "successChance": 100,
+      "inputItems": [{"item": "Log",
+        "quantity": 1}],
+      "outputItems": [{"item": "Plank",
+        "quantity": 5}],
+      "experienceGained": [{"skill": "Carpentry",
+        "exp": 10}]
+    }
+  ],
+  "recipeCollections": [
+    {
+      "name": "Smelt",
+      "recipes": [
+        "Bronze"
+      ]
+    },
+    {
+      "name": "Smith",
+      "recipes": [
+      "BronzeHatchet",
+      "BronzeSword",
+      "BronzeChainbody",
+      "BronzePlatebody",
+      "BronzePlatelegs",
+      "BronzeNasalHelm",
+      "BronzeGreatHelm",
+      "BronzeBascinet"
+      ]
+    },
+    {
+      "name": "Cook",
+      "recipes": ["Catfish"]
+    },
+    {
+      "name": "Woodcutting",
+      "recipes": ["Log"]
+    },
+    {
+      "name": "Carpentry",
+      "recipes": ["Plank"]
+    }
+  ],
+  "itemUses": [
+    {
+      "item1": "Steel & flint",
+      "item2": "Log",
+      "action": "Firemaking"
+    },
+    {
+      "item1": "Bronze hatchet",
+      "item2": "Felled tree",
+      "action": "Woodcutting"
+    },
+    {
+      "item1": "Iron saw",
+      "item2": "Felled tree",
+      "action": "Woodcutting"
+    },
+    {
+      "item1": "Iron saw",
+      "item2": "Log",
+      "action": "Carpentry"
+    }
+  ],
+  "tileItemUses": [
+    {
+      "tile": "Grass",
+      "item": "Shovel",
+      "use": "DigGrass"
+    },
+    {
+      "tile": "Dirt",
+      "item": "Shovel",
+      "use": "DigDirt"
+    },
+    {
+      "tile": "Rock",
+      "item": "Pickaxe",
+      "use": "Mine"
+    },
+    {
+      "tile": "Water",
+      "item": "Fishing rod",
+      "use": "Fish"
+    }
+  ],
+  "objectItemUses": [
+    {
+    "tile": "Furnace",
+    "item": "Copper ore",
+    "use": "Smelt"
+    },
+    {
+      "tile": "Furnace",
+      "item": "Tin ore",
+      "use": "Smelt"
+    },
+    {
+      "tile": "Anvil",
+      "item": "Hammer",
+      "use": "Smith"
+    },
+    {
+      "tile": "Fire",
+      "item": "Raw catfish",
+      "use": "Cook"
+    }
+  ],
+  "initialItems": [
+    "IronSaw",
+    "BronzeHatchet",
+    "SteelFlint",
+    "Shovel",
+    "Pickaxe",
+    "Hammer"
+  ]
+}

@@ -1,11 +1,17 @@
 package com.whiuk.philip.worldquest;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
+import static com.whiuk.philip.worldquest.JsonUtils.parseColor;
 
 public class NPCType {
     final String id;
@@ -42,55 +48,59 @@ public class NPCType {
     }
 
     static class Provider {
-        static Map<String, NPCType> loadNPCTypesFromBuffer(ScenarioData data, BufferedReader buffer) throws IOException {
-            int npcTypeCount = Integer.parseInt(buffer.readLine());
+        static Map<String, NPCType> loadNPCTypesFromJson(ScenarioData data, JSONArray npcTypesData) {
             Map<String, NPCType> npcTypes = new HashMap<>();
-            for (int n = 0; n < npcTypeCount; n++) {
-                String[] npcTypeData = buffer.readLine().split(",");
-                String id = npcTypeData[0];
-                String name = npcTypeData[1];
-                Color color = new Color(Integer.parseInt(npcTypeData[2]),Integer.parseInt(npcTypeData[3]),Integer.parseInt(npcTypeData[4]));
-                boolean canMove = Boolean.parseBoolean(npcTypeData[5]);
-                boolean canFight = Boolean.parseBoolean(npcTypeData[6]);
-                boolean isAggressive = Boolean.parseBoolean(npcTypeData[7]);
-                int health = Integer.parseInt(npcTypeData[8]);
-                int damage = Integer.parseInt(npcTypeData[9]);
-                int itemDropCount = Integer.parseInt(npcTypeData[10]);
-                GObjects.ItemDrop[] dropTable = new GObjects.ItemDrop[itemDropCount];
-                for (int i = 0; i < itemDropCount ; i ++ ) {
-                    String itemDropData[] = buffer.readLine().split(",");
-                    switch (itemDropData[0]) {
+            for (Object nTO: npcTypesData) {
+                JSONObject npcTypeData = (JSONObject) nTO;
+                String id = (String) npcTypeData.get("id");
+                String name = (String) npcTypeData.get("name");
+                Color color = parseColor((JSONObject) npcTypeData.get("color"));
+                boolean canMove = (Boolean) npcTypeData.get("canMove");
+                boolean canFight = (Boolean) npcTypeData.get("canFight");
+                boolean isAggressive = (Boolean) npcTypeData.get("isAggressive");
+                int health = intFromObj(npcTypeData.get("health"));
+                int damage = intFromObj(npcTypeData.get("damage"));
+
+                List<GObjects.ItemDrop> dropTable = new ArrayList<>();
+                JSONArray dropTableData = (JSONArray) npcTypeData.getOrDefault("dropTable", new JSONArray());
+                for (Object dTO : dropTableData) {
+                    JSONObject itemDropData = (JSONObject) dTO;
+                    switch ((String) itemDropData.get("type")) {
                         case "Item":
-                            dropTable[i] = new GObjects.ItemDrop(data.item(itemDropData[1]).copy());
+                            dropTable.add(new GObjects.ItemDrop(data.itemType((String) itemDropData.get("item")).create()));
                             break;
                         case "Money":
-                            dropTable[i] = new GObjects.ItemDrop(Integer.parseInt(itemDropData[1]));
+                            dropTable.add(new GObjects.ItemDrop(intFromObj(itemDropData.get("quantity"))));
                             break;
                     }
                 }
-                boolean canTalk = Boolean.parseBoolean(npcTypeData[11]);
+                boolean canTalk = (Boolean) npcTypeData.get("canTalk");
                 Conversation conversation = null;
                 if (canTalk) {
-                    String[] conversationData = buffer.readLine().split(",");
-                    switch (conversationData[0]) {
+                    String conversationStarter = (String) npcTypeData.get("conversationStarter");
+                    switch (conversationStarter) {
                         case "QuestTreeSwitchConversation":
-                            String questName = conversationData[1];
-                            int statusCount = Integer.parseInt(conversationData[2]);
+                            String questName = (String) npcTypeData.get("quest");
+                            JSONArray questStatusSwitchData = (JSONArray) npcTypeData.get("questStatusSwitch");
                             Map<QuestStatus, String> statusMap = new HashMap<>();
-                            for(int s = 0 ; s < statusCount; s++) {
-                                String[] questStatusData = buffer.readLine().split(",");
-                                statusMap.put(QuestStatus.valueOf(questStatusData[0]), questStatusData[1]);
+                            for(Object qSO : questStatusSwitchData) {
+                                JSONObject questStatusData = (JSONObject) qSO;
+                                statusMap.put(
+                                        QuestStatus.valueOf((String) questStatusData.get("status")),
+                                        (String) questStatusData.get("conversationStarter"));
                             }
                             conversation = new Conversation(new QuestTreeSwitchSelector(questName, statusMap));
                             break;
                         case "ConversationChoice":
-                            conversation = new Conversation(state -> data.conversationChoices.get(conversationData[1]));
+                            String choice = (String) npcTypeData.get("conversationChoice");
+                            conversation = new Conversation(state -> data.conversationChoices.get(choice));
                             break;
                     }
                 }
-                String shop = npcTypeData[12];
+                String shop = (String) npcTypeData.get("shop");
                 NPCType npcType = new NPCType(
-                        id, name, color, canMove, canFight, isAggressive, health, damage, dropTable, canTalk, conversation,
+                        id, name, color, canMove, canFight, isAggressive, health, damage,
+                        dropTable.toArray(new GObjects.ItemDrop[]{}), canTalk, conversation,
                         data.shops.get(shop));
                 npcTypes.put(id, npcType);
             }
@@ -99,9 +109,9 @@ public class NPCType {
     }
 
     public static class Persistor {
-        public static void saveNPCTypesToBuffer(Map<String, NPCType> npcTypes, BufferedWriter buffer) throws IOException {
-            buffer.write(Integer.toString(npcTypes.size()));
-            buffer.newLine();
+        public static JSONArray saveNPCTypesToJson(Map<String, NPCType> npcTypes) throws IOException {
+            //TODO:
+            return new JSONArray();
         }
     }
 }

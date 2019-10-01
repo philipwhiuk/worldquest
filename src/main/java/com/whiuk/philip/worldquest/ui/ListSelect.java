@@ -58,12 +58,15 @@ public abstract class ListSelect<T> extends ClickableUI implements FocusableUI {
             }
             g.setColor(primary);
             g.draw(this);
-        } else {
+        } else if (itemBounds.size() >= 1) {
             g.setColor(primary);
             g.draw(itemBounds.get(0));
             g.setColor(primary);
             String title = renderFunction.apply(selectedItem);
             g.drawString(title, x+5, y+15);
+        } else {
+            g.draw(new Rectangle(x, y, 100, 20));
+            g.drawString(" - None -", x+5, y+15);
         }
     }
 

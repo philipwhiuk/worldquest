@@ -14,7 +14,7 @@ public class QuestStatePredicate implements Predicate<QuestState> {
     @Override
     public boolean test(QuestState questState) {
         for(Map.Entry<String, QuestStatus> requiredQuest: requiredQuestState.entrySet()) {
-            Quest playerQuest = questState.player.quests.get(requiredQuest.getKey());
+            QuestProgress playerQuest = questState.player.quests.get(requiredQuest.getKey());
 
             if (playerQuest == null) {
                 if (requiredQuest.getValue() != QuestStatus.NOT_STARTED) {

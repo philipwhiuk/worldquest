@@ -1,19 +1,22 @@
 package com.whiuk.philip.worldquest;
 
+import org.json.simple.JSONObject;
+
 import java.awt.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.whiuk.philip.worldquest.Direction.EAST;
 import static com.whiuk.philip.worldquest.Direction.SOUTH;
+import static com.whiuk.philip.worldquest.JsonUtils.intFromObj;
 import static com.whiuk.philip.worldquest.MapConstants.MAP_SPACING;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_HEIGHT;
 import static com.whiuk.philip.worldquest.MapConstants.TILE_WIDTH;
 
 public class GObjects {
 
-    static HashMap<String, GameObjectBuilder> provideBuilders() {
+    static HashMap<String, GameObjectBuilder> provideBuilders(Map<String, ItemType> itemTypes) {
         HashMap<String, GameObjectBuilder> gameObjectBuilders = new HashMap<>();
         gameObjectBuilders.put("Stairs", new GObjects.StairsBuilder());
         gameObjectBuilders.put("Tree", new GObjects.TreeBuilder());
@@ -22,7 +25,7 @@ public class GObjects {
         gameObjectBuilders.put("Door", new GObjects.DoorBuilder());
         gameObjectBuilders.put("Anvil", new GObjects.AnvilBuilder());
         gameObjectBuilders.put("Fence", new GObjects.FenceBuilder());
-        gameObjectBuilders.put("ItemDrop", new GObjects.ItemDropBuilder());
+        gameObjectBuilders.put("ItemDrop", new GObjects.ItemDropBuilder(itemTypes));
         gameObjectBuilders.put("Fire", new GObjects.FireBuilder());
         return gameObjectBuilders;
     }
@@ -46,18 +49,19 @@ public class GObjects {
 
         public void doAction(WorldQuest game, Player player) {}
 
-        public abstract String asString();
-
         public abstract String id();
     }
 
     abstract static class GameObjectBuilder {
-        public abstract GameObject build(String[] arguments);
+        public abstract GameObject build(JSONObject data);
     }
 
     static class StairsBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            return new Stairs(arguments);
+        public GameObject build(JSONObject data) {
+            return new Stairs((String) data.get("map"),
+                    intFromObj(data.get("startX")),
+                    intFromObj(data.get("startY")),
+                    Direction.valueOf((String) data.get("direction")));
         }
     }
 
@@ -66,10 +70,6 @@ public class GObjects {
         private int startX;
         private int startY;
         private Direction direction;
-
-        public Stairs(String[] arguments) {
-            this(arguments[0], Integer.parseInt(arguments[1]), Integer.parseInt(arguments[2]), Direction.valueOf(arguments[3]));
-        }
 
         public Stairs(String map, int startX, int startY, Direction direction) {
             this.map = map;
@@ -104,19 +104,14 @@ public class GObjects {
         }
 
         @Override
-        public String asString() {
-            return map+","+startX+","+startY+","+direction;
-        }
-
-        @Override
         public String id() {
             return "Stairs";
         }
     }
 
     static class TreeBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            return new Tree(arguments);
+        public GameObject build(JSONObject data) {
+            return new Tree((String) data.get("resource"));
         }
     }
 
@@ -125,8 +120,8 @@ public class GObjects {
         boolean cutDown;
         int ticksToRegrow;
 
-        public Tree(String[] arguments) {
-            this.resource = arguments[0];
+        public Tree(String resource) {
+            this.resource = resource;
         }
 
         @Override
@@ -158,7 +153,8 @@ public class GObjects {
 
         @Override
         public void doAction(WorldQuest game, Player player) {
-            Item item = game.scenarioData.item(resource).copy();
+            //TODO: Quality
+            Item item = game.scenarioData.itemType(resource).create();
             if (player.mainHandWeapon instanceof Hatchet && player.inventory.hasSpaceForItem(item)) {
                 cutDown = true;
                 ticksToRegrow = 10;
@@ -172,18 +168,13 @@ public class GObjects {
         }
 
         @Override
-        public String asString() {
-            return resource;
-        }
-
-        @Override
         public String id() {
             return "Tree";
         }
     }
 
     static class FireBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
+        public GameObject build(JSONObject data) {
             return new Fire();
         }
     }
@@ -193,11 +184,6 @@ public class GObjects {
         @Override
         public boolean canMoveTo(Direction directionMoving) {
             return true;
-        }
-
-        @Override
-        public String asString() {
-            return "";
         }
 
         @Override
@@ -217,16 +203,13 @@ public class GObjects {
     }
 
     static class DoorBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            if (arguments.length != 2) {
-                throw new IllegalArgumentException("Expected door position and open side: " + Arrays.toString(arguments));
-            }
-            Direction doorDirection = Direction.valueOf(arguments[0]);
+        public GameObject build(JSONObject data) {
+            Direction doorDirection = Direction.valueOf((String) data.get("direction"));
             switch (doorDirection) {
                 case SOUTH:
-                    return new SouthDoor(SOUTH, Direction.valueOf(arguments[1]));
+                    return new SouthDoor(SOUTH, Direction.valueOf((String) data.get("openSide")));
                 case EAST:
-                    return new EastDoor(EAST, Direction.valueOf(arguments[1]));
+                    return new EastDoor(EAST, Direction.valueOf((String) data.get("openSide")));
                 default:
                     throw new IllegalArgumentException("Unexpected direction for door:" + doorDirection);
             }
@@ -256,14 +239,6 @@ public class GObjects {
             } else {
                 ticksToShut -= 1;
             }
-        }
-
-        @Override
-        public String asString() {
-            if (openDoorSide != null) {
-                return direction.name()+","+openDoorSide.name();
-            }
-            return direction.name()+","+Direction.NORTH.name();
         }
 
         @Override
@@ -332,14 +307,20 @@ public class GObjects {
     }
 
     static class ItemDropBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            if (arguments.length == 1) {
-                return new ItemDrop(Integer.parseInt(arguments[0]));
+        private Map<String, ItemType> itemTypesStore;
+
+        ItemDropBuilder(Map<String, ItemType> itemTypesStore) {
+            this.itemTypesStore = itemTypesStore;
+        }
+
+        public GameObject build(JSONObject data) {
+            if (data.containsKey("item")) {
+                //noinspection RedundantCast
+                return new ItemDrop(itemTypesStore.get((String) data.get("item")).create());
+            } else {
+                //TODO: Don't create
+                return new ItemDrop(intFromObj(data.get("money")));
             }
-            else if (arguments.length != 2) {
-                throw new IllegalArgumentException("Expected money and item only: " + Arrays.toString(arguments));
-            }
-            return new ItemDrop(Item.Provider.parseItem(arguments[1]));
         }
     }
 
@@ -353,6 +334,11 @@ public class GObjects {
         }
 
         ItemDrop(int money) {
+            this.money = money;
+        }
+
+        private ItemDrop(Item i, int money) {
+            this.item = i;
             this.money = money;
         }
 
@@ -375,20 +361,8 @@ public class GObjects {
         }
 
         @Override
-        public String asString() {
-            return money+","+(item != null ? Item.Provider.printItem(item).replaceAll(",","|") : "");
-        }
-
-        @Override
         public String id() {
             return "ItemDrop";
-        }
-
-        public ItemDrop copy() {
-            ItemDrop copy = new ItemDrop(money);
-            if (item != null)
-                copy.item = item.copy();
-            return copy;
         }
 
         @Override
@@ -399,11 +373,15 @@ public class GObjects {
                 ticksToRemove -= 1;
             }
         }
+
+        public ItemDrop spawn() {
+            return new ItemDrop(this.item, this.money);
+        }
     }
 
     static class ResourceProviderBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            return new ResourceProvider(arguments);
+        public GameObject build(JSONObject data) {
+            return new ResourceProvider((String) data.get("name"), (String) data.get("resource"), (String) data.get("cssDef"));
         }
     }
 
@@ -413,11 +391,11 @@ public class GObjects {
         final String cssDef;
         final Color veinColour;
 
-        ResourceProvider(String[] arguments) {
-            this.resource = arguments[0];
-            this.cssDef = arguments[1];
+        ResourceProvider(String name, String resource, String cssDef) {
+            this.name = name;
+            this.resource = resource;
+            this.cssDef = cssDef;
             this.veinColour = fromCSSDef(cssDef);
-            this.name = arguments[2];
         }
 
         private Color fromCSSDef(String value) {
@@ -433,15 +411,8 @@ public class GObjects {
         }
 
         public Item extract(WorldQuest game) {
-            return game.scenarioData.item(resource).copy();
-        }
-
-        @Override
-        public String asString() {
-            return String.join(",",
-                    resource,
-                    cssDef,
-                    name);
+            //TODO: Quality
+            return game.scenarioData.itemType(resource).create();
         }
 
         @Override
@@ -451,7 +422,7 @@ public class GObjects {
     }
 
     static class FurnaceBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
+        public GameObject build(JSONObject data) {
             return new Furnace();
         }
     }
@@ -471,18 +442,13 @@ public class GObjects {
         }
 
         @Override
-        public String asString() {
-            return "";
-        }
-
-        @Override
         public String id() {
             return "Furnace";
         }
     }
 
     static class AnvilBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
+        public GameObject build(JSONObject data) {
             return new Anvil();
         }
     }
@@ -496,22 +462,14 @@ public class GObjects {
         }
 
         @Override
-        public String asString() {
-            return "";
-        }
-
-        @Override
         public String id() {
             return "Anvil";
         }
     }
 
     static class FenceBuilder extends GameObjectBuilder {
-        public GameObject build(String[] arguments) {
-            if (arguments.length != 1) {
-                throw new IllegalArgumentException("Expected fence position only: " + Arrays.toString(arguments));
-            }
-            Direction fenceDirection = Direction.valueOf(arguments[0]);
+        public GameObject build(JSONObject data) {
+            Direction fenceDirection = Direction.valueOf((String) data.get("side"));
             switch (fenceDirection) {
                 case NORTH:
                     return new NorthFence();
@@ -535,11 +493,6 @@ public class GObjects {
 
         Fence(Direction direction) {
             this.direction = direction;
-        }
-
-        @Override
-        public String asString() {
-            return direction.name();
         }
 
         @Override
